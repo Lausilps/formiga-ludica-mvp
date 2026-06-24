@@ -1,11 +1,10 @@
-# formiga-ludica-mvp
 # 🎲 Formiga Lúdica MVP
 
 MVP de uma plataforma web para locadora de jogos, com catálogo online, cadastro de jogos e recomendações inteligentes com IA.
 
 ---
 
-## 📖 Sobre o projeto
+## Sobre o projeto
 
 O Formiga Lúdica MVP é um sistema web desenvolvido para auxiliar na gestão de uma locadora de jogos de tabuleiro.
 
@@ -13,7 +12,7 @@ O objetivo é automatizar processos atualmente realizados manualmente, oferecend
 
 ---
 
-# Funcionalidades previstas #
+# Funcionalidades previstas 
 
 - [x] Cadastro manual de jogos
 - [x] Catálogo online
@@ -27,7 +26,7 @@ O objetivo é automatizar processos atualmente realizados manualmente, oferecend
 
 ---
 
-# Tecnologias utilizadas #
+# Tecnologias utilizadas 
 
 - PHP
 - MySQL
@@ -38,7 +37,7 @@ O objetivo é automatizar processos atualmente realizados manualmente, oferecend
 
 ---
 
-# Inteligência Artificial #
+# Inteligência Artificial 
 
 O projeto contará com um agente de IA responsável por recomendar jogos aos clientes com base em informações como:
 
@@ -50,7 +49,7 @@ O projeto contará com um agente de IA responsável por recomendar jogos aos cli
 
 ---
 
-# Estrutura do projeto #
+# Estrutura do projeto 
 
 ```text
 formiga-ludica-mvp/
@@ -65,7 +64,7 @@ formiga-ludica-mvp/
 
 ---
 
-# Como executar o projeto #
+# Como executar o projeto 
 
 ```bash
 # Clonar repositório
@@ -83,6 +82,6 @@ config/conexao.php
 
 ---
 
-# Desenvolvido por #
+# Desenvolvido por 
 
 Laura Lopes

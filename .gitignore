@@ -11,5 +11,9 @@
 .DS_Store
 Thumbs.db
 
-# Configurações locais do VSCode (opcional)
+# Configurações locais do VSCode 
 .vscode/settings.json
+
+# Logs do sistema
+/logs/*.log
+!/logs/.gitkeep

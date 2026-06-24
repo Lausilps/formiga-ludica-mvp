@@ -2,6 +2,8 @@
 
 require_once '../config/conexao.php';
 
+require_once '../helpers/logHelper.php';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $nome = $_POST['nome'];
@@ -19,6 +21,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $verificaResultado = mysqli_query($conexao, $verificaSql);
 
    if (mysqli_num_rows($verificaResultado) > 0) {
+
+        registrarLog(
+            'ALERTA',
+            "Tentativa de cadastro duplicado do jogo: $nome"
+        );
 
         $dados = http_build_query([
             'erro' => 'duplicado',
@@ -49,11 +56,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         empty($dificuldade)
     ) {
 
+        registrarLog(
+            'ALERTA',
+            "Tentativa de cadastro sem preenchimento dos campos obrigatórios. Jogo: $nome"
+        );
+
         header("Location: ../views/jogos/cadastrar.php?erro=campos_obrigatorios");
         exit;
     }
 
     if ($min_jogadores > $max_jogadores) {
+
+        registrarLog(
+            'ALERTA',
+            "Tentativa de cadastro inválido. Min jogadores ($min_jogadores) maior que Max jogadores ($max_jogadores). Jogo: $nome"
+        );
 
         $dados = http_build_query([
             'erro' => 'jogadores_invalidos',
@@ -98,9 +115,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             )";
 
     if (mysqli_query($conexao, $sql)) {
+
+        registrarLog(
+            'INFO',
+            "Novo jogo cadastrado: $nome"
+        );
+
         header("Location: ../views/jogos/cadastrar.php?sucesso=1");
         exit;
+
     } else {
-        echo "Erro ao cadastrar jogo: " . mysqli_error($conexao);
+
+        $erro = mysqli_error($conexao);
+
+        registrarLog(
+            'ERRO',
+            "Falha ao cadastrar jogo '$nome': $erro"
+        );
+
+        echo "Ocorreu um erro ao cadastrar o jogo.";
     }
 }
