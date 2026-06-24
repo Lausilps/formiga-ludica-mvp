@@ -1,0 +1,15 @@
+# Arquivos de ambiente
+.env
+
+# Uploads enviados pelos usuários
+/uploads/*
+!/uploads/.gitkeep
+!/uploads/jogos/
+!/uploads/jogos/.gitkeep
+
+# Arquivos do sistema operacional
+.DS_Store
+Thumbs.db
+
+# Configurações locais do VSCode (opcional)
+.vscode/settings.json

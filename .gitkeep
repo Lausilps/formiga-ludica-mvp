@@ -1,0 +1,10 @@
+uploads/.gitkeep
+uploads/jogos/.gitkeep
+assets/css/.gitkeep
+assets/js/.gitkeep
+assets/imagens/.gitkeep
+controllers/.gitkeep
+models/.gitkeep
+views/jogos/.gitkeep
+views/layout/.gitkeep
+config/.gitkeep
