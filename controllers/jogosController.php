@@ -90,8 +90,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    $imagem = null;
+
+    if (isset($_FILES['imagem']) && $_FILES['imagem']['error'] === 0) {
+
+        $pastaDestino = "../uploads/jogos/";
+
+        $nomeArquivo = time() . "_" . basename($_FILES['imagem']['name']);
+
+        $caminhoDestino = $pastaDestino . $nomeArquivo;
+
+        if (move_uploaded_file($_FILES['imagem']['tmp_name'], $caminhoDestino)) {
+            $imagem = "uploads/jogos/" . $nomeArquivo;
+        }
+    }
+
     $sql = "INSERT INTO jogos (
                 nome,
+                imagem,
                 descricao,
                 preco,
                 min_jogadores,
@@ -103,6 +119,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 link_tutorial
             ) VALUES (
                 '$nome',
+                '$imagem',
                 '$descricao',
                 '$preco',
                 '$min_jogadores',

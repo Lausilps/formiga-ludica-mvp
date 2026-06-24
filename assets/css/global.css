@@ -95,6 +95,53 @@ button:hover {
     background: #55751a;
 }
 
+/* IMAGEM LISTAGEM */
+
+.tooltip-imagem {
+    position: relative;
+}
+
+.imagem-preview {
+    display: none;
+    position: absolute;
+    top: 30px;
+    left: 0;
+
+    background: white;
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+    z-index: 999;
+}
+
+.imagem-preview img {
+    width: 200px;
+    border-radius: 8px;
+}
+
+.tooltip-imagem:hover .imagem-preview {
+    display: block;
+}
+
+/* para checkbox alinhados */
+.campo-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.campo-checkbox input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+.campo-checkbox label {
+    margin: 0;
+    font-weight: 600;
+}
+
 /* Responsividade */
 @media (max-width: 600px) {
     body {

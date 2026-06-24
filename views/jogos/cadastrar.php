@@ -38,11 +38,16 @@ require_once '../../config/conexao.php';
         </div>
     <?php endif; ?>
 
-    <form action="../../controllers/jogosController.php" method="POST">
+    <form action="../../controllers/jogosController.php" method="POST" enctype="multipart/form-data">
 
         <label>Nome do jogo:</label><br>
         <input type="text" name="nome" required value="<?= $_GET['nome'] ?? '' ?>"><br><br>
         
+
+        <label>Imagem do jogo:</label><br>
+        <input type="file" name="imagem" id="imagem" accept="image/*"><br><br>
+
+        <img id="preview-imagem" src="" alt="Prévia da imagem" style="display:none; max-width:200px; border-radius:8px; margin-bottom:16px;">
 
         <label>Descrição:</label><br>
         <textarea name="descricao" required><?= $_GET['descricao'] ?? '' ?></textarea><br><br>
@@ -83,6 +88,21 @@ require_once '../../config/conexao.php';
         <button type="submit">Cadastrar jogo</button>
 
     </form>
+
+    <script>
+    document.getElementById('imagem').addEventListener('change', function(event) {
+        const arquivo = event.target.files[0];
+        const preview = document.getElementById('preview-imagem');
+
+        if (arquivo) {
+            preview.src = URL.createObjectURL(arquivo);
+            preview.style.display = 'block';
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    });
+    </script>
 
 </body>
 </html>
