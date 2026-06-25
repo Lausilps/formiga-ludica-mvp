@@ -94,6 +94,8 @@ if (!$resultado) {
             <a href="cadastrar.php">+ Cadastrar novo jogo</a>
             |
             <a href="importar_olaclick.php">Importar OlaClick</a>
+            |
+            <a href="relatorio.php">Gerar relatório</a>
     </p>
 
     <?php if (mysqli_num_rows($resultado) == 0): ?>

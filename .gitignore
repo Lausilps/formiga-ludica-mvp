@@ -17,3 +17,5 @@ Thumbs.db
 # Logs do sistema
 /logs/*.log
 !/logs/.gitkeep
+
+/vendor/
