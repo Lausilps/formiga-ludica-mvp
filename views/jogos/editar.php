@@ -2,6 +2,8 @@
 
 require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
+require_once '../../helpers/authHelper.php';
+protegerAdmin();
 
 if (!isset($_GET['id'])) {
     registrarLog('ERRO', 'Tentativa de acessar edição sem informar ID do jogo.');

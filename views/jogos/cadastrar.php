@@ -1,5 +1,7 @@
 <?php
 require_once '../../config/conexao.php';
+require_once '../../helpers/authHelper.php';
+protegerAdmin();
 
 ?>
 

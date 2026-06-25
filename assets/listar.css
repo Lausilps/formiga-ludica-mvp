@@ -20,3 +20,24 @@
 .form-busca a {
     white-space: nowrap;
 }
+
+
+.sair-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-logout:hover {
+    opacity: 0.9;
+}

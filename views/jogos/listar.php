@@ -3,6 +3,9 @@
 require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
 
+require_once '../../helpers/authHelper.php';
+protegerAdmin();
+
 $busca = $_GET['busca'] ?? '';
 $pagina = $_GET['pagina'] ?? 1;
 
@@ -86,7 +89,9 @@ if (!$resultado) {
     </form>
 
     <p>
-        <a href="cadastrar.php">+ Cadastrar novo jogo</a>
+            <a href="cadastrar.php">+ Cadastrar novo jogo</a>
+            |
+            <a href="importar_olaclick.php">Importar OlaClick</a>
     </p>
 
     <?php if (mysqli_num_rows($resultado) == 0): ?>
@@ -154,6 +159,12 @@ if (!$resultado) {
         <?php endif; ?>
 
     <?php endif; ?>
+
+        <div class="sair-admin">
+
+        <a href="../../logout.php" class="btn-logout">
+            Sair
+        </a>
 
 </body>
 </html>
