@@ -37,6 +37,7 @@ $sql = "SELECT
             id_jogo,
             nome,
             imagem,
+            descricao,
             preco,
             min_jogadores,
             max_jogadores,
@@ -69,6 +70,7 @@ if (!$resultado) {
     <title>Listagem de Jogos</title>
 
     <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/listar.css">
 
 </head>
 <body>
@@ -124,9 +126,25 @@ if (!$resultado) {
                             <?= $jogo['nome'] ?>
 
                             <?php if (!empty($jogo['imagem'])): ?>
+
+                                <?php
+                                    $imagem = $jogo['imagem'];
+
+                                    if (str_starts_with($imagem, 'http')) {
+                                        $srcImagem = $imagem;
+                                    } else {
+                                        $srcImagem = "../../" . $imagem;
+                                    }
+                                ?>
+
                                 <span class="imagem-preview">
-                                    <img src="../../<?= $jogo['imagem'] ?>" alt="<?= $jogo['nome'] ?>">
+                                    <img src="<?= $srcImagem ?>" alt="<?= $jogo['nome'] ?>">
+
+                                    <p class="descricao-preview">
+                                        <?= mb_strimwidth($jogo['descricao'] ?? '', 0, 250, '...') ?>
+                                    </p>
                                 </span>
+
                             <?php endif; ?>
 
                         </td>
@@ -149,16 +167,51 @@ if (!$resultado) {
         </table>
 
                <?php if ($totalPaginas > 1): ?>
-            <div class="paginacao">
-                <?php for ($i = 1; $i <= $totalPaginas; $i++): ?>
-                    <a href="listar.php?pagina=<?= $i ?>&busca=<?= $busca ?>">
+
+    <div class="paginacao">
+
+        <?php if ($pagina > 1): ?>
+                    <a href="listar.php?pagina=<?= $pagina - 1 ?>&busca=<?= $busca ?>">
+                        &laquo;
+                    </a>
+                <?php endif; ?>
+
+                <?php
+
+                $inicio = $pagina;
+                $fim = $pagina + 2;
+
+                if ($fim > $totalPaginas) {
+                    $fim = $totalPaginas;
+                    $inicio = max(1, $fim - 2);
+                }
+
+                for ($i = $inicio; $i <= $fim; $i++):
+                ?>
+
+                    <a
+                        href="listar.php?pagina=<?= $i ?>&busca=<?= $busca ?>"
+                        class="<?= $i == $pagina ? 'pagina-atual' : '' ?>"
+                    >
                         <?= $i ?>
                     </a>
+
                 <?php endfor; ?>
+
+                <?php if ($pagina < $totalPaginas): ?>
+                    <a href="listar.php?pagina=<?= $pagina + 1 ?>&busca=<?= $busca ?>">
+                        &raquo;
+                    </a>
+                <?php endif; ?>
+
             </div>
+
         <?php endif; ?>
 
     <?php endif; ?>
+
+    <br>
+    <br>
 
         <div class="sair-admin">
 

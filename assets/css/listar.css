@@ -1,0 +1,109 @@
+/* formulario de busca - filtros */
+.form-busca {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    max-width: 700px;
+    margin-bottom: 20px;
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.form-busca input {
+    margin: 0;
+}
+
+.form-busca button {
+    white-space: nowrap;
+}
+
+.form-busca a {
+    white-space: nowrap;
+}
+
+/* IMAGEM LISTAGEM */
+
+.tooltip-imagem {
+    position: relative;
+}
+
+.imagem-preview {
+    display: none;
+    position: absolute;
+    width: 260px;
+    top: 30px;
+    left: 0;
+
+    background: white;
+    padding: 8px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+    z-index: 999;
+}
+
+.imagem-preview img {
+    width: 200px;
+    border-radius: 8px;
+}
+
+.tooltip-imagem:hover .imagem-preview {
+    display: block;
+}
+
+.descricao-preview {
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #333;
+}
+
+/* paginacao */
+.paginacao {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.paginacao a {
+    padding: 8px 14px;
+    border: 1px solid #d0d0d0;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #2d3a22;
+    background: white;
+}
+
+.paginacao a:hover {
+    background: #f0f0f0;
+}
+
+.pagina-atual {
+    background: #6b8e23 !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+
+/* logout admin */
+.sair-admin {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.btn-logout {
+    background-color: #dc3545;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-logout:hover {
+    opacity: 0.9;
+}
