@@ -52,16 +52,76 @@ body {
 }
 
 .filtros-catalogo {
-    margin-bottom: 28px;
+    background: #fff;
+    padding: 22px;
+    border-radius: 18px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
 }
 
-.filtros-catalogo input {
-    width: 100%;
-    max-width: 600px;
-    padding: 16px;
+.filtros-catalogo > input {
+    width: 300px;
+    padding: 14px;
     border-radius: 12px;
     border: 1px solid #ddd;
-    font-size: 16px;
+    font-size: 15px;
+}
+
+.filtros-catalogo > div {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.filtros-catalogo > div div {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filtros-catalogo strong {
+    font-size: 14px;
+    color: #2b1b12;
+}
+
+.filtros-catalogo label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+.filtros-catalogo input[type="checkbox"] {
+    accent-color: #7C3AED;
+}
+
+#limpar-filtros {
+    background: #F6C453;
+    color: #2b1b12;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.grupo-filtro {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.opcoes-filtro {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .grid-jogos {
