@@ -35,9 +35,19 @@ if (!$resultado) {
 <body>
 
     <header class="catalogo-topo">
-        <div>
-            <h1>FORMIGA LÚDICA - CATÁLOGO</h1>
-            <p>Encontre o jogo perfeito para sua próxima jogatina.</p>
+        <div class="info-topo">
+
+            <img
+                src="assets/img/logo_formiga_ludica.png"
+                alt="Formiga Lúdica"
+                class="logo-topo">
+
+            <div class="texto-topo">
+                <span class="titulo-catalogo">CATÁLOGO</span>
+
+                <p>Encontre o jogo perfeito para sua próxima jogatina.</p>
+            </div>
+
         </div>
 
         <div class="acoes-topo">
