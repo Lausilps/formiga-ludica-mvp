@@ -42,7 +42,6 @@ if (!$resultado) {
 
         <div class="acoes-topo">
             <a href="recomendacao.php" class="btn-recomendar">✨ Recomendar para mim</a>
-            <a href="https://wa.me/5537999999999" target="_blank" class="btn-whatsapp">WhatsApp</a>
         </div>
     </header>
 
@@ -246,6 +245,16 @@ if (!$resultado) {
         window.open(url, '_blank');
     });
     </script>
+
+    <a href="https://wa.me/5537999139354"
+    target="_blank"
+    class="whatsapp-flutuante">
+
+        <img
+            src="assets/img/formiga-whatsapp.gif"
+            alt="Chamar no WhatsApp">
+
+    </a>
 
 </body>
 </html>
