@@ -1,0 +1,174 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f7f1e8;
+    color: #2b1b12;
+    padding: 35px;
+}
+
+.catalogo-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 35px;
+    gap: 20px;
+}
+
+.catalogo-topo h1 {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.catalogo-topo p {
+    font-size: 18px;
+    color: #5f5148;
+}
+
+.acoes-topo {
+    display: flex;
+    gap: 12px;
+}
+
+.acoes-topo a {
+    padding: 14px 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.btn-recomendar {
+    background: #5b2ca0;
+    color: white;
+}
+
+.btn-whatsapp {
+    background: #25d366;
+    color: white;
+}
+
+.filtros-catalogo {
+    margin-bottom: 28px;
+}
+
+.filtros-catalogo input {
+    width: 100%;
+    max-width: 600px;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+}
+
+.grid-jogos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+}
+
+.card-jogo {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+.imagem-card {
+    height: 210px;
+    background: #eee;
+}
+
+.imagem-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.conteudo-card {
+    padding: 18px;
+}
+
+.conteudo-card h2 {
+    font-size: 22px;
+    margin-bottom: 10px;
+}
+
+.descricao-card {
+    color: #5f5148;
+    line-height: 1.4;
+    min-height: 60px;
+    margin-bottom: 16px;
+}
+
+.infos-card {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    margin-bottom: 18px;
+    color: #555;
+}
+
+.rodape-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-escolher {
+    background: #6b8e23;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-escolher.selecionado {
+    background: #2d3a22;
+}
+
+.barra-whatsapp {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2d3a22;
+    color: white;
+    padding: 16px 22px;
+    border-radius: 14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    gap: 20px;
+    align-items: center;
+}
+
+.barra-whatsapp button {
+    background: #25d366;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+@media (max-width: 700px) {
+    .catalogo-topo {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .acoes-topo {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .acoes-topo a {
+        text-align: center;
+    }
+}
