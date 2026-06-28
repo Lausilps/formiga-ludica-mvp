@@ -106,5 +106,11 @@ protegerAdmin();
     });
     </script>
 
+    <br>
+    
+    <p>
+        <a href="listar.php">← Voltar para listagem</a>
+    </p>
+
 </body>
 </html>

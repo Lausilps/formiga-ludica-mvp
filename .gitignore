@@ -19,3 +19,5 @@ Thumbs.db
 !/logs/.gitkeep
 
 /vendor/
+
+/config/gemini.php
