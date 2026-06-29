@@ -21,3 +21,5 @@ Thumbs.db
 /vendor/
 
 /config/gemini.php
+
+/config/groq.php

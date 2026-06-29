@@ -1,153 +1,140 @@
 <?php
+require_once __DIR__ . '/../config/conexao.php';
+require_once __DIR__ . '/../config/gemini.php';
+require_once __DIR__ . '/../helpers/logHelper.php';
 
-require_once '../config/conexao.php';
-require_once '../config/gemini.php';
-require_once '../helpers/logHelper.php';
+registrarLog(
+    'INFO',
+    "Iniciando RAG. Jogadores: $jogadores | Idade: $idade | Tempo: $tempo | Texto: $descricao"
+);
 
-$jogadores = $_POST['jogadores'];
-$idade = $_POST['idade'];
-$tempo = $_POST['tempo'];
-$experiencia = $_POST['experiencia'];
-$ocasiao = $_POST['ocasiao'];
+// Recebe dados do formulário
+$descricao = trim($_POST['descricao_sessao'] ?? '');
+$jogadores = (int)($_POST['jogadores'] ?? 4);
+$idade     = (int)($_POST['idade'] ?? 10);
+$tempo     = (int)($_POST['tempo'] ?? 999);
 
-$sql = "SELECT
-            nome,
-            descricao,
-            preco,
-            min_jogadores,
-            max_jogadores,
-            idade_minima,
-            duracao_minutos,
-            dificuldade
-        FROM jogos
-        WHERE ativo = 1
-          AND min_jogadores <= '$jogadores'
-          AND max_jogadores >= '$jogadores'
-          AND idade_minima <= '$idade'
-          AND duracao_minutos <= '$tempo'
-        ORDER BY nome ASC
-        LIMIT 20";
-
-$resultado = mysqli_query($conexao, $sql);
-
-if (!$resultado) {
-    registrarLog('ERRO', 'Erro ao buscar jogos para recomendação: ' . mysqli_error($conexao));
-    die('Erro ao buscar jogos.');
-}
-
-$jogos = [];
-
-while ($jogo = mysqli_fetch_assoc($resultado)) {
-    $jogos[] = $jogo;
-}
-
-if (count($jogos) == 0) {
-    echo "Nenhum jogo compatível encontrado.";
+if (empty($descricao)) {
+    header('Location: ../recomendacao.php?erro=1');
     exit;
 }
 
-$listaJogos = "";
-
-foreach ($jogos as $jogo) {
-    $listaJogos .= "
-Nome: {$jogo['nome']}
-Descrição: {$jogo['descricao']}
-Jogadores: {$jogo['min_jogadores']} a {$jogo['max_jogadores']}
-Idade: {$jogo['idade_minima']}+
-Duração: {$jogo['duracao_minutos']} minutos
-Dificuldade: {$jogo['dificuldade']}
-Preço: R$ {$jogo['preco']}
----
-";
+// 1. Monta query semântica
+$queryTexto  = "Quero um jogo para: {$descricao}. ";
+$queryTexto .= "Somos {$jogadores} jogadores. ";
+$queryTexto .= "Idade mínima do grupo: {$idade} anos. ";
+if ($tempo < 999) {
+    $queryTexto .= "Tempo disponível: até {$tempo} minutos.";
+} else {
+    $queryTexto .= "Sem restrição de tempo de jogo.";
 }
 
-$prompt = "
-Você é a Formiguinha da Formiga Lúdica, uma assistente simpática que recomenda jogos de tabuleiro.
+// 2. Gera embedding da query
+$queryEmbedding = geminiEmbedding($queryTexto);
 
-O cliente informou:
-- Jogadores: $jogadores
-- Idade mínima do grupo: $idade
-- Tempo disponível: $tempo minutos
-- Experiência: $experiencia
-- Ocasião: $ocasiao
-
-Com base SOMENTE nos jogos abaixo, escolha os 5 melhores jogos para recomendar.
-Explique de forma curta e amigável por que cada jogo combina com o perfil.
-Depois, liste os demais jogos compatíveis sem explicação longa.
-
-Jogos disponíveis:
-$listaJogos
-";
-
-$url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" . GEMINI_API_KEY;
-
-$dados = [
-    "contents" => [
-        [
-            "parts" => [
-                ["text" => $prompt]
-            ]
-        ]
-    ]
-];
-
-$ch = curl_init($url);
-
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    "Content-Type: application/json"
-]);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($dados));
-
-$resposta = curl_exec($ch);
-
-if (curl_errno($ch)) {
-    registrarLog('ERRO', 'Erro CURL Gemini: ' . curl_error($ch));
-    die('Erro ao consultar a IA.');
+if (empty($queryEmbedding)) {
+    header('Location: ../recomendacao.php?erro=2');
+    exit;
 }
 
-curl_close($ch);
+// 3. Pré-filtra no banco com filtros estruturados
+$sql = "SELECT id_jogo, nome, descricao, imagem, preco,
+               min_jogadores, max_jogadores, idade_minima,
+               duracao_minutos, dificuldade, embedding
+        FROM jogos
+        WHERE ativo = 1
+          AND embedding IS NOT NULL
+          AND min_jogadores <= {$jogadores}
+          AND max_jogadores >= {$jogadores}
+          AND idade_minima <= {$idade}";
 
-$respostaArray = json_decode($resposta, true);
+if ($tempo < 999) {
+    $sql .= " AND (duracao_minutos <= {$tempo} OR duracao_minutos IS NULL)";
+}
 
-$textoIA = $respostaArray['candidates'][0]['content']['parts'][0]['text'] ?? 'Não foi possível gerar recomendação.';
+registrarLog('INFO', 'Embedding da consulta gerado com sucesso.');
 
-registrarLog('INFO', 'Recomendação por Gemini gerada.');
+$result = mysqli_query($conexao, $sql);
+$jogos  = [];
 
-?>
+while ($row = mysqli_fetch_assoc($result)) {
+    $embJogo       = json_decode($row['embedding'], true);
+    $row['score']  = cosineSimilarity($queryEmbedding, $embJogo);
+    $row['embedding'] = null; // libera memória
+    $jogos[] = $row;
+}
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>Resultado da Recomendação</title>
-    <link rel="stylesheet" href="../assets/css/catalogo.css">
-</head>
-<body>
+if (empty($jogos)) {
+    header('Location: ../recomendacao.php?erro=3');
+    exit;
+}
 
-<header class="catalogo-topo">
-    <div class="info-topo">
-        <img src="../assets/img/logo-formiga-ludica.png" alt="Formiga Lúdica" class="logo-topo">
+// 4. Ordena por similaridade e pega top 8
+usort($jogos, fn($a, $b) => $b['score'] <=> $a['score']);
+$topJogos = array_slice($jogos, 0, 8);
 
-        <div class="texto-topo">
-            <span class="titulo-catalogo">RECOMENDAÇÃO</span>
-            <p>A Formiguinha escolheu algumas opções para você.</p>
-        </div>
-    </div>
-</header>
+// 5. Monta contexto pro Gemini
+$contexto = "";
+foreach ($topJogos as $j) {
+    $contexto .= "- {$j['nome']}: {$j['descricao']} ";
+    $contexto .= "({$j['min_jogadores']}-{$j['max_jogadores']} jogadores, ";
+    $contexto .= "{$j['duracao_minutos']}min, dificuldade: {$j['dificuldade']}, ";
+    $contexto .= "idade mínima: {$j['idade_minima']} anos)\n";
+}
 
-<section class="filtros-catalogo">
-    <div style="white-space: pre-line; line-height: 1.7;">
-        <?= htmlspecialchars($textoIA) ?>
-    </div>
-</section>
+$prompt = <<<PROMPT
+Você é a Formiguinha, assistente especialista em jogos de tabuleiro da Formiga Lúdica, uma locadora de jogos.
+Seu jeito é animado, divertido e descontraído — fala como brasileiro mesmo!
 
-<p style="text-align:center; margin-bottom:40px;">
-    <a href="../recomendacao.php">← Fazer nova recomendação</a>
-    |
-    <a href="../index.php">Voltar ao catálogo</a>
-</p>
+Um cliente está buscando jogos com esse perfil:
+"{$queryTexto}"
 
-</body>
-</html>
+Com base APENAS nos jogos do catálogo abaixo, escolha os 3 que melhor combinam com o pedido.
+Para cada um, explique em 2-3 frases descontraídas por que ele é perfeito pra essa situação.
+
+CATÁLOGO:
+{$contexto}
+
+Responda SOMENTE em JSON válido, sem texto antes ou depois, sem blocos de código, neste formato:
+{
+  "intro": "Uma frase animada de introdução personalizada para o cliente",
+  "recomendacoes": [
+    {
+      "nome": "Nome exato do jogo como aparece no catálogo",
+      "motivo": "Explicação divertida e personalizada"
+    }
+  ]
+}
+PROMPT;
+
+// 6. Chama Gemini
+$respostaTexto = geminiChat($prompt);
+$respostaTexto = preg_replace('/```json|```/i', '', $respostaTexto);
+$resposta      = json_decode(trim($respostaTexto), true);
+
+// 7. Enriquece com dados do banco
+$recomendacoes = [];
+if (!empty($resposta['recomendacoes'])) {
+    foreach ($resposta['recomendacoes'] as $rec) {
+        foreach ($topJogos as $j) {
+            if (strtolower(trim($j['nome'])) === strtolower(trim($rec['nome']))) {
+                $recomendacoes[] = [
+                    'nome'          => $j['nome'],
+                    'motivo'        => $rec['motivo'],
+                    'imagem'        => $j['imagem'],
+                    'preco'         => $j['preco'],
+                    'duracao'       => $j['duracao_minutos'],
+                    'dificuldade'   => $j['dificuldade'],
+                    'min_jogadores' => $j['min_jogadores'],
+                    'max_jogadores' => $j['max_jogadores'],
+                ];
+                break;
+            }
+        }
+    }
+}
+
+$intro = $resposta['intro'] ?? 'Aqui estão as minhas recomendações para você!';
+
+// 8. Passa dados pra view
+require_once __DIR__ . '/../views/jogos/recomendacao.php';

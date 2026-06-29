@@ -13,7 +13,7 @@ require_once 'config/conexao.php';
 
 <header class="catalogo-topo">
     <div class="info-topo">
-        <img src="assets/img/logo-formiga-ludica.png" alt="Formiga Lúdica" class="logo-topo">
+        <img src="assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo">
 
         <div class="texto-topo">
             <span class="titulo-catalogo">RECOMENDAÇÃO</span>
@@ -25,13 +25,20 @@ require_once 'config/conexao.php';
 <section class="filtros-catalogo">
     <form action="controllers/recomendacaoController.php" method="POST">
 
+        <label>Descreva sua jogatina:</label>
+        <textarea
+            name="descricao_sessao"
+            required
+            placeholder="Ex: noite divertida com 6 amigos, queremos jogos interativos, de mímica, risada e pouca regra."
+        ></textarea>
+
         <label>Quantas pessoas vão jogar?</label>
         <input type="number" name="jogadores" min="1" required>
 
-        <label>Qual a idade mínima do grupo?</label>
+        <label>Idade mínima do grupo:</label>
         <input type="number" name="idade" min="1" required>
 
-        <label>Quanto tempo vocês têm?</label>
+        <label>Tempo disponível:</label>
         <select name="tempo" required>
             <option value="">Selecione</option>
             <option value="30">Até 30 minutos</option>
@@ -39,25 +46,7 @@ require_once 'config/conexao.php';
             <option value="90">Até 1h30</option>
             <option value="999">Tanto faz</option>
         </select>
-
-        <label>Experiência do grupo</label>
-        <select name="experiencia" required>
-            <option value="">Selecione</option>
-            <option value="iniciante">Iniciante</option>
-            <option value="intermediario">Intermediário</option>
-            <option value="experiente">Experiente</option>
-        </select>
-
-        <label>Ocasião</label>
-        <select name="ocasiao" required>
-            <option value="">Selecione</option>
-            <option value="familia">Família</option>
-            <option value="casal">Casal</option>
-            <option value="amigos">Amigos</option>
-            <option value="festa">Festa</option>
-            <option value="criancas">Crianças</option>
-        </select>
-
+        
         <button type="submit">✨ Ver recomendações</button>
 
     </form>
