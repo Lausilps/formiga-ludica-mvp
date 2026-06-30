@@ -3,6 +3,7 @@
 require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
 require_once '../../helpers/authHelper.php';
+
 protegerAdmin();
 
 if (!isset($_GET['id'])) {
@@ -34,6 +35,15 @@ $resumo_regras = $_GET['resumo_regras'] ?? $jogo['resumo_regras'];
 $link_tutorial = $_GET['link_tutorial'] ?? $jogo['link_tutorial'];
 $ativo = $_GET['ativo'] ?? $jogo['ativo'];
 
+$srcImagemAtual = '';
+
+if (!empty($jogo['imagem'])) {
+    if (str_starts_with($jogo['imagem'], 'http')) {
+        $srcImagemAtual = $jogo['imagem'];
+    } else {
+        $srcImagemAtual = "../../" . $jogo['imagem'];
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -44,10 +54,23 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
     <title>Editar Jogo</title>
 
     <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/editar.css">
 </head>
-<body>
+<body class="admin-body">
 
-    <h1>Editar jogo</h1>
+<header class="admin-header">
+    <div class="admin-header-conteudo">
+        <img src="../../assets/img/logo-formiga-ludica.png" alt="Formiga Lúdica" class="admin-logo">
+
+        <div>
+            <span class="admin-label">Painel administrativo</span>
+            <h1>Editar jogo</h1>
+            <p>Atualize as informações do catálogo da Formiga Lúdica.</p>
+        </div>
+    </div>
+</header>
+
+<main class="admin-container">
 
     <?php if (isset($_GET['erro']) && $_GET['erro'] == 'duplicado'): ?>
         <div class="alerta alerta-erro">
@@ -67,112 +90,134 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
         </div>
     <?php endif; ?>
 
-    <form action="../../controllers/editarJogoController.php" method="POST" enctype="multipart/form-data">
+    <section class="card-admin">
 
-        <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
+        <form action="../../controllers/editarJogoController.php" method="POST" enctype="multipart/form-data" class="form-editar">
 
-        <label>Nome:</label><br>
-        <input type="text" name="nome" required value="<?= $nome ?>"><br><br>
+            <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
 
-        <div class="campo-checkbox">
-            <input
-                type="checkbox"
-                id="inativar"
-                name="inativar"
-                value="1"
-                <?= $ativo == 0 ? 'checked' : '' ?>
-            >
+            <div class="grid-form">
 
-            <label for="inativar">Inativar produto</label>
-        </div>
+                <div class="campo campo-grande">
+                    <label>Nome:</label>
+                    <input type="text" name="nome" required value="<?= htmlspecialchars($nome) ?>">
+                </div>
 
-        <br><br>
+                <div class="campo">
+                    <label>Status:</label>
+                    <select name="ativo">
+                        <option value="1" <?= $ativo == 1 ? 'selected' : '' ?>>Ativo</option>
+                        <option value="0" <?= $ativo == 0 ? 'selected' : '' ?>>Inativo</option>
+                    </select>
+                </div>
 
-        <br><br>
+                <div class="campo campo-grande">
+                    <label>Descrição:</label>
+                    <textarea name="descricao" required><?= htmlspecialchars($descricao) ?></textarea>
+                </div>
 
-        <label>Descrição:</label><br>
-        <textarea name="descricao" required><?= $descricao ?></textarea><br><br>
+                <div class="campo">
+                    <label>Preço:</label>
+                    <input type="number" step="0.01" name="preco" required value="<?= htmlspecialchars($preco) ?>">
+                </div>
 
-        <label>Preço:</label><br>
-        <input type="number" step="0.01" name="preco" required value="<?= $preco ?>"><br><br>
+                <div class="campo">
+                    <label>Mínimo de jogadores:</label>
+                    <input type="number" name="min_jogadores" required value="<?= htmlspecialchars($min_jogadores) ?>">
+                </div>
 
-        <label>Mínimo de jogadores:</label><br>
-        <input type="number" name="min_jogadores" required value="<?= $min_jogadores ?>"><br><br>
+                <div class="campo">
+                    <label>Máximo de jogadores:</label>
+                    <input type="number" name="max_jogadores" required value="<?= htmlspecialchars($max_jogadores) ?>">
+                </div>
 
-        <label>Máximo de jogadores:</label><br>
-        <input type="number" name="max_jogadores" required value="<?= $max_jogadores ?>"><br><br>
+                <div class="campo">
+                    <label>Idade mínima:</label>
+                    <input type="number" name="idade_minima" required value="<?= htmlspecialchars($idade_minima) ?>">
+                </div>
 
-        <label>Idade mínima:</label><br>
-        <input type="number" name="idade_minima" required value="<?= $idade_minima ?>"><br><br>
+                <div class="campo">
+                    <label>Duração média:</label>
+                    <input type="number" name="duracao_minutos" required value="<?= htmlspecialchars($duracao_minutos) ?>">
+                </div>
 
-        <label>Duração média (minutos):</label><br>
-        <input type="number" name="duracao_minutos" required value="<?= $duracao_minutos ?>"><br><br>
+                <div class="campo">
+                    <label>Dificuldade:</label>
+                    <select name="dificuldade" required>
+                        <option value="facil" <?= $dificuldade == 'facil' ? 'selected' : '' ?>>Fácil</option>
+                        <option value="media" <?= $dificuldade == 'media' ? 'selected' : '' ?>>Média</option>
+                        <option value="dificil" <?= $dificuldade == 'dificil' ? 'selected' : '' ?>>Difícil</option>
+                    </select>
+                </div>
 
-        <label>Dificuldade:</label><br>
-        <select name="dificuldade" required>
-            <option value="facil" <?= $dificuldade == 'facil' ? 'selected' : '' ?>>Fácil</option>
-            <option value="media" <?= $dificuldade == 'media' ? 'selected' : '' ?>>Média</option>
-            <option value="dificil" <?= $dificuldade == 'dificil' ? 'selected' : '' ?>>Difícil</option>
-        </select><br><br>
+                <div class="campo campo-grande">
+                    <label>Resumo das regras:</label>
+                    <textarea name="resumo_regras"><?= htmlspecialchars($resumo_regras) ?></textarea>
+                </div>
 
-        <label>Status:</label><br>
-        <select name="ativo">
-            <option value="1" <?= $ativo == 1 ? 'selected' : '' ?>>Ativo</option>
-            <option value="0" <?= $ativo == 0 ? 'selected' : '' ?>>Inativo</option>
-        </select><br><br>
+                <div class="campo campo-grande">
+                    <label>Link do tutorial:</label>
+                    <input
+                        type="url"
+                        name="link_tutorial"
+                        placeholder="Cole aqui o link do tutorial"
+                        value="<?= htmlspecialchars($link_tutorial) ?>"
+                    >
+                </div>
 
-        <label>Resumo das regras:</label><br>
-        <textarea name="resumo_regras"><?= $resumo_regras ?></textarea><br><br>
+            </div>
 
-        <label>Link do tutorial:</label><br>
-        <input
-            type="url"
-            name="link_tutorial"
-            placeholder="Cole aqui o link do tutorial"
-            value="<?= $link_tutorial ?>"
-        ><br><br>
+            <div class="area-imagem">
 
-        <?php if (!empty($jogo['imagem'])): ?>
-            <label>Imagem atual:</label><br>
-            <img
-                src="../../<?= $jogo['imagem'] ?>"
-                alt="<?= $jogo['nome'] ?>"
-                style="max-width:200px; border-radius:10px; margin-bottom:16px;"
-            ><br><br>
-        <?php endif; ?>
+                <?php if (!empty($srcImagemAtual)): ?>
+                    <div>
+                        <label>Imagem atual:</label>
 
-        <label>Nova imagem:</label><br>
-        <input type="file" name="imagem" id="imagem" accept="image/*"><br><br>
+                        <div class="preview-atual">
+                            <img src="<?= htmlspecialchars($srcImagemAtual) ?>" alt="<?= htmlspecialchars($jogo['nome']) ?>">
+                        </div>
+                    </div>
+                <?php endif; ?>
 
-        <img
-            id="preview-imagem"
-            src=""
-            alt="Prévia da nova imagem"
-            style="display:none; max-width:200px; border-radius:10px; margin-bottom:16px;"
-        >
+                <div>
+                    <label>Nova imagem:</label>
+                    <input type="file" name="imagem" id="imagem" accept="image/*">
 
-        <button type="submit">Salvar alterações</button>
+                    <img
+                        id="preview-imagem"
+                        src=""
+                        alt="Prévia da nova imagem"
+                        class="preview-nova"
+                    >
+                </div>
 
-    </form>
+            </div>
 
-    <p>
-        <a href="listar.php">Voltar para listagem</a>
-    </p>
+            <div class="acoes-form">
+                <button type="submit" class="btn-salvar">Salvar alterações</button>
+                <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
+            </div>
 
-    <script>
-        document.getElementById('imagem').addEventListener('change', function(event) {
-            const arquivo = event.target.files[0];
-            const preview = document.getElementById('preview-imagem');
+        </form>
 
-            if (arquivo) {
-                preview.src = URL.createObjectURL(arquivo);
-                preview.style.display = 'block';
-            } else {
-                preview.src = '';
-                preview.style.display = 'none';
-            }
-        });
-    </script>
+    </section>
+
+</main>
+
+<script>
+    document.getElementById('imagem').addEventListener('change', function(event) {
+        const arquivo = event.target.files[0];
+        const preview = document.getElementById('preview-imagem');
+
+        if (arquivo) {
+            preview.src = URL.createObjectURL(arquivo);
+            preview.style.display = 'block';
+        } else {
+            preview.src = '';
+            preview.style.display = 'none';
+        }
+    });
+</script>
 
 </body>
 </html>

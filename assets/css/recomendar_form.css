@@ -1,0 +1,250 @@
+.recomendar-body {
+    background: #94cf8c;
+    color: #2b1b12;
+    padding: 0;
+}
+
+/* HEADER */
+.recomendar-header {
+    background: linear-gradient(135deg, #2d0b5f, #4b1a8d, #7C3AED);
+    color: white;
+    padding: 38px 42px 95px;
+}
+
+.recomendar-header-conteudo {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+}
+
+.recomendar-logo {
+    width: 165px;
+    height: auto;
+}
+
+.recomendar-label {
+    display: inline-block;
+    color: #F6C453;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.recomendar-header h1 {
+    color: #F6C453;
+    font-size: 3.4rem;
+    margin: 0;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow:
+        3px 3px 0 #2d0b5f,
+        6px 6px 12px rgba(0,0,0,.25);
+}
+
+.recomendar-header p {
+    color: rgba(255,255,255,.92);
+    font-size: 1.15rem;
+    margin-top: 8px;
+    max-width: 700px;
+}
+
+/* CONTAINER */
+.recomendar-container {
+    max-width: 1080px;
+    margin: -55px auto 50px;
+    padding: 0 28px;
+}
+
+.card-recomendacao-form {
+    background: rgba(255,255,255,.96);
+    border-radius: 28px;
+    box-shadow: 0 14px 38px rgba(0,0,0,.14);
+    padding: 30px;
+}
+
+.intro-card {
+    background: #FAF7F3;
+    border: 1px solid #eee;
+    border-radius: 22px;
+    padding: 22px;
+    margin-bottom: 24px;
+}
+
+.intro-card h2 {
+    color: #2d0b5f;
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+}
+
+.intro-card p {
+    color: #5f5148;
+    line-height: 1.6;
+}
+
+/* ALERTA */
+.alerta-recomendacao {
+    background: #FFF4D6;
+    color: #7A4B00;
+    border: 1px solid #F6C453;
+    border-radius: 18px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    font-weight: 700;
+}
+
+/* FORM */
+.form-recomendacao {
+    max-width: none;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+.grid-form {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 22px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+}
+
+.campo-grande {
+    margin-bottom: 22px;
+}
+
+label {
+    font-weight: 900;
+    color: #2d0b5f;
+    margin-bottom: 8px;
+}
+
+textarea,
+input,
+select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 16px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    background: white;
+}
+
+textarea {
+    min-height: 160px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+textarea:focus,
+input:focus,
+select:focus {
+    outline: 2px solid #C9B4FF;
+    border-color: #7C3AED;
+}
+
+/* AÇÕES */
+.acoes-recomendacao {
+    margin-top: 28px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-recomendar-form {
+    background: linear-gradient(135deg, #7C3AED, #9333EA);
+    color: white;
+    border: none;
+    padding: 15px 24px;
+    border-radius: 16px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(124,58,237,.22);
+}
+
+.btn-voltar-catalogo {
+    background: #F6C453;
+    color: #2b1b12;
+    padding: 14px 20px;
+    border-radius: 16px;
+    text-decoration: none;
+    font-weight: 900;
+}
+
+.btn-recomendar-form:hover,
+.btn-voltar-catalogo:hover {
+    opacity: .92;
+}
+
+/* LOADING */
+#overlay-carregando {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.48);
+    backdrop-filter: blur(5px);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-carregando {
+    background: rgba(255,255,255,.96);
+    border-radius: 28px;
+    padding: 34px;
+    max-width: 430px;
+    text-align: center;
+    box-shadow: 0 20px 45px rgba(0,0,0,.2);
+}
+
+.gif-formiguinha {
+    width: 150px;
+    margin-bottom: 18px;
+}
+
+.modal-carregando p {
+    color: #2d0b5f;
+    font-weight: 900;
+    line-height: 1.5;
+}
+
+/* RESPONSIVO */
+@media (max-width: 800px) {
+    .recomendar-header {
+        padding: 30px 24px 90px;
+    }
+
+    .recomendar-header-conteudo {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .recomendar-header h1 {
+        font-size: 2.3rem;
+    }
+
+    .recomendar-container {
+        padding: 0 18px;
+    }
+
+    .grid-form {
+        grid-template-columns: 1fr;
+    }
+
+    .acoes-recomendacao {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-recomendar-form,
+    .btn-voltar-catalogo {
+        text-align: center;
+    }
+}

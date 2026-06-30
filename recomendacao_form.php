@@ -1,5 +1,9 @@
 <?php
+session_start();
 require_once 'config/conexao.php';
+
+$dadosAnteriores = $_SESSION['form_recomendacao'] ?? [];
+unset($_SESSION['form_recomendacao']);
 ?>
 
 <!DOCTYPE html>
@@ -7,54 +11,144 @@ require_once 'config/conexao.php';
 <head>
     <meta charset="UTF-8">
     <title>Recomendação - Formiga Lúdica</title>
-    <link rel="stylesheet" href="assets/css/catalogo.css">
+
+    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/recomendar_form.css">
 </head>
-<body>
+<body class="recomendar-body">
 
-<header class="catalogo-topo">
-    <div class="info-topo">
-        <img src="assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo">
+<header class="recomendar-header">
+    <div class="recomendar-header-conteudo">
 
-        <div class="texto-topo">
-            <span class="titulo-catalogo">RECOMENDAÇÃO</span>
-            <p>Responda rapidinho e a Formiguinha te ajuda a escolher.</p>
+        <img src="assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="recomendar-logo">
+
+        <div>
+            <span class="recomendar-label">Formiguinha IA</span>
+            <h1>Recomendação</h1>
+            <p>Conte como será sua jogatina e a Formiguinha encontra jogos que combinam com você.</p>
         </div>
+
     </div>
 </header>
 
-<section class="filtros-catalogo">
-    <form action="controllers/recomendacaoController.php" method="POST">
+<main class="recomendar-container">
 
-        <label>Descreva sua jogatina:</label>
-        <textarea
-            name="descricao_sessao"
-            required
-            placeholder="Ex: noite divertida com 6 amigos, queremos jogos interativos, de mímica, risada e pouca regra."
-        ></textarea>
+    <section class="card-recomendacao-form">
 
-        <label>Quantas pessoas vão jogar?</label>
-        <input type="number" name="jogadores" min="1" required>
+        <div class="intro-card">
+            <h2>🐜 O que você quer jogar hoje?</h2>
+            <p>
+                Pode escrever do seu jeito: churrasco com amigos, noite em família,
+                jogos rápidos, mímica, estratégia, risada, crianças ou casal.
+            </p>
+        </div>
 
-        <label>Idade mínima do grupo:</label>
-        <input type="number" name="idade" min="1" required>
+        <?php if (isset($_GET['erro'])): ?>
+            <?php
+            $mensagens = [
+                1 => '🐜 Ops, esqueceu de contar pra Formiguinha o que você procura! Descreve sua jogatina.',
+                2 => '🐜 A Formiguinha não conseguiu entender seu pedido agora. Tenta de novo em instantes!',
+                3 => '🐜 Não encontrei jogos com esse perfil no catálogo. Tenta ajustar os filtros!',
+                4 => '🐜 Estou bombando de pedidos agora! Aguarda uns 30 segundinhos e tenta de novo 💛',
+                5 => '🐜 Algo deu errado por aqui. Tenta novamente em instantes!',
+            ];
+            $codigo = (int)$_GET['erro'];
+            ?>
+            <div class="alerta-recomendacao">
+                <?= $mensagens[$codigo] ?? 'Algo deu errado. Tenta novamente!' ?>
+            </div>
+        <?php endif; ?>
 
-        <label>Tempo disponível:</label>
-        <select name="tempo" required>
-            <option value="">Selecione</option>
-            <option value="30">Até 30 minutos</option>
-            <option value="60">Até 1 hora</option>
-            <option value="90">Até 1h30</option>
-            <option value="999">Tanto faz</option>
-        </select>
-        
-        <button type="submit">✨ Ver recomendações</button>
+        <form action="controllers/recomendacaoController.php" method="POST" class="form-recomendacao" id="form-recomendacao">
 
-    </form>
-</section>
+            <div class="campo campo-grande">
+                <label>Descreva sua jogatina:</label>
+                <textarea
+                    name="descricao_sessao"
+                    required
+                    placeholder="Ex: noite divertida com 6 amigos, queremos jogos interativos, de mímica, risada e pouca regra."
+                ><?= htmlspecialchars($dadosAnteriores['descricao_sessao'] ?? '') ?></textarea>
+            </div>
 
-<p style="text-align:center;">
-    <a href="index.php">← Voltar ao catálogo</a>
-</p>
+            <div class="grid-form">
+
+                <div class="campo">
+                    <label>Quantas pessoas vão jogar?</label>
+                    <input
+                        type="number"
+                        name="jogadores"
+                        min="1"
+                        required
+                        placeholder="Ex: 6"
+                        value="<?= htmlspecialchars($dadosAnteriores['jogadores'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="campo">
+                    <label>Idade mínima do grupo:</label>
+                    <input
+                        type="number"
+                        name="idade"
+                        min="1"
+                        required
+                        placeholder="Ex: 10"
+                        value="<?= htmlspecialchars($dadosAnteriores['idade'] ?? '') ?>"
+                    >
+                </div>
+
+                <div class="campo">
+                    <label>Tempo disponível:</label>
+                    <select name="tempo" required>
+                        <option value="">Selecione</option>
+                        <?php
+                        $opcoesTempo = [
+                            30 => 'Até 30 minutos',
+                            60 => 'Até 1 hora',
+                            90 => 'Até 1h30',
+                            999 => 'Tanto faz'
+                        ];
+
+                        $tempoSelecionado = $dadosAnteriores['tempo'] ?? '';
+
+                        foreach ($opcoesTempo as $valor => $label):
+                        ?>
+                            <option value="<?= $valor ?>" <?= ($tempoSelecionado == $valor) ? 'selected' : '' ?>>
+                                <?= $label ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="acoes-recomendacao">
+                <button type="submit" class="btn-recomendar-form">
+                    ✨ Ver recomendações
+                </button>
+
+                <a href="index.php" class="btn-voltar-catalogo">
+                    ← Voltar ao catálogo
+                </a>
+            </div>
+
+        </form>
+
+    </section>
+
+</main>
+
+<div id="overlay-carregando">
+    <div class="modal-carregando">
+        <img src="assets/img/formiguinha-pesquisando.gif" alt="Formiguinha pesquisando" class="gif-formiguinha">
+        <p>🐜 A Formiguinha está fuçando o catálogo pra achar os jogos perfeitos pra você...</p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('form-recomendacao').addEventListener('submit', function () {
+        document.getElementById('overlay-carregando').style.display = 'flex';
+    });
+</script>
 
 </body>
 </html>

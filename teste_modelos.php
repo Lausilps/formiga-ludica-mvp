@@ -21,3 +21,11 @@ foreach ($response['models'] ?? [] as $model) {
     }
 }
 echo "</ul>";
+
+echo "<h3>Modelos que suportam embedContent:</h3><ul>";
+foreach ($response['models'] ?? [] as $model) {
+    if (in_array('embedContent', $model['supportedGenerationMethods'] ?? [])) {
+        echo "<li><strong>{$model['name']}</strong> — {$model['displayName']}</li>";
+    }
+}
+echo "</ul>";

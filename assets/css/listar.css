@@ -185,7 +185,7 @@
 
 /* TABELA */
 .tabela-card {
-    overflow: hidden;
+    overflow: visible;
 }
 
 .tabela-topo {
@@ -216,7 +216,8 @@
 }
 
 .tabela-responsiva {
-    overflow-x: auto;
+    overflow-x: visible;
+    overflow-y: visible;
 }
 
 .tabela-jogos {
@@ -307,7 +308,7 @@
     padding: 10px;
     border-radius: 16px;
     box-shadow: 0 12px 28px rgba(0,0,0,.22);
-    z-index: 999;
+    z-index: 99999;
 }
 
 .imagem-preview img {
@@ -413,5 +414,8 @@
 
     .btn-admin {
         text-align: center;
+    }
+    .tabela-responsiva {
+        overflow-x: auto;
     }
 }
