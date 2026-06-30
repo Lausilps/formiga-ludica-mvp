@@ -1,10 +1,10 @@
 <?php
 
 $host = "localhost";
-$usuario = "edilsystem";
-$senha = "3Dsys_04244425";
+$usuario = "root";
+$senha = "ROOT";
 $banco = "formiga_ludica";
-$porta = 33418;
+$porta = 3306;
 
 $conexao = mysqli_connect(
     $host,

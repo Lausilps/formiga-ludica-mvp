@@ -3,16 +3,16 @@ require_once __DIR__ . '/../config/conexao.php';
 require_once __DIR__ . '/../config/gemini.php';
 require_once __DIR__ . '/../helpers/logHelper.php';
 
-registrarLog(
-    'INFO',
-    "Iniciando RAG. Jogadores: $jogadores | Idade: $idade | Tempo: $tempo | Texto: $descricao"
-);
-
 // Recebe dados do formulário
 $descricao = trim($_POST['descricao_sessao'] ?? '');
 $jogadores = (int)($_POST['jogadores'] ?? 4);
 $idade     = (int)($_POST['idade'] ?? 10);
 $tempo     = (int)($_POST['tempo'] ?? 999);
+
+registrarLog(
+    'INFO',
+    "Iniciando recomendação RAG | Jogadores: $jogadores | Idade: $idade | Tempo: $tempo | Descrição: $descricao"
+);
 
 if (empty($descricao)) {
     header('Location: ../recomendacao.php?erro=1');
@@ -31,6 +31,22 @@ if ($tempo < 999) {
 
 // 2. Gera embedding da query
 $queryEmbedding = geminiEmbedding($queryTexto);
+
+if (empty($queryEmbedding)) {
+
+    registrarLog(
+        'ERRO',
+        'Falha ao gerar embedding da consulta.'
+    );
+
+    header('Location: ../recomendacao.php?erro=2');
+    exit;
+}
+
+registrarLog(
+    'INFO',
+    'Embedding da consulta gerado com sucesso.'
+);
 
 if (empty($queryEmbedding)) {
     header('Location: ../recomendacao.php?erro=2');
@@ -52,7 +68,7 @@ if ($tempo < 999) {
     $sql .= " AND (duracao_minutos <= {$tempo} OR duracao_minutos IS NULL)";
 }
 
-registrarLog('INFO', 'Embedding da consulta gerado com sucesso.');
+
 
 $result = mysqli_query($conexao, $sql);
 $jogos  = [];
@@ -62,7 +78,11 @@ while ($row = mysqli_fetch_assoc($result)) {
     $row['score']  = cosineSimilarity($queryEmbedding, $embJogo);
     $row['embedding'] = null; // libera memória
     $jogos[] = $row;
-}
+} 
+registrarLog(
+    'INFO',
+    'Quantidade de jogos candidatos encontrados: ' . count($jogos)
+);
 
 if (empty($jogos)) {
     header('Location: ../recomendacao.php?erro=3');
@@ -72,6 +92,12 @@ if (empty($jogos)) {
 // 4. Ordena por similaridade e pega top 8
 usort($jogos, fn($a, $b) => $b['score'] <=> $a['score']);
 $topJogos = array_slice($jogos, 0, 8);
+
+registrarLog(
+    'INFO',
+    'Top jogos selecionados: ' .
+    implode(', ', array_column($topJogos, 'nome'))
+);
 
 // 5. Monta contexto pro Gemini
 $contexto = "";
@@ -107,10 +133,29 @@ Responda SOMENTE em JSON válido, sem texto antes ou depois, sem blocos de códi
 }
 PROMPT;
 
+registrarLog(
+    'INFO',
+    'Enviando prompt para o Gemini.'
+);
+
 // 6. Chama Gemini
 $respostaTexto = geminiChat($prompt);
+
+registrarLog(
+    'INFO',
+    'Resposta recebida do Gemini.'
+);
+
 $respostaTexto = preg_replace('/```json|```/i', '', $respostaTexto);
 $resposta      = json_decode(trim($respostaTexto), true);
+
+if (empty($resposta)) {
+
+    registrarLog(
+        'ERRO',
+        'Resposta inválida do Gemini: ' . $respostaTexto
+    );
+}
 
 // 7. Enriquece com dados do banco
 $recomendacoes = [];
@@ -135,6 +180,11 @@ if (!empty($resposta['recomendacoes'])) {
 }
 
 $intro = $resposta['intro'] ?? 'Aqui estão as minhas recomendações para você!';
+
+registrarLog(
+    'INFO',
+    'Recomendações finais geradas: ' . count($recomendacoes)
+);
 
 // 8. Passa dados pra view
 require_once __DIR__ . '/../views/jogos/recomendacao.php';

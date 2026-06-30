@@ -61,7 +61,7 @@ while ($jogo = mysqli_fetch_assoc($result)) {
     }
 
     // Respeita rate limit do Gemini free tier
-    usleep(200000); // 0.2s entre chamadas
+    sleep(1); // 1 segundo entre cada chamada
 }
 
 echo "\n✅ Concluído! {$processados} embeddings gerados. {$erros} erros.\n";

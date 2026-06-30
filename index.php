@@ -60,7 +60,7 @@ if (!$resultado) {
             <div class="texto-recomendacao">
                 <span>Não sabe o que jogar hoje?</span>
 
-                <a href="recomendacao.php" class="btn-recomendar">
+                <a href="recomendacao_form.php" class="btn-recomendar">
                     ✨ Recomendar para mim
                 </a>
             </div>

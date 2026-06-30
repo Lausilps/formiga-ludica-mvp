@@ -1,29 +1,298 @@
-/* formulario de busca - filtros */
+.admin-body {
+    background: #94cf8c;
+    color: #2b1b12;
+    padding: 0;
+}
+
+/* HEADER ADMIN */
+.admin-header {
+    background: linear-gradient(135deg, #2d0b5f, #4b1a8d, #7C3AED);
+    color: white;
+    padding: 34px 42px 80px;
+}
+
+.admin-header-conteudo {
+    max-width: 1500px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+.admin-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+.admin-logo {
+    width: 150px;
+    height: auto;
+}
+
+.admin-label {
+    display: inline-block;
+    color: #F6C453;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.admin-header h1 {
+    color: #F6C453;
+    font-size: 3rem;
+    margin: 0;
+    letter-spacing: 2px;
+    text-shadow:
+        3px 3px 0 #2d0b5f,
+        6px 6px 12px rgba(0,0,0,.25);
+}
+
+.admin-header p {
+    color: rgba(255,255,255,.92);
+    font-size: 1.1rem;
+    margin-top: 8px;
+}
+
+.btn-logout-topo {
+    background: rgba(255,255,255,.13);
+    color: white;
+    border: 1px solid rgba(255,255,255,.22);
+    padding: 12px 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 800;
+    transition: .2s;
+}
+
+.btn-logout-topo:hover {
+    background: #F04A23;
+}
+
+/* CONTAINER */
+.admin-container {
+    max-width: 1500px;
+    margin: -45px auto 50px;
+    padding: 0 30px;
+}
+
+/* CARDS */
+.card-admin {
+    background: rgba(255,255,255,.96);
+    border-radius: 24px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.12);
+}
+
+/* BUSCA */
+.card-busca-admin {
+    padding: 22px;
+    margin-bottom: 18px;
+}
+
 .form-busca {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
-    max-width: 700px;
-    margin-bottom: 20px;
     padding: 0;
     background: transparent;
     box-shadow: none;
+    max-width: none;
+    margin: 0;
 }
 
 .form-busca input {
+    width: 100%;
+    max-width: 480px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    font-size: 15px;
     margin: 0;
 }
 
 .form-busca button {
-    white-space: nowrap;
+    background: #7C3AED;
+    color: white;
+    border: none;
+    padding: 14px 22px;
+    border-radius: 14px;
+    font-weight: 800;
+    cursor: pointer;
 }
 
-.form-busca a {
-    white-space: nowrap;
+.btn-limpar {
+    background: #F6C453;
+    color: #2b1b12;
+    padding: 13px 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 800;
 }
 
-/* IMAGEM LISTAGEM */
+/* AÇÕES */
+.acoes-admin {
+    padding: 20px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
 
+.btn-admin {
+    border: none;
+    padding: 13px 18px;
+    border-radius: 14px;
+    text-decoration: none;
+    font-weight: 900;
+    cursor: pointer;
+    transition: .2s;
+    font-size: 15px;
+}
+
+.btn-admin:hover {
+    transform: translateY(-2px);
+}
+
+.btn-roxo {
+    background: linear-gradient(135deg, #7C3AED, #9333EA);
+    color: white;
+}
+
+.btn-amarelo {
+    background: #F6C453;
+    color: #2b1b12;
+}
+
+.btn-contorno {
+    background: white;
+    color: #7C3AED;
+    border: 2px solid #E5D7FF;
+}
+
+.btn-ia {
+    background: #2d0b5f;
+    color: white;
+}
+
+.status-embeddings {
+    color: #5f5148;
+    font-size: .9rem;
+    margin-left: 4px;
+}
+
+/* TABELA */
+.tabela-card {
+    overflow: hidden;
+}
+
+.tabela-topo {
+    padding: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.tabela-topo h2 {
+    color: #2d0b5f;
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.tabela-topo p {
+    color: #6b5f57;
+    margin-top: 5px;
+}
+
+.badge-sistema {
+    background: #E3F8E8;
+    color: #147A32;
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-weight: 800;
+}
+
+.tabela-responsiva {
+    overflow-x: auto;
+}
+
+.tabela-jogos {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.tabela-jogos thead {
+    background: linear-gradient(135deg, #2d0b5f, #7C3AED);
+    color: white;
+}
+
+.tabela-jogos th,
+.tabela-jogos td {
+    padding: 15px 16px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.tabela-jogos th {
+    font-weight: 900;
+}
+
+.tabela-jogos tbody tr:hover {
+    background: #FAF7F3;
+}
+
+.coluna-nome {
+    font-weight: 800;
+    color: #2d0b5f;
+}
+
+/* STATUS */
+.badge-status {
+    display: inline-block;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: .85rem;
+}
+
+.badge-ativo {
+    background: #DDF7E4;
+    color: #0E7A31;
+}
+
+.badge-inativo {
+    background: #FFE0E0;
+    color: #C62828;
+}
+
+/* AÇÕES TABELA */
+.acoes-tabela {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-acao {
+    background: #F5F1FF;
+    color: #7C3AED;
+    border: 1px solid #E5D7FF;
+    padding: 8px 12px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 800;
+}
+
+.btn-acao:hover {
+    background: #7C3AED;
+    color: white;
+}
+
+/* IMAGEM PREVIEW */
 .tooltip-imagem {
     position: relative;
 }
@@ -31,21 +300,22 @@
 .imagem-preview {
     display: none;
     position: absolute;
-    width: 260px;
-    top: 30px;
+    width: 280px;
+    top: 36px;
     left: 0;
-
     background: white;
-    padding: 8px;
-    border-radius: 10px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-
+    padding: 10px;
+    border-radius: 16px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.22);
     z-index: 999;
 }
 
 .imagem-preview img {
-    width: 200px;
-    border-radius: 8px;
+    width: 100%;
+    max-height: 230px;
+    object-fit: contain;
+    border-radius: 12px;
+    background: #FAF7F3;
 }
 
 .tooltip-imagem:hover .imagem-preview {
@@ -53,57 +323,95 @@
 }
 
 .descricao-preview {
-    margin-top: 8px;
+    margin-top: 10px;
     font-size: 13px;
     line-height: 1.4;
-    color: #333;
+    color: #444;
 }
 
-/* paginacao */
+/* PAGINAÇÃO */
 .paginacao {
-    margin-top: 25px;
+    background: rgba(255,255,255,.96);
+    margin: 18px 0 0;
+    padding: 18px;
+    border-radius: 22px;
+    box-shadow: 0 12px 35px rgba(0,0,0,.10);
+
     display: flex;
     justify-content: center;
+    align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
-.paginacao a {
-    padding: 8px 14px;
-    border: 1px solid #d0d0d0;
-    border-radius: 8px;
-    text-decoration: none;
-    color: #2d3a22;
+.paginacao a,
+.reticencias {
     background: white;
+    padding: 10px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 800;
+    color: #2d0b5f;
+    border: 1px solid #E5D7FF;
 }
 
 .paginacao a:hover {
-    background: #f0f0f0;
+    background: #F6C453;
+    border-color: #F6C453;
 }
 
 .pagina-atual {
-    background: #6b8e23 !important;
+    background: #7C3AED !important;
     color: white !important;
-    font-weight: bold;
+    border-color: #7C3AED !important;
 }
 
+.info-paginacao {
+    color: #6b5f57;
+    font-weight: 700;
+    margin-left: 10px;
+}
 
-/* logout admin */
+/* LOGOUT ANTIGO, SE USAR */
 .sair-admin {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+    display: none;
 }
 
-.btn-logout {
-    background-color: #dc3545;
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-}
+/* RESPONSIVO */
+@media (max-width: 900px) {
+    .admin-header {
+        padding: 28px 24px 80px;
+    }
 
-.btn-logout:hover {
-    opacity: 0.9;
+    .admin-header-conteudo,
+    .admin-logo-area {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .admin-header h1 {
+        font-size: 2.2rem;
+    }
+
+    .admin-container {
+        padding: 0 18px;
+    }
+
+    .form-busca {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-busca input {
+        max-width: none;
+    }
+
+    .acoes-admin {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-admin {
+        text-align: center;
+    }
 }

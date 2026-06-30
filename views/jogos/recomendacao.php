@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Recomendações - Formiga Lúdica</title>
-    <link rel="stylesheet" href="assets/css/catalogo.css">
+    <link rel="stylesheet" href="../assets/css/catalogo.css">
     <style>
         .recomendacoes-grid {
             display: flex;
@@ -102,8 +102,8 @@
     </div>
 <?php endif; ?>
 
-<a class="btn-voltar" href="recomendacao.php">← Tentar outra busca</a>
-<a class="btn-voltar" href="index.php">← Voltar ao catálogo</a>
+<a class="btn-voltar" href="../recomendacao_form.php">← Tentar outra busca</a>
+<a class="btn-voltar" href="../index.php">← Voltar ao catálogo</a>
 
 </body>
 </html>
