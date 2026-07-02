@@ -72,7 +72,7 @@
 
 <header class="catalogo-topo">
     <div class="info-topo">
-        <img src="../../assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo">
+        <img src="../assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo">
         <div class="texto-topo">
             <span class="titulo-catalogo">RECOMENDAÇÕES</span>
             <p>A Formiguinha escolheu especialmente pra você 🐜✨</p>
@@ -82,41 +82,49 @@
 
 <?php if (!empty($recomendacoes)): ?>
 
-    <p class="intro-texto">🐜 <?= htmlspecialchars($intro) ?></p>
+    <section class="fala-formiguinha">
+        <img src="../assets/img/formiguinha-falando.png" alt="Formiguinha" class="formiguinha-fala">
 
-    <div class="recomendacoes-grid">
-        <?php foreach ($recomendacoes as $jogo): ?>
-        <div class="card-recomendacao">
-            <?php
-                $imgSrc = !empty($jogo['imagem'])
-                    ? htmlspecialchars($jogo['imagem'])
-                    : 'assets/img/sem-imagem.png';
-            ?>
-            <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($jogo['nome']) ?>">
-            <div class="card-body">
-                <h3><?= htmlspecialchars($jogo['nome']) ?></h3>
-                <p class="card-motivo"><?= htmlspecialchars($jogo['motivo']) ?></p>
-                <p class="card-meta">
-                    👥 <?= $jogo['min_jogadores'] ?>–<?= $jogo['max_jogadores'] ?> jogadores &nbsp;|&nbsp;
-                    ⏱ <?= $jogo['duracao'] ?> min &nbsp;|&nbsp;
-                    🎯 <?= ucfirst($jogo['dificuldade']) ?>
-                </p>
-                <p class="card-preco">R$ <?= number_format($jogo['preco'], 2, ',', '.') ?>/dia</p>
-            </div>
+        <div class="balao-fala">
+            <h2>🐜 E aí, formigão!</h2>
+            <p><?= htmlspecialchars($intro) ?></p>
         </div>
-        <?php endforeach; ?>
-    </div>
+    </section>
 
     <?php if (!empty($recomendacoes)): ?>
 
     <div id="container-recomendacoes">
-    <div class="recomendacoes-grid" id="grid-recomendacoes">
-        <?php foreach ($recomendacoes as $jogo): ?>
-        <div class="card-recomendacao" data-id="<?= $jogo['id'] ?>">
-            <!-- conteúdo do card igual já está -->
+        <div class="recomendacoes-grid" id="grid-recomendacoes">
+            <?php foreach ($recomendacoes as $jogo): ?>
+                <div class="card-recomendacao" data-id="<?= $jogo['id'] ?>">
+                    <?php
+                        $imgSrc = !empty($jogo['imagem'])
+                            ? htmlspecialchars($jogo['imagem'])
+                            : '../../assets/img/sem-imagem.png';
+                    ?>
+
+                    <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($jogo['nome']) ?>">
+
+                    <div class="card-body">
+                        <h3><?= htmlspecialchars($jogo['nome']) ?></h3>
+
+                        <p class="card-motivo">
+                            <?= htmlspecialchars($jogo['motivo']) ?>
+                        </p>
+
+                        <p class="card-meta">
+                            👥 <?= $jogo['min_jogadores'] ?>–<?= $jogo['max_jogadores'] ?> jogadores &nbsp;|&nbsp;
+                            ⏱ <?= $jogo['duracao'] ?> min &nbsp;|&nbsp;
+                            🎯 <?= ucfirst($jogo['dificuldade']) ?>
+                        </p>
+
+                        <p class="card-preco">
+                            R$ <?= number_format($jogo['preco'], 2, ',', '.') ?>/dia
+                        </p>
+                    </div>
+                </div>
+            <?php endforeach; ?>
         </div>
-        <?php endforeach; ?>
-    </div>
 
     <div style="text-align:center; margin: 24px 0;">
             <button id="btn-mais-recomendacoes" class="btn-mais">

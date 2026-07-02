@@ -1,0 +1,80 @@
+.fala-formiguinha {
+    max-width: 1000px;
+    margin: 35px auto 20px;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 28px;
+}
+
+.formiguinha-fala {
+    width: 190px;
+    height: auto;
+}
+
+.balao-fala {
+    position: relative;
+
+    background: rgba(255,255,255,.95);
+    border: 3px solid #7C3AED;
+    border-radius: 28px;
+
+    padding: 26px 32px;
+    max-width: 680px;
+
+    box-shadow: 0 12px 30px rgba(0,0,0,.12);
+}
+
+.balao-fala::before {
+    content: "";
+    position: absolute;
+    left: -22px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    border-top: 16px solid transparent;
+    border-bottom: 16px solid transparent;
+    border-right: 22px solid #7C3AED;
+}
+
+.balao-fala::after {
+    content: "";
+    position: absolute;
+    left: -16px;
+    top: 50%;
+    transform: translateY(-50%);
+
+    border-top: 12px solid transparent;
+    border-bottom: 12px solid transparent;
+    border-right: 18px solid rgba(255,255,255,.95);
+}
+
+.balao-fala h2 {
+    color: #7C3AED;
+    margin-bottom: 8px;
+    font-size: 1.6rem;
+}
+
+.balao-fala p {
+    color: #2b1b12;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 750px) {
+    .fala-formiguinha {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .balao-fala::before,
+    .balao-fala::after {
+        display: none;
+    }
+
+    .formiguinha-fala {
+        width: 150px;
+    }
+}
