@@ -78,3 +78,126 @@
         width: 150px;
     }
 }
+
+/* Grid de recomendações - mesmo padrão visual do catálogo */
+.recomendacoes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 32px 30px;
+}
+
+.card-recomendacao {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    transition: .2s;
+}
+
+.card-recomendacao:hover {
+    transform: translateY(-3px);
+}
+
+.card-recomendacao img {
+    width: 100%;
+    height: 210px;
+    object-fit: contain;
+    background: #eee;
+}
+
+.card-body {
+    padding: 18px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card-body h3 {
+    font-size: 22px;
+    color: #2b1b12;
+    margin: 0;
+}
+
+.card-motivo {
+    color: #5f5148;
+    line-height: 1.4;
+    flex: 1;
+}
+
+.card-meta {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 14px;
+    color: #555;
+}
+
+.card-preco {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #2b1b12;
+}
+
+.acoes-mais-recomendacoes {
+    text-align: center;
+    margin: 8px 0 32px;
+}
+
+/* Botão de carregar mais recomendações */
+.btn-mais {
+    background: linear-gradient(135deg, #9333EA, #7C3AED);
+    color: #fff;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 14px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: .25s;
+}
+
+.btn-mais:hover {
+    transform: translateY(-3px);
+}
+
+.btn-mais:disabled {
+    opacity: .6;
+    cursor: wait;
+    transform: none;
+}
+
+#msg-fim-catalogo {
+    color: #5f5148;
+}
+
+.sem-resultado {
+    max-width: 700px;
+    margin: 60px auto;
+    padding: 40px 24px;
+    text-align: center;
+    color: #5f5148;
+
+    background: rgba(255,255,255,.95);
+    border-radius: 24px;
+    box-shadow: 0 12px 30px rgba(0,0,0,.12);
+}
+
+.btn-voltar {
+    display: block;
+    text-align: center;
+    margin: 20px auto;
+    color: #2d0b5f;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.btn-voltar:hover {
+    text-decoration: underline;
+}

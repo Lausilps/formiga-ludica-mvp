@@ -4,69 +4,7 @@
     <meta charset="UTF-8">
     <title>Recomendações - Formiga Lúdica</title>
     <link rel="stylesheet" href="../assets/css/catalogo.css">
-    <style>
-        .recomendacoes-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            justify-content: center;
-            padding: 32px 16px;
-        }
-        .card-recomendacao {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.10);
-            width: 280px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-        .card-recomendacao img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-        .card-body {
-            padding: 16px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .card-body h3 { margin: 0; font-size: 1.1rem; }
-        .card-motivo { font-size: 0.92rem; color: #444; flex: 1; }
-        .card-meta { font-size: 0.85rem; color: #777; }
-        .card-preco { font-weight: bold; color: #e07b00; font-size: 1rem; }
-        .intro-texto {
-            text-align: center;
-            font-size: 1.1rem;
-            padding: 24px 16px 0;
-            color: #333;
-        }
-        .btn-voltar {
-            display: block;
-            text-align: center;
-            margin: 24px auto;
-            color: #555;
-        }
-        .sem-resultado {
-            text-align: center;
-            padding: 48px 16px;
-            color: #666;
-        }
-        .btn-mais {
-            background: #e07b00;
-            color: #fff;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .btn-mais:hover { opacity: 0.85; }
-        .btn-mais:disabled { opacity: 0.6; cursor: wait; }
-    </style>
+    <link rel="stylesheet" href="../assets/css/recomendacao_resultado.css">
 </head>
 <body>
 
@@ -99,7 +37,7 @@
                     <?php
                         $imgSrc = !empty($jogo['imagem'])
                             ? htmlspecialchars($jogo['imagem'])
-                            : '../../assets/img/sem-imagem.png';
+                            : '../assets/img/sem-imagem.png';
                     ?>
 
                     <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($jogo['nome']) ?>">
@@ -125,7 +63,7 @@
             <?php endforeach; ?>
         </div>
 
-    <div style="text-align:center; margin: 24px 0;">
+    <div class="acoes-mais-recomendacoes">
             <button id="btn-mais-recomendacoes" class="btn-mais">
                 🐜 + Recomendações
             </button>
@@ -189,7 +127,7 @@
 
             // Adiciona os novos cards no grid
             data.recomendacoes.forEach(jogo => {
-                const imgSrc = jogo.imagem ? jogo.imagem : '../../assets/img/sem-imagem.png';
+                const imgSrc = jogo.imagem ? jogo.imagem : '../assets/img/sem-imagem.png';
                 const card = document.createElement('div');
                 card.className = 'card-recomendacao';
                 card.dataset.id = jogo.id;
