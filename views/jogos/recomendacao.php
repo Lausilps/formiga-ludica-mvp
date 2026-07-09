@@ -5,6 +5,7 @@
     <title>Recomendações - Formiga Lúdica</title>
     <link rel="stylesheet" href="../assets/css/catalogo.css">
     <link rel="stylesheet" href="../assets/css/recomendacao_resultado.css">
+    <script src="../assets/js/carrinho.js"></script>
 </head>
 <body>
 
@@ -21,6 +22,7 @@
 <?php if (!empty($recomendacoes)): ?>
 
     <section class="fala-formiguinha">
+        <img src="../assets/img/formiguinha-falando.png" alt="Formiguinha" class="formiguinha-fala">
 
         <div class="balao-fala">
             <h2>🐜 E aí, formigão!</h2>
@@ -33,7 +35,7 @@
     <div id="container-recomendacoes">
         <div class="recomendacoes-grid" id="grid-recomendacoes">
             <?php foreach ($recomendacoes as $jogo): ?>
-                <div class="card-recomendacao" data-id="<?= $jogo['id'] ?>">
+                <div class="card-recomendacao" data-id="<?= $jogo['id'] ?>" data-nome="<?= htmlspecialchars($jogo['nome']) ?>" data-preco="<?= $jogo['preco'] ?>">
                     <?php
                         $imgSrc = !empty($jogo['imagem'])
                             ? htmlspecialchars($jogo['imagem'])
@@ -55,9 +57,10 @@
                             🎯 <?= ucfirst($jogo['dificuldade']) ?>
                         </p>
 
-                        <p class="card-preco">
-                            R$ <?= number_format($jogo['preco'], 2, ',', '.') ?>/dia
-                        </p>
+                        <div class="rodape-card">
+                            <span class="card-preco">R$ <?= number_format($jogo['preco'], 2, ',', '.') ?>/dia</span>
+                            <button type="button" class="btn-escolher" data-nome="<?= htmlspecialchars($jogo['nome']) ?>">Escolher</button>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -78,6 +81,26 @@
         <input type="hidden" id="dados-jogadores" value="<?= htmlspecialchars($jogadores ?? '') ?>">
         <input type="hidden" id="dados-idade" value="<?= htmlspecialchars($idade ?? '') ?>">
         <input type="hidden" id="dados-tempo" value="<?= htmlspecialchars($tempo ?? '') ?>">
+    </div>
+
+    <!-- Modal do pedido -->
+    <div class="modal" id="modal-pedido">
+        <div class="modal-conteudo">
+            <button type="button" class="fechar-modal" id="fechar-modal-pedido">×</button>
+            <h2>Conferir pedido</h2>
+            <p>Confira os jogos selecionados antes de enviar pelo WhatsApp.</p>
+            <div id="lista-pedido"></div>
+            <strong id="total-pedido"></strong>
+            <div class="acoes-modal">
+                <button type="button" id="continuar-escolhendo">Continuar escolhendo</button>
+                <button type="button" id="confirmar-whatsapp">Enviar para WhatsApp</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="barra-whatsapp" id="barra-whatsapp" style="display:none;">
+        <span id="qtd-selecionados">0 jogos selecionados</span>
+        <button type="button" id="abrir-modal-pedido">Enviar pedido</button>
     </div>
 
     <script>
@@ -131,6 +154,8 @@
                 const card = document.createElement('div');
                 card.className = 'card-recomendacao';
                 card.dataset.id = jogo.id;
+                card.dataset.nome = jogo.nome;
+                card.dataset.preco = jogo.preco;
                 card.innerHTML = `
                     <img src="${imgSrc}" alt="${jogo.nome}">
                     <div class="card-body">
@@ -141,11 +166,15 @@
                             ⏱ ${jogo.duracao} min &nbsp;|&nbsp;
                             🎯 ${jogo.dificuldade.charAt(0).toUpperCase() + jogo.dificuldade.slice(1)}
                         </p>
-                        <p class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/dia</p>
+                        <div class="rodape-card">
+                            <span class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/dia</span>
+                            <button type="button" class="btn-escolher" data-nome="${jogo.nome}">Escolher</button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
+            atualizarBotoesSelecionados();
         })
         .catch(() => {
             btn.disabled = false;
@@ -153,6 +182,119 @@
             alert('Erro ao buscar mais recomendações. Tenta novamente!');
         });
     });
+
+    // ============================================================
+    // CARRINHO / SELEÇÃO DE JOGOS PARA O WHATSAPP
+    // ============================================================
+    const selecionados = Carrinho.obter();
+
+    const barra          = document.getElementById('barra-whatsapp');
+    const qtdSelecionados = document.getElementById('qtd-selecionados');
+    const modalPedido     = document.getElementById('modal-pedido');
+    const gridRecomendacoes = document.getElementById('grid-recomendacoes');
+
+    function formatarPreco(valor) {
+        return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function atualizarBarraPedido() {
+        if (selecionados.length > 0) {
+            barra.style.display = 'flex';
+            qtdSelecionados.textContent = selecionados.length + ' jogo(s) selecionado(s)';
+        } else {
+            barra.style.display = 'none';
+        }
+    }
+
+    function atualizarBotoesSelecionados() {
+        document.querySelectorAll('#grid-recomendacoes .btn-escolher').forEach(botao => {
+            const nome = botao.dataset.nome;
+            if (selecionados.some(j => j.nome === nome)) {
+                botao.textContent = 'Selecionado';
+                botao.classList.add('selecionado');
+            } else {
+                botao.textContent = 'Escolher';
+                botao.classList.remove('selecionado');
+            }
+        });
+    }
+
+    function alternarJogoSelecionado(jogo) {
+        const index = selecionados.findIndex(i => i.nome === jogo.nome);
+        if (index === -1) {
+            selecionados.push(jogo);
+        } else {
+            selecionados.splice(index, 1);
+        }
+        Carrinho.salvar(selecionados);
+        atualizarBarraPedido();
+        atualizarBotoesSelecionados();
+    }
+
+    // Delegação de evento: cobre os cards já renderizados e os que forem adicionados depois
+    gridRecomendacoes.addEventListener('click', function(e) {
+        const botao = e.target.closest('.btn-escolher');
+        if (!botao) return;
+        const card = botao.closest('.card-recomendacao');
+        alternarJogoSelecionado({ nome: card.dataset.nome, preco: card.dataset.preco });
+    });
+
+    function montarListaPedido() {
+        const listaPedido = document.getElementById('lista-pedido');
+        const totalPedido = document.getElementById('total-pedido');
+        listaPedido.innerHTML = '';
+        let total = 0;
+
+        selecionados.forEach((jogo, index) => {
+            total += Number(jogo.preco);
+            const item = document.createElement('div');
+            item.className = 'item-pedido';
+            item.innerHTML = `
+                <span>${jogo.nome} - ${formatarPreco(jogo.preco)}</span>
+                <button type="button" data-index="${index}">Remover</button>
+            `;
+            listaPedido.appendChild(item);
+        });
+
+        totalPedido.textContent = `Total estimado: ${formatarPreco(total)}`;
+
+        document.querySelectorAll('#lista-pedido button').forEach(botao => {
+            botao.addEventListener('click', function() {
+                selecionados.splice(Number(this.dataset.index), 1);
+                Carrinho.salvar(selecionados);
+                montarListaPedido();
+                atualizarBarraPedido();
+                atualizarBotoesSelecionados();
+                if (selecionados.length === 0) modalPedido.classList.remove('ativo');
+            });
+        });
+    }
+
+    document.getElementById('abrir-modal-pedido').addEventListener('click', () => {
+        montarListaPedido();
+        modalPedido.classList.add('ativo');
+    });
+
+    document.getElementById('fechar-modal-pedido').addEventListener('click', () => {
+        modalPedido.classList.remove('ativo');
+    });
+
+    document.getElementById('continuar-escolhendo').addEventListener('click', () => {
+        modalPedido.classList.remove('ativo');
+    });
+
+    modalPedido.addEventListener('click', e => {
+        if (e.target === modalPedido) modalPedido.classList.remove('ativo');
+    });
+
+    document.getElementById('confirmar-whatsapp').addEventListener('click', () => {
+        const total = selecionados.reduce((soma, j) => soma + Number(j.preco), 0);
+        const mensagem = `Olá! Tenho interesse em alugar os jogos:\n\n- ${selecionados.map(j => j.nome).join('\n- ')}\n\nTotal estimado: ${formatarPreco(total)}\n\nPode me passar disponibilidade?`;
+        window.open(`https://wa.me/5537999139354?text=${encodeURIComponent(mensagem)}`, '_blank');
+    });
+
+    atualizarBarraPedido();
+    atualizarBotoesSelecionados();
     </script>
 
     <?php endif; ?>
@@ -164,8 +306,10 @@
     </div>
 <?php endif; ?>
 
-<a class="btn-voltar" href="../recomendacao_form.php">← Tentar outra busca</a>
-<a class="btn-voltar" href="../index.php">← Voltar ao catálogo</a>
+<div class="acoes-finais">
+    <a class="btn-voltar" href="../recomendacao_form.php">← Tentar outra busca</a>
+    <a class="btn-voltar" href="../index.php">← Voltar ao catálogo</a>
+</div>
 
 </body>
 </html>

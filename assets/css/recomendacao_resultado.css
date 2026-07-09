@@ -189,15 +189,37 @@
     box-shadow: 0 12px 30px rgba(0,0,0,.12);
 }
 
+.acoes-finais {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin: 12px 0 40px;
+}
+
 .btn-voltar {
-    display: block;
-    text-align: center;
-    margin: 20px auto;
-    color: #2d0b5f;
+    background: #F6C453;
+    color: #2b1b12;
+    padding: 14px 20px;
+    border-radius: 16px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 900;
+    transition: .2s;
 }
 
 .btn-voltar:hover {
-    text-decoration: underline;
+    opacity: .9;
+}
+
+@media (max-width: 600px) {
+    .acoes-finais {
+        flex-direction: column;
+        align-items: stretch;
+        margin-left: 20px;
+        margin-right: 20px;
+    }
+
+    .btn-voltar {
+        text-align: center;
+    }
 }

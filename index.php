@@ -31,6 +31,7 @@ if (!$resultado) {
     <meta charset="UTF-8">
     <title>Formiga Lúdica - Catálogo</title>
     <link rel="stylesheet" href="assets/css/catalogo.css">
+    <script src="assets/js/carrinho.js"></script>
 </head>
 <body>
 
@@ -158,7 +159,7 @@ let temMais       = true;
 let filtroAtivo   = false;
 let debounceTimer = null;
 
-const selecionados = [];
+const selecionados = Carrinho.obter();
 
 // ============================================================
 // ELEMENTOS
@@ -441,6 +442,7 @@ function alternarJogoSelecionado(jogo) {
     } else {
         selecionados.splice(index, 1);
     }
+    Carrinho.salvar(selecionados);
     atualizarBarraPedido();
     atualizarBotoesSelecionados();
     if (jogoModalAtual && jogoModalAtual.nome === jogo.nome) atualizarBotaoModal();
@@ -476,6 +478,7 @@ function montarListaPedido() {
     document.querySelectorAll('#lista-pedido button').forEach(botao => {
         botao.addEventListener('click', function() {
             selecionados.splice(Number(this.dataset.index), 1);
+            Carrinho.salvar(selecionados);
             montarListaPedido();
             atualizarBarraPedido();
             atualizarBotoesSelecionados();
@@ -510,6 +513,7 @@ document.getElementById('confirmar-whatsapp').addEventListener('click', () => {
 // ============================================================
 // INICIA
 // ============================================================
+atualizarBarraPedido();
 carregarJogos(true);
 </script>
 
