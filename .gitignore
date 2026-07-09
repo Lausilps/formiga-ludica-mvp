@@ -20,6 +20,5 @@ Thumbs.db
 
 /vendor/
 
-/config/gemini.php
 /config/ludopedia.php
 /config/groq.php
