@@ -1,0 +1,58 @@
+<?php
+
+function camposObrigatoriosPreenchidos(array $campos): bool
+{
+    foreach ($campos as $valor) {
+        if (empty($valor)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+function jogoNomeDuplicado($conexao, string $nome, ?int $idExcluir = null): bool
+{
+    if ($idExcluir !== null) {
+        $stmt = mysqli_prepare($conexao, "SELECT id_jogo FROM jogos WHERE nome = ? AND id_jogo <> ?");
+        mysqli_stmt_bind_param($stmt, 'si', $nome, $idExcluir);
+    } else {
+        $stmt = mysqli_prepare($conexao, "SELECT id_jogo FROM jogos WHERE nome = ?");
+        mysqli_stmt_bind_param($stmt, 's', $nome);
+    }
+
+    mysqli_stmt_execute($stmt);
+    $resultado = mysqli_stmt_get_result($stmt);
+
+    return mysqli_num_rows($resultado) > 0;
+}
+
+function uploadImagemJogo(?array $arquivo): ?string
+{
+    if (!$arquivo || $arquivo['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+
+    $pastaDestino = "../uploads/jogos/";
+
+    if (!is_dir($pastaDestino)) {
+        mkdir($pastaDestino, 0777, true);
+    }
+
+    $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
+    $nomeArquivo = uniqid('jogo_') . '.' . $extensao;
+
+    if (!move_uploaded_file($arquivo['tmp_name'], $pastaDestino . $nomeArquivo)) {
+        return null;
+    }
+
+    return 'uploads/jogos/' . $nomeArquivo;
+}
+
+function redirecionarComDados(string $url, string $erro, array $dados): void
+{
+    $dados['erro'] = $erro;
+
+    header("Location: $url?" . http_build_query($dados));
+    exit;
+}

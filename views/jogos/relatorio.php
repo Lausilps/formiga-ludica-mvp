@@ -14,17 +14,11 @@ protegerAdmin();
 </head>
 <body class="admin-body">
 
-<header class="admin-header">
-    <div class="admin-header-conteudo">
-        <img src="../../assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="admin-logo">
-
-        <div>
-            <span class="admin-label">Painel administrativo</span>
-            <h1>Relatórios</h1>
-            <p>Gere relatórios personalizados do catálogo de jogos.</p>
-        </div>
-    </div>
-</header>
+<?php
+    $tituloPagina = 'Relatórios';
+    $subtituloPagina = 'Gere relatórios personalizados do catálogo de jogos.';
+    include '../partials/admin_header.php';
+?>
 
 <main class="admin-container">
 

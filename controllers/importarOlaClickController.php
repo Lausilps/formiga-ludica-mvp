@@ -2,6 +2,7 @@
 
 require_once '../config/conexao.php';
 require_once '../helpers/logHelper.php';
+require_once '../helpers/jogoHelper.php';
 
 $json = $_POST['json_olaclick'] ?? '';
 
@@ -41,12 +42,7 @@ foreach ($dados['data'] as $categoria) {
         $idade_minima = $idade[1] ?? 8;
         $duracao_minutos = $tempo[1] ?? 30;
 
-        $verifica = mysqli_query(
-            $conexao,
-            "SELECT id_jogo FROM jogos WHERE nome = '$nome'"
-        );
-
-        if (mysqli_num_rows($verifica) > 0) {
+        if (jogoNomeDuplicado($conexao, $nome)) {
             $ignorados++;
             continue;
         }

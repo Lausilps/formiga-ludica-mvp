@@ -27,17 +27,11 @@ $link_tutorial = $_GET['link_tutorial'] ?? '';
 </head>
 <body class="admin-body">
 
-<header class="admin-header">
-    <div class="admin-header-conteudo">
-        <img src="../../assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="admin-logo">
-
-        <div>
-            <span class="admin-label">Painel administrativo</span>
-            <h1>Cadastrar jogo</h1>
-            <p>Adicione um novo jogo ao catálogo da Formiga Lúdica.</p>
-        </div>
-    </div>
-</header>
+<?php
+    $tituloPagina = 'Cadastrar jogo';
+    $subtituloPagina = 'Adicione um novo jogo ao catálogo da Formiga Lúdica.';
+    include '../partials/admin_header.php';
+?>
 
 <main class="admin-container">
 
@@ -70,67 +64,7 @@ $link_tutorial = $_GET['link_tutorial'] ?? '';
         <form action="../../controllers/jogosController.php" method="POST" enctype="multipart/form-data" class="form-cadastrar">
 
             <div class="grid-form">
-
-                <div class="campo campo-grande">
-                    <label>Nome do jogo:</label>
-                    <input type="text" name="nome" required value="<?= htmlspecialchars($nome) ?>">
-                </div>
-
-                <div class="campo campo-grande">
-                    <label>Descrição:</label>
-                    <textarea name="descricao" required><?= htmlspecialchars($descricao) ?></textarea>
-                </div>
-
-                <div class="campo">
-                    <label>Preço:</label>
-                    <input type="number" name="preco" step="0.01" required value="<?= htmlspecialchars($preco) ?>">
-                </div>
-
-                <div class="campo">
-                    <label>Mínimo de jogadores:</label>
-                    <input type="number" name="min_jogadores" required value="<?= htmlspecialchars($min_jogadores) ?>">
-                </div>
-
-                <div class="campo">
-                    <label>Máximo de jogadores:</label>
-                    <input type="number" name="max_jogadores" required value="<?= htmlspecialchars($max_jogadores) ?>">
-                </div>
-
-                <div class="campo">
-                    <label>Idade mínima:</label>
-                    <input type="number" name="idade_minima" required value="<?= htmlspecialchars($idade_minima) ?>">
-                </div>
-
-                <div class="campo">
-                    <label>Duração média:</label>
-                    <input type="number" name="duracao_minutos" required value="<?= htmlspecialchars($duracao_minutos) ?>">
-                </div>
-
-                <div class="campo">
-                    <label>Dificuldade:</label>
-                    <select name="dificuldade" required>
-                        <option value="">Selecione</option>
-                        <option value="facil" <?= $dificuldade == 'facil' ? 'selected' : '' ?>>Fácil</option>
-                        <option value="media" <?= $dificuldade == 'media' ? 'selected' : '' ?>>Média</option>
-                        <option value="dificil" <?= $dificuldade == 'dificil' ? 'selected' : '' ?>>Difícil</option>
-                    </select>
-                </div>
-
-                <div class="campo campo-grande">
-                    <label>Resumo das regras:</label>
-                    <textarea name="resumo_regras"><?= htmlspecialchars($resumo_regras) ?></textarea>
-                </div>
-
-                <div class="campo campo-grande">
-                    <label>Link do tutorial:</label>
-                    <input
-                        type="url"
-                        name="link_tutorial"
-                        placeholder="Cole aqui o link do tutorial"
-                        value="<?= htmlspecialchars($link_tutorial) ?>"
-                    >
-                </div>
-
+                <?php include '../partials/jogo_form_campos.php'; ?>
             </div>
 
             <div class="area-imagem">
@@ -158,19 +92,9 @@ $link_tutorial = $_GET['link_tutorial'] ?? '';
 
 </main>
 
+<script src="../../assets/js/preview-imagem.js"></script>
 <script>
-document.getElementById('imagem').addEventListener('change', function(event) {
-    const arquivo = event.target.files[0];
-    const preview = document.getElementById('preview-imagem');
-
-    if (arquivo) {
-        preview.src = URL.createObjectURL(arquivo);
-        preview.style.display = 'block';
-    } else {
-        preview.src = '';
-        preview.style.display = 'none';
-    }
-});
+    inicializarPreviewImagem('imagem', 'preview-imagem');
 </script>
 
 </body>
