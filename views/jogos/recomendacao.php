@@ -162,7 +162,7 @@
         formData.append('tempo', document.getElementById('dados-tempo').value);
         idsExibidos.forEach(id => formData.append('ids_exibidos[]', id));
 
-        fetch('/formiga-ludica-mvp/controllers/maisRecomendacoesController.php', {
+        fetch('maisRecomendacoesController.php', {
             method: 'POST',
             body: formData
         })
