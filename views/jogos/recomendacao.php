@@ -85,17 +85,12 @@
     <section class="fala-formiguinha">
 
         <div class="balao-fala">
-            <h2>Tenho algumas ideias...</h2>
+            <h2>🐜 E aí, formigão!</h2>
             <p><?= htmlspecialchars($intro) ?></p>
         </div>
     </section>
 
-    <section class="resultado-recomendacoes">
-
-    <div class="titulo-resultado">
-        <h2>✨ Jogos escolhidos especialmente para vocês</h2>
-        <p>A Formiguinha analisou as respostas e encontrou estes jogos.</p>
-    </div>
+    <?php if (!empty($recomendacoes)): ?>
 
     <div id="container-recomendacoes">
         <div class="recomendacoes-grid" id="grid-recomendacoes">
@@ -136,7 +131,7 @@
             </button>
             <p id="msg-fim-catalogo" style="display:none; color:#777; margin-top:12px;">
                 🐜 A Formiguinha já trouxe tudo que tinha no catálogo pra esse perfil!
-                Se não gostou de nenhuma, fala com o <strong>Jander</strong> que ele pode te ajudar a encontrar o jogo ideal. 💛
+                Se não gostou de nenhuma, fala com o <strong>Jander</strong> que ele te ajuda pessoalmente. 💛
             </p>
         </div>
 
@@ -146,7 +141,6 @@
         <input type="hidden" id="dados-idade" value="<?= htmlspecialchars($idade ?? '') ?>">
         <input type="hidden" id="dados-tempo" value="<?= htmlspecialchars($tempo ?? '') ?>">
     </div>
-    </section>
 
     <script>
     document.getElementById('btn-mais-recomendacoes').addEventListener('click', function() {
