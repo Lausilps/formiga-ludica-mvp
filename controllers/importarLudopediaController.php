@@ -113,14 +113,16 @@ registrarLog('INFO', 'Iniciando importação da Ludopedia.');
 echo "🐜 Iniciando importação da Ludopedia...\n\n";
 
 $pagina      = 1;
-$porPagina   = 20;
+$porPagina = 100;
 $totalJogos  = 0;
 $inseridos   = 0;
 $atualizados = 0;
 $erros       = 0;
+$idsVistos = [];
+$totalGeral = 0;
 
 do {
-    $url      = "https://ludopedia.com.br/api/v1/colecao?fl_tem=1&pagina={$pagina}";
+    $url = "https://ludopedia.com.br/api/v1/colecao?lista=colecao&fl_tem=1&page={$pagina}&rows=100";
     $response = ludopediaGet($url);
 
     if (empty($response['colecao'])) {
@@ -129,12 +131,21 @@ do {
     }
 
     $colecao = $response['colecao'];
-    registrarLog('INFO', "Página {$pagina}: " . count($colecao) . " jogos recebidos.");
-    echo "📄 Página {$pagina} — " . count($colecao) . " jogos\n";
+    $totalGeral = $response['total'] ?? 0; // ADICIONA ESSA LINHA
+    registrarLog('INFO', "Página {$pagina}: " . count($colecao) . " jogos recebidos. Total geral: {$totalGeral}");
+    echo "📄 Página {$pagina} — " . count($colecao) . " jogos | Total na Ludopedia: {$totalGeral}\n";
 
     foreach ($colecao as $item) {
         $idLudopedia = (int)$item['id_jogo'];
         $totalJogos++;
+
+        // Proteção contra loop
+        if (in_array($idLudopedia, $idsVistos)) {
+            echo "  ⚠️ Loop detectado! Encerrando.\n";
+            registrarLog('ALERTA', 'Loop detectado na paginação. Encerrando importação.');
+            break 2;
+        }
+        $idsVistos[] = $idLudopedia;
 
         registrarLog('INFO', "Processando [{$totalJogos}]: {$item['nm_jogo']} (id_ludopedia: {$idLudopedia})");
         echo "  → [{$totalJogos}] {$item['nm_jogo']}\n";
@@ -151,6 +162,14 @@ do {
         }
 
         $nome       = $detalhes['nm_jogo']           ?? '';
+
+        // Se vier sem nome, usa um placeholder identificável
+        if (empty($nome)) {
+            $nome = "SEM NOME (Ludopedia #{$idLudopedia})";
+            registrarLog('ALERTA', "Jogo sem nome recebido da API (id_ludopedia: {$idLudopedia}). Inserido com nome placeholder.");
+            echo "  ⚠️ Sem nome: usando placeholder para id_ludopedia: {$idLudopedia}\n";
+        }
+
         $imagem     = $detalhes['thumb']              ?? '';
         $minJog     = (int)($detalhes['qt_jogadores_min'] ?? 1);
         $maxJog     = (int)($detalhes['qt_jogadores_max'] ?? 10);
@@ -198,36 +217,17 @@ do {
             $atualizados++;
 
         } else {
-            // ── INSERE jogo novo ──
-            $descricao = '';
-
-            try {
-                echo "  🤖 Gerando descrição: {$nome}...\n";
-                registrarLog('INFO', "Gerando descrição via Gemini para: {$nome}");
-                $descricao = gerarDescricaoComIA($detalhes);
-                registrarLog('INFO', "Descrição gerada com sucesso: {$nome}");
-                sleep(2); // respeita rate limit
-            } catch (Exception $e) {
-                if ($e->getMessage() === 'LIMITE_EXCEDIDO') {
-                    echo "\n⚠️  Rate limit atingido! Progresso salvo. Rode novamente amanhã.\n";
-                    registrarLog('ERRO', "Rate limit Gemini atingido! Inseridos: {$inseridos} | Atualizados: {$atualizados} | Erros: {$erros}");
-                    echo "✅ Parcial: {$inseridos} inseridos | {$atualizados} atualizados | {$erros} erros\n";
-                    exit;
-                }
-                registrarLog('ERRO', "Erro ao gerar descrição para {$nome}: " . $e->getMessage());
-                $descricao = '';
-            }
-
+            // ── INSERE jogo novo SEM descrição ──
             $stmt = mysqli_prepare($conexao, "
                 INSERT INTO jogos (
                     id_ludopedia, nome, imagem, descricao,
                     min_jogadores, max_jogadores, idade_minima,
                     duracao_minutos, tp_jogo, link_ludopedia,
                     preco, ativo, origem, criado_em
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0.00, 1, 'ludopedia', NOW())
+                ) VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, 0.00, 1, 'ludopedia', NOW())
             ");
-            mysqli_stmt_bind_param($stmt, 'isssiiiiss',
-                $idLudopedia, $nome, $imagem, $descricao,
+            mysqli_stmt_bind_param($stmt, 'issiiiiss',
+                $idLudopedia, $nome, $imagem,
                 $minJog, $maxJog, $idadeMin, $duracao, $tpJogo, $linkLudo
             );
             mysqli_stmt_execute($stmt);
@@ -240,13 +240,16 @@ do {
             $inseridos++;
         }
 
-        usleep(300000); // 0.3s entre jogos
+        usleep(800000); // 0.8s entre jogos — mais respeitoso com a API
     }
 
     $pagina++;
+    registrarLog('INFO', "Página {$pagina} concluída.");
+    echo "✅ Página {$pagina} concluída.\n\n";
     sleep(1); // 1s entre páginas
 
-} while (count($colecao) === $porPagina);
+$totalImportado = ($pagina - 1) * $porPagina + count($colecao);
+} while ($totalImportado < $totalGeral && count($colecao) > 0);
 
 $resumo = "Importação concluída! Total: {$totalJogos} | Inseridos: {$inseridos} | Atualizados: {$atualizados} | Erros: {$erros}";
 echo "\n✅ {$resumo}\n";

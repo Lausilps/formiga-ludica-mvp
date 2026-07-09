@@ -419,3 +419,9 @@
         overflow-x: auto;
     }
 }
+
+/* importar do Ludopedia */
+.btn-ludopedia {
+    background: linear-gradient(135deg, #e8a000, #f0c040);
+    color: #2b1b12;
+}

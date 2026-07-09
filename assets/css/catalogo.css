@@ -696,3 +696,77 @@ body {
     color: #444;
     margin: 0;
 }
+
+/* Badge Ludopedia - referencia ao site */
+.badge-ludopedia {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(0, 0, 0, 0.08);
+    color: #444;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 9px 4px 6px;
+    border-radius: 6px;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    transition: background 0.2s;
+    border: 1px solid rgba(0,0,0,0.12);
+}
+
+.badge-ludopedia:hover {
+    background: rgba(0, 0, 0, 0.18);
+}
+
+.badge-ludopedia img {
+    width: 14px;
+    height: 14px;
+    object-fit: contain;
+}
+
+.badge-via {
+    font-size: 0.62rem;
+    opacity: 0.7;
+    font-weight: 400;
+}
+
+.badge-nome {
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+
+/* Botão Ludopedia no modal */
+.btn-ludopedia {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff8e6;
+    border: 1px solid #f0c040;
+    color: #7a5c00;
+    padding: 7px 14px 7px 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: background 0.2s;
+    white-space: nowrap;
+}
+
+.btn-ludopedia:hover {
+    background: #fef0b0;
+}
+
+.btn-ludopedia img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
+
+.btn-ludopedia span {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+}
+

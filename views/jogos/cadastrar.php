@@ -1,20 +1,45 @@
 <?php
 require_once '../../config/conexao.php';
 require_once '../../helpers/authHelper.php';
+
 protegerAdmin();
 
+$nome = $_GET['nome'] ?? '';
+$descricao = $_GET['descricao'] ?? '';
+$preco = $_GET['preco'] ?? '';
+$min_jogadores = $_GET['min_jogadores'] ?? '';
+$max_jogadores = $_GET['max_jogadores'] ?? '';
+$idade_minima = $_GET['idade_minima'] ?? '';
+$duracao_minutos = $_GET['duracao_minutos'] ?? '';
+$dificuldade = $_GET['dificuldade'] ?? '';
+$resumo_regras = $_GET['resumo_regras'] ?? '';
+$link_tutorial = $_GET['link_tutorial'] ?? '';
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../../assets/css/global.css">
     <title>Cadastrar Jogo</title>
-</head>
-<body>      
 
-    <h1>Cadastrar Jogo</h1>
+    <link rel="stylesheet" href="../../assets/css/global.css">
+    <link rel="stylesheet" href="../../assets/css/cadastrar.css">
+</head>
+<body class="admin-body">
+
+<header class="admin-header">
+    <div class="admin-header-conteudo">
+        <img src="../../assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="admin-logo">
+
+        <div>
+            <span class="admin-label">Painel administrativo</span>
+            <h1>Cadastrar jogo</h1>
+            <p>Adicione um novo jogo ao catálogo da Formiga Lúdica.</p>
+        </div>
+    </div>
+</header>
+
+<main class="admin-container">
 
     <?php if (isset($_GET['sucesso'])): ?>
         <div class="alerta alerta-sucesso">
@@ -40,77 +65,113 @@ protegerAdmin();
         </div>
     <?php endif; ?>
 
-    <form action="../../controllers/jogosController.php" method="POST" enctype="multipart/form-data">
+    <section class="card-admin">
 
-        <label>Nome do jogo:</label><br>
-        <input type="text" name="nome" required value="<?= $_GET['nome'] ?? '' ?>"><br><br>
-        
+        <form action="../../controllers/jogosController.php" method="POST" enctype="multipart/form-data" class="form-cadastrar">
 
-        <label>Imagem do jogo:</label><br>
-        <input type="file" name="imagem" id="imagem" accept="image/*"><br><br>
+            <div class="grid-form">
 
-        <img id="preview-imagem" src="" alt="Prévia da imagem" style="display:none; max-width:200px; border-radius:8px; margin-bottom:16px;">
+                <div class="campo campo-grande">
+                    <label>Nome do jogo:</label>
+                    <input type="text" name="nome" required value="<?= htmlspecialchars($nome) ?>">
+                </div>
 
-        <label>Descrição:</label><br>
-        <textarea name="descricao" required><?= $_GET['descricao'] ?? '' ?></textarea><br><br>
+                <div class="campo campo-grande">
+                    <label>Descrição:</label>
+                    <textarea name="descricao" required><?= htmlspecialchars($descricao) ?></textarea>
+                </div>
 
-        <label>Preço:</label><br>
-        <input type="number" name="preco" step="0.01" required value="<?= $_GET['preco'] ?? '' ?>"><br><br>
+                <div class="campo">
+                    <label>Preço:</label>
+                    <input type="number" name="preco" step="0.01" required value="<?= htmlspecialchars($preco) ?>">
+                </div>
 
-        <label>Mínimo de jogadores:</label><br>
-        <input type="number" name="min_jogadores" required value="<?= $_GET['min_jogadores'] ?? '' ?>"><br><br>
+                <div class="campo">
+                    <label>Mínimo de jogadores:</label>
+                    <input type="number" name="min_jogadores" required value="<?= htmlspecialchars($min_jogadores) ?>">
+                </div>
 
-        <label>Máximo de jogadores:</label><br>
-        <input type="number" name="max_jogadores" required value="<?= $_GET['max_jogadores'] ?? '' ?>"><br><br>
+                <div class="campo">
+                    <label>Máximo de jogadores:</label>
+                    <input type="number" name="max_jogadores" required value="<?= htmlspecialchars($max_jogadores) ?>">
+                </div>
 
-        <label>Idade mínima:</label><br>
-        <input type="number" name="idade_minima" required value="<?= $_GET['idade_minima'] ?? '' ?>"><br><br>
+                <div class="campo">
+                    <label>Idade mínima:</label>
+                    <input type="number" name="idade_minima" required value="<?= htmlspecialchars($idade_minima) ?>">
+                </div>
 
-        <label>Duração média em minutos:</label><br>
-        <input type="number" name="duracao_minutos" required value="<?= $_GET['duracao_minutos'] ?? '' ?>"><br><br>
+                <div class="campo">
+                    <label>Duração média:</label>
+                    <input type="number" name="duracao_minutos" required value="<?= htmlspecialchars($duracao_minutos) ?>">
+                </div>
 
-        <label>Dificuldade:</label><br>
-        <select name="dificuldade" required>
-            <option value="facil" <?= (($_GET['dificuldade'] ?? '') == 'facil') ? 'selected' : '' ?>>Fácil</option>
-            <option value="media" <?= (($_GET['dificuldade'] ?? '') == 'media') ? 'selected' : '' ?>>Média</option>
-            <option value="dificil" <?= (($_GET['dificuldade'] ?? '') == 'dificil') ? 'selected' : '' ?>>Difícil</option>
-        </select><br><br>
+                <div class="campo">
+                    <label>Dificuldade:</label>
+                    <select name="dificuldade" required>
+                        <option value="">Selecione</option>
+                        <option value="facil" <?= $dificuldade == 'facil' ? 'selected' : '' ?>>Fácil</option>
+                        <option value="media" <?= $dificuldade == 'media' ? 'selected' : '' ?>>Média</option>
+                        <option value="dificil" <?= $dificuldade == 'dificil' ? 'selected' : '' ?>>Difícil</option>
+                    </select>
+                </div>
 
-        <label>Resumo das regras:</label><br>
-        <textarea name="resumo_regras"><?= $_GET['resumo_regras'] ?? '' ?></textarea><br><br>
+                <div class="campo campo-grande">
+                    <label>Resumo das regras:</label>
+                    <textarea name="resumo_regras"><?= htmlspecialchars($resumo_regras) ?></textarea>
+                </div>
 
-        <label>Link do tutorial:</label><br>
-        <input
-            type="url"
-            name="link_tutorial"
-            placeholder="Cole aqui o link do tutorial"
-            value="<?= $_GET['link_tutorial'] ?? '' ?>"
-        ><br><br>
+                <div class="campo campo-grande">
+                    <label>Link do tutorial:</label>
+                    <input
+                        type="url"
+                        name="link_tutorial"
+                        placeholder="Cole aqui o link do tutorial"
+                        value="<?= htmlspecialchars($link_tutorial) ?>"
+                    >
+                </div>
 
-        <button type="submit">Cadastrar jogo</button>
+            </div>
 
-    </form>
+            <div class="area-imagem">
+                <div>
+                    <label>Imagem do jogo:</label>
+                    <input type="file" name="imagem" id="imagem" accept="image/*">
 
-    <script>
-    document.getElementById('imagem').addEventListener('change', function(event) {
-        const arquivo = event.target.files[0];
-        const preview = document.getElementById('preview-imagem');
+                    <img
+                        id="preview-imagem"
+                        src=""
+                        alt="Prévia da imagem"
+                        class="preview-nova"
+                    >
+                </div>
+            </div>
 
-        if (arquivo) {
-            preview.src = URL.createObjectURL(arquivo);
-            preview.style.display = 'block';
-        } else {
-            preview.src = '';
-            preview.style.display = 'none';
-        }
-    });
-    </script>
+            <div class="acoes-form">
+                <button type="submit" class="btn-salvar">Cadastrar jogo</button>
+                <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
+            </div>
 
-    <br>
-    
-    <p>
-        <a href="listar.php">← Voltar para listagem</a>
-    </p>
+        </form>
+
+    </section>
+
+</main>
+
+<script>
+document.getElementById('imagem').addEventListener('change', function(event) {
+    const arquivo = event.target.files[0];
+    const preview = document.getElementById('preview-imagem');
+
+    if (arquivo) {
+        preview.src = URL.createObjectURL(arquivo);
+        preview.style.display = 'block';
+    } else {
+        preview.src = '';
+        preview.style.display = 'none';
+    }
+});
+</script>
 
 </body>
 </html>

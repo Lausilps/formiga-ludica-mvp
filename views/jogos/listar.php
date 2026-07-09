@@ -125,7 +125,12 @@ $buscaUrl = urlencode($busca);
                 🧠 Atualizar IA
             </button>
 
+            <button type="button" onclick="sincronizarLudopedia()" id="btn-ludopedia" class="btn-admin btn-ludopedia">
+                🎲 Sincronizar Ludopedia
+            </button>
+
             <span id="status-embeddings" class="status-embeddings"></span>
+            <span id="status-ludopedia" class="status-embeddings"></span>
         </section>
 
         <?php if (mysqli_num_rows($resultado) == 0): ?>
@@ -292,6 +297,31 @@ $buscaUrl = urlencode($busca);
                 })
                 .catch(() => {
                     status.textContent = '❌ Erro ao processar.';
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                });
+        }
+
+        function sincronizarLudopedia() {
+            const btn = document.getElementById('btn-ludopedia');
+            const status = document.getElementById('status-ludopedia');
+
+            if (!confirm('Isso vai sincronizar o catálogo com a Ludopedia. Pode levar alguns minutos. Continuar?')) return;
+
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            status.textContent = '⏳ Sincronizando com Ludopedia...';
+
+            fetch('../../controllers/importarLudopediaController.php?token=formiga2024')
+                .then(res => res.text())
+                .then(txt => {
+                    const match = txt.match(/✅ Importação concluída!.*/);
+                    status.textContent = match ? match[0] : '✅ Sincronização concluída!';
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                })
+                .catch(() => {
+                    status.textContent = '❌ Erro ao sincronizar.';
                     btn.disabled = false;
                     btn.style.opacity = '';
                 });

@@ -112,12 +112,13 @@ if (!$resultado) {
                 <span id="modal-idade"></span>
                 <strong id="modal-preco"></strong>
             </div>
-            <div id="modal-ludopedia" style="display:none; margin-top:8px;">
-                <a id="modal-link-ludopedia" href="#" target="_blank"
-                   style="display:inline-flex; align-items:center; gap:6px; font-size:0.85rem; color:#e07b00; text-decoration:none;">
-                    🎲 Ver na Ludopedia
+            <div id="modal-ludopedia" style="display:none; margin-top:12px;">
+                <a id="modal-link-ludopedia" href="#" target="_blank" class="btn-ludopedia">
+                    <img src="assets/img/logo-ludopedia.png" alt="Ludopedia">
+                    Ver na Ludopedia
                 </a>
             </div>
+            <br>
             <button type="button" id="modal-selecionar" class="btn-escolher">Selecionar jogo</button>
         </div>
     </div>
@@ -218,10 +219,14 @@ function criarCard(jogo) {
     });
 
     const badgeLudo = jogo.link_ludopedia
-        ? `<a href="https://ludopedia.com.br" target="_blank" class="badge-ludopedia" title="Integrado via Ludopedia">
-               <img src="assets/img/logo-ludopedia.png" alt="Ludopedia"> Ludopedia
-           </a>`
-        : '';
+    ? `<a href="https://ludopedia.com.br" target="_blank" class="badge-ludopedia" title="Ver na Ludopedia">
+           <img src="assets/img/logo-ludopedia.png" alt="Ludopedia">
+           <span>
+               <span class="badge-via">integrado via</span>
+               <span class="badge-nome">Ludopedia</span>
+           </span>
+       </a>`
+    : '';
 
     const article = document.createElement('article');
     article.className = 'card-jogo';
@@ -238,7 +243,6 @@ function criarCard(jogo) {
 
     article.innerHTML = `
         <div class="imagem-card">
-            ${badgeLudo}
             <img src="${jogo.imagem}" alt="${jogo.nome}"
                  onerror="this.src='assets/img/sem-imagem.png'">
         </div>
@@ -249,6 +253,7 @@ function criarCard(jogo) {
                 <span>👥 ${jogo.min_jogadores} - ${jogo.max_jogadores}</span>
                 <span>⏱ ${jogo.duracao} min</span>
                 <span>👤 ${jogo.idade_minima}+</span>
+                ${badgeLudo}
             </div>
             <div class="rodape-card">
                 <strong>${preco}</strong>
