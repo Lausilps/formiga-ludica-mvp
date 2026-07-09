@@ -159,7 +159,12 @@ let temMais       = true;
 let filtroAtivo   = false;
 let debounceTimer = null;
 
-const selecionados = Carrinho.obter();
+const carrinhoUI = Carrinho.iniciarUI({
+    botaoEscolherSeletor: '.btn-escolher',
+    aoAlternarSelecao(jogo) {
+        if (jogoModalAtual && jogoModalAtual.nome === jogo.nome) atualizarBotaoModal();
+    }
+});
 
 // ============================================================
 // ELEMENTOS
@@ -167,10 +172,7 @@ const selecionados = Carrinho.obter();
 const grid           = document.getElementById('grid-jogos');
 const sentinel       = document.getElementById('sentinel');
 const loadingMais    = document.getElementById('loading-mais');
-const barra          = document.getElementById('barra-whatsapp');
-const qtdSelecionados = document.getElementById('qtd-selecionados');
 const modalJogo      = document.getElementById('modal-jogo');
-const modalPedido    = document.getElementById('modal-pedido');
 const modalImagem    = document.getElementById('modal-imagem');
 const modalNome      = document.getElementById('modal-nome');
 const modalDescricao = document.getElementById('modal-descricao');
@@ -272,7 +274,7 @@ function criarCard(jogo) {
     // Botão escolher
     article.querySelector('.btn-escolher').addEventListener('click', function(e) {
         e.stopPropagation();
-        alternarJogoSelecionado({ nome: jogo.nome, preco: jogo.preco });
+        carrinhoUI.alternarJogoSelecionado({ nome: jogo.nome, preco: jogo.preco });
     });
 
     return article;
@@ -315,7 +317,7 @@ async function carregarJogos(resetar = false) {
 
         offset  = data.offset + data.jogos.length;
         temMais = data.tem_mais;
-        atualizarBotoesSelecionados();
+        carrinhoUI.atualizarBotoesSelecionados();
 
     } catch(e) {
         console.error('Erro ao carregar jogos:', e);
@@ -395,125 +397,33 @@ function abrirModalJogo(card) {
     modalJogo.classList.add('ativo');
 }
 
-function fecharModais() {
+function fecharModalJogo() {
     modalJogo.classList.remove('ativo');
-    modalPedido.classList.remove('ativo');
 }
 
 // ============================================================
-// SELEÇÃO DE JOGOS
+// SELEÇÃO DE JOGOS (MODAL DE DETALHES)
 // ============================================================
-function formatarPreco(valor) {
-    return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
-function atualizarBarraPedido() {
-    if (selecionados.length > 0) {
-        barra.style.display = 'flex';
-        qtdSelecionados.textContent = selecionados.length + ' jogo(s) selecionado(s)';
-    } else {
-        barra.style.display = 'none';
-    }
-}
-
-function atualizarBotoesSelecionados() {
-    document.querySelectorAll('.btn-escolher').forEach(botao => {
-        const nome = botao.dataset.nome;
-        if (selecionados.some(j => j.nome === nome)) {
-            botao.textContent = 'Selecionado';
-            botao.classList.add('selecionado');
-        } else {
-            botao.textContent = 'Escolher';
-            botao.classList.remove('selecionado');
-        }
-    });
-}
-
 function atualizarBotaoModal() {
     if (!jogoModalAtual) return;
-    const selecionado = selecionados.some(j => j.nome === jogoModalAtual.nome);
+    const selecionado = carrinhoUI.selecionados.some(j => j.nome === jogoModalAtual.nome);
     modalSelecionar.textContent = selecionado ? 'Remover da seleção' : 'Selecionar jogo';
-}
-
-function alternarJogoSelecionado(jogo) {
-    const index = selecionados.findIndex(i => i.nome === jogo.nome);
-    if (index === -1) {
-        selecionados.push(jogo);
-    } else {
-        selecionados.splice(index, 1);
-    }
-    Carrinho.salvar(selecionados);
-    atualizarBarraPedido();
-    atualizarBotoesSelecionados();
-    if (jogoModalAtual && jogoModalAtual.nome === jogo.nome) atualizarBotaoModal();
 }
 
 modalSelecionar.addEventListener('click', () => {
     if (!jogoModalAtual) return;
-    alternarJogoSelecionado({ nome: jogoModalAtual.nome, preco: jogoModalAtual.preco });
+    carrinhoUI.alternarJogoSelecionado({ nome: jogoModalAtual.nome, preco: jogoModalAtual.preco });
 });
-
-// ============================================================
-// MODAL DO PEDIDO
-// ============================================================
-function montarListaPedido() {
-    const listaPedido  = document.getElementById('lista-pedido');
-    const totalPedido  = document.getElementById('total-pedido');
-    listaPedido.innerHTML = '';
-    let total = 0;
-
-    selecionados.forEach((jogo, index) => {
-        total += Number(jogo.preco);
-        const item = document.createElement('div');
-        item.className = 'item-pedido';
-        item.innerHTML = `
-            <span>${jogo.nome} - ${formatarPreco(jogo.preco)}</span>
-            <button type="button" data-index="${index}">Remover</button>
-        `;
-        listaPedido.appendChild(item);
-    });
-
-    totalPedido.textContent = `Total estimado: ${formatarPreco(total)}`;
-
-    document.querySelectorAll('#lista-pedido button').forEach(botao => {
-        botao.addEventListener('click', function() {
-            selecionados.splice(Number(this.dataset.index), 1);
-            Carrinho.salvar(selecionados);
-            montarListaPedido();
-            atualizarBarraPedido();
-            atualizarBotoesSelecionados();
-            if (selecionados.length === 0) modalPedido.classList.remove('ativo');
-        });
-    });
-}
 
 // ============================================================
 // EVENTOS GERAIS
 // ============================================================
-document.getElementById('fechar-modal-jogo').addEventListener('click', fecharModais);
-document.getElementById('fechar-modal-pedido').addEventListener('click', fecharModais);
-modalJogo.addEventListener('click', e => { if (e.target === modalJogo) fecharModais(); });
-modalPedido.addEventListener('click', e => { if (e.target === modalPedido) fecharModais(); });
-
-document.getElementById('abrir-modal-pedido').addEventListener('click', () => {
-    montarListaPedido();
-    modalPedido.classList.add('ativo');
-});
-
-document.getElementById('continuar-escolhendo').addEventListener('click', () => {
-    modalPedido.classList.remove('ativo');
-});
-
-document.getElementById('confirmar-whatsapp').addEventListener('click', () => {
-    const total = selecionados.reduce((soma, j) => soma + Number(j.preco), 0);
-    const mensagem = `Olá! Tenho interesse em alugar os jogos:\n\n- ${selecionados.map(j => j.nome).join('\n- ')}\n\nTotal estimado: ${formatarPreco(total)}\n\nPode me passar disponibilidade?`;
-    window.open(`https://wa.me/5537999139354?text=${encodeURIComponent(mensagem)}`, '_blank');
-});
+document.getElementById('fechar-modal-jogo').addEventListener('click', fecharModalJogo);
+modalJogo.addEventListener('click', e => { if (e.target === modalJogo) fecharModalJogo(); });
 
 // ============================================================
 // INICIA
 // ============================================================
-atualizarBarraPedido();
 carregarJogos(true);
 </script>
 
