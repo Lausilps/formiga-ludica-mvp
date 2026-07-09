@@ -31,8 +31,7 @@ function geminiEmbedding(string $texto): array {
     curl_close($ch);
 
     if (empty($response['embedding']['values'])) {
-        echo "ERRO API: " . htmlspecialchars($raw) . "\n";
-        flush();
+        error_log("ERRO API GEMINI: " . $raw);
     }
 
     return $response['embedding']['values'] ?? [];
@@ -59,12 +58,7 @@ function geminiChat(string $prompt): string {
     $response = json_decode($raw, true);
     curl_close($ch);
 
-        // DEBUG TEMPORÁRIO
-    file_put_contents(
-        __DIR__ . '/../logs/gemini_debug.log',
-        date('Y-m-d H:i:s') . "\nRESPOSTA BRUTA:\n" . $raw . "\n\n",
-        FILE_APPEND
-    );
+    error_log("RESPOSTA GEMINI CHAT: " . $raw);
 
     return $response['candidates'][0]['content']['parts'][0]['text'] ?? '';
 }
