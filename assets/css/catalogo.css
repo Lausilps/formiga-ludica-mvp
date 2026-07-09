@@ -182,7 +182,7 @@ body {
     padding: 14px;
     border-radius: 12px;
     border: 1px solid #ddd;
-    font-size: 15px;
+    font-size: 16px;
 }
 
 .filtros-catalogo > div {
@@ -399,9 +399,37 @@ body {
 @media (max-width: 900px) {
 
     .catalogo-topo {
-        padding: 30px;
+        padding: 24px 20px;
         flex-direction: column;
         align-items: flex-start;
+        gap: 20px;
+    }
+
+    .info-topo {
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .logo-topo {
+        width: 120px;
+    }
+
+    .titulo-catalogo {
+        font-size: 2rem;
+        letter-spacing: 2px;
+    }
+
+    .texto-topo p {
+        font-size: 1rem;
+    }
+
+    .box-recomendacao {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .gif-recomendacao {
+        width: 70px;
     }
 
     .acoes-topo {
@@ -414,7 +442,33 @@ body {
     }
 
     .filtros-catalogo {
-        margin: -25px 20px 30px;
+        margin: -25px 16px 30px;
+        padding: 18px;
+        gap: 16px;
+    }
+
+    .filtros-catalogo > input {
+        width: 100%;
+    }
+
+    .grupo-filtro,
+    .filtros-catalogo > div {
+        width: 100%;
+    }
+
+    .filtros-catalogo strong {
+        font-size: 15px;
+    }
+
+    .filtros-catalogo label {
+        font-size: 15px;
+        padding: 6px 0;
+    }
+
+    #limpar-filtros {
+        width: 100%;
+        padding: 14px 16px;
+        font-size: 16px;
     }
 
 }
@@ -768,5 +822,21 @@ body {
     flex-direction: row;
     align-items: center;
     gap: 4px;
+}
+
+.rodape-site {
+    text-align: center;
+    padding: 28px 20px 22px;
+    color: #4a3b2c;
+}
+
+.rodape-site p {
+    margin: 4px 0;
+    font-size: 0.85rem;
+}
+
+.rodape-credito {
+    opacity: 0.75;
+    font-weight: 600;
 }
 

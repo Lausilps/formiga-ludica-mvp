@@ -10,6 +10,7 @@ unset($_SESSION['form_recomendacao']);
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recomendação - Formiga Lúdica</title>
 
     <link rel="stylesheet" href="assets/css/global.css">
@@ -149,6 +150,8 @@ unset($_SESSION['form_recomendacao']);
         document.getElementById('overlay-carregando').style.display = 'flex';
     });
 </script>
+
+<?php include 'views/partials/footer.php'; ?>
 
 </body>
 </html>

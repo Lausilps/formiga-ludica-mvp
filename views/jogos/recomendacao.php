@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recomendações - Formiga Lúdica</title>
     <link rel="stylesheet" href="../assets/css/catalogo.css">
     <link rel="stylesheet" href="../assets/css/recomendacao_resultado.css">
@@ -215,6 +216,8 @@
     <a class="btn-voltar" href="../recomendacao_form.php">← Tentar outra busca</a>
     <a class="btn-voltar" href="../index.php">← Voltar ao catálogo</a>
 </div>
+
+<?php include '../partials/footer.php'; ?>
 
 </body>
 </html>

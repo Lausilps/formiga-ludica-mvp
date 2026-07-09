@@ -248,3 +248,19 @@ select:focus {
         text-align: center;
     }
 }
+
+.rodape-site {
+    text-align: center;
+    padding: 28px 20px 22px;
+    color: #4a3b2c;
+}
+
+.rodape-site p {
+    margin: 4px 0;
+    font-size: 0.85rem;
+}
+
+.rodape-credito {
+    opacity: 0.75;
+    font-weight: 600;
+}

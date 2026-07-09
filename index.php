@@ -29,6 +29,7 @@ if (!$resultado) {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formiga Lúdica - Catálogo</title>
     <link rel="stylesheet" href="assets/css/catalogo.css">
     <script src="assets/js/carrinho.js"></script>
@@ -426,6 +427,8 @@ modalJogo.addEventListener('click', e => { if (e.target === modalJogo) fecharMod
 // ============================================================
 carregarJogos(true);
 </script>
+
+<?php include 'views/partials/footer.php'; ?>
 
 </body>
 </html>
