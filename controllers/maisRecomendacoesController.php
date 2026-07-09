@@ -65,9 +65,7 @@ Responda SOMENTE em JSON válido, sem texto antes ou depois, sem blocos de códi
 }
 PROMPT;
 
-    $respostaTexto = geminiChat($prompt);
-
-    $resultado     = interpretarRespostaGemini($respostaTexto, $topJogos);
+    $resultado     = gerarRecomendacoesComRetry($prompt, $topJogos);
     $recomendacoes = $resultado['recomendacoes'];
 
     if (empty($recomendacoes)) {

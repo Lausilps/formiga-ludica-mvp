@@ -92,14 +92,12 @@ PROMPT;
 
     registrarLog('INFO', 'Enviando prompt para o Gemini.');
 
-    // 6. Chama Gemini
-    $respostaTexto = geminiChat($prompt);
+    // 6. Chama Gemini (com 1 nova tentativa se a resposta não render recomendações aproveitáveis)
+    $resultado = gerarRecomendacoesComRetry($prompt, $topJogos);
 
     registrarLog('INFO', 'Resposta recebida do Gemini.');
 
     // 7. Interpreta resposta e enriquece com dados do banco
-    $resultado = interpretarRespostaGemini($respostaTexto, $topJogos);
-
     if ($resultado['respostaVazia']) {
         registrarLog('ERRO', 'Resposta inválida do Gemini: ' . $resultado['respostaBruta']);
     }

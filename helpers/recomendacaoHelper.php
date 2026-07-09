@@ -120,3 +120,24 @@ function interpretarRespostaGemini(string $respostaTexto, array $topJogos): arra
         'respostaVazia' => empty($resposta),
     ];
 }
+
+function gerarRecomendacoesComRetry(string $prompt, array $topJogos, int $tentativas = 2): array
+{
+    $resultado = null;
+
+    for ($i = 1; $i <= $tentativas; $i++) {
+        $respostaTexto = geminiChat($prompt);
+        $resultado     = interpretarRespostaGemini($respostaTexto, $topJogos);
+
+        if (!empty($resultado['recomendacoes'])) {
+            return $resultado;
+        }
+
+        registrarLog(
+            'ALERTA',
+            "Tentativa {$i}/{$tentativas} sem recomendações aproveitáveis na resposta do Gemini: {$resultado['respostaBruta']}"
+        );
+    }
+
+    return $resultado;
+}

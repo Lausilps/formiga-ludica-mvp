@@ -25,7 +25,8 @@
         <img src="../assets/img/formiguinha-falando.png" alt="Formiguinha" class="formiguinha-fala">
 
         <div class="balao-fala">
-            <h2>🐜 E aí, formigão!</h2>
+            <span class="selo-formiguinha">🐜 Formiguinha</span>
+            <h2>Acho que encontrei algo...</h2>
             <p><?= htmlspecialchars($intro) ?></p>
         </div>
     </section>
