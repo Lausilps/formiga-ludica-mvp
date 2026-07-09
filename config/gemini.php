@@ -1,6 +1,10 @@
 <?php
 
-define('GEMINI_API_KEY', getenv('GEMINI_API_KEY') ?: '');
+define('GEMINI_API_KEY', trim(getenv('GEMINI_API_KEY') ?: ''));
+
+if (GEMINI_API_KEY === '') {
+    die('GEMINI_API_KEY não configurada.');
+}
 define('GEMINI_EMBED_MODEL', 'models/gemini-embedding-2');
 define('GEMINI_LLM_MODEL', 'models/gemini-2.5-flash');
 
