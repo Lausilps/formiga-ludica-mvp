@@ -1,6 +1,6 @@
 <?php
 
-define('GEMINI_API_KEY', 'chave_de_api_aqui'); // Substitua pela sua chave de API do Gemini
+define('GEMINI_API_KEY', getenv('GEMINI_API_KEY') ?: '');
 define('GEMINI_EMBED_MODEL', 'models/gemini-embedding-2');
 define('GEMINI_LLM_MODEL', 'models/gemini-2.5-flash');
 
