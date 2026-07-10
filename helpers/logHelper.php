@@ -13,4 +13,9 @@ function registrarLog($tipo, $mensagem)
         $texto,
         FILE_APPEND
     );
+
+    // Também manda pro log padrão do PHP (stdout/stderr), que é o que
+    // aparece na aba de Logs do Railway — o arquivo acima some a cada
+    // deploy porque o disco lá é temporário.
+    error_log("[$tipo] $mensagem");
 }
