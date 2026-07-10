@@ -1,0 +1,99 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project overview
+
+Formiga Lúdica MVP — a web platform for a board game rental business ("locadora de jogos"). Plain PHP (no framework), MySQL, vanilla JS, no build step. Public catalog + WhatsApp-based checkout, an admin panel for managing games, and a Gemini-powered RAG recommendation feature ("Formiguinha").
+
+## Running the project
+
+There is no framework CLI, no test suite, and no bundler/npm. Development happens directly against PHP files:
+
+- **Local (XAMPP):** drop the repo in `htdocs` and hit it through Apache, or run PHP's built-in server: `php -S localhost:8080`.
+- **Docker:** `Dockerfile` uses `php:8.2-cli` with `mysqli`, `pdo_mysql`, `curl` extensions and serves via `php -S 0.0.0.0:${PORT:-8080}`.
+- **Dependencies:** `composer install` (only dependency is `dompdf/dompdf` for PDF reports).
+- **No linter, formatter, or test suite is configured** — there's nothing to run beyond manually exercising the app in a browser.
+
+### Required environment / config
+
+- `config/conexao.php` reads `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT` from env (falling back to XAMPP-style defaults), and connects with `mysqli_connect`. Note: the port fallback references a `PORTA` constant that is **not defined anywhere in the codebase** — if `DB_PORT` isn't set in the environment, this will fatal error.
+- `config/gemini.php` requires `GEMINI_API_KEY` in env or calls `die()`. Defines `geminiEmbedding()`, `geminiChat()`, and `cosineSimilarity()` used by the recommendation feature.
+- `config/ludopedia.php` and `config/groq.php` are **gitignored** (real API credentials live there locally, not in the repo) — `LUDOPEDIA_APP_ID`, `LUDOPEDIA_APP_SECRET`, `LUDOPEDIA_TOKEN`, `LUDOPEDIA_CALLBACK`. Anyone recreating this file locally needs Ludopedia API credentials.
+- No `.sql` schema file exists in the repo — the `jogos` table structure has to be inferred from the queries in `controllers/`.
+
+## Architecture
+
+There is no router or front controller. Each `.php` file at the root or under `views/`/`controllers/` is hit directly as a URL, and HTML/PHP forms POST/GET straight to controller scripts by relative path (e.g. `<form action="controllers/loginController.php">`). Controllers typically `require_once` config/helpers, do their work, then either `header("Location: ...")` back to a view or `echo json_encode(...)` for AJAX endpoints.
+
+### Two areas of the site
+
+- **Public catalog** (root level): `index.php` (catalog + infinite scroll + WhatsApp cart), `recomendacao_form.php` + `controllers/recomendacaoController.php` (AI recommendation flow), `views/jogos/recomendacao.php` (results page). No auth.
+- **Admin panel** (`views/jogos/*.php` + matching `controllers/*Controller.php`): listing/search/pagination, cadastrar (create), editar (edit), relatório (PDF report), imports. Every admin view calls `helpers/authHelper.php::protegerAdmin()` at the top, which redirects to `login.php` unless `$_SESSION['tipo'] === 'admin'`. Session-based auth only, single user table (`usuarios`), passwords via `password_hash`/`password_verify` (see `gerar_senha.php` for hash generation, `controllers/loginController.php`, `logout.php`).
+
+### AI recommendation flow (RAG)
+
+This is the core "smart" feature, split across:
+- `controllers/gerarEmbeddings.php` — batch job that generates a Gemini embedding for every game missing one and stores it as JSON text in the `jogos.embedding` column. Guarded by a hardcoded token (`?token=formiga2024`) when not run from CLI.
+- `controllers/recomendacaoController.php` — takes the user's free-text description + player count/age/time filters, embeds the query via Gemini, pre-filters candidate games in SQL (players/age/time), ranks by `cosineSimilarity()` computed in PHP against stored embeddings, takes the top 12, then asks Gemini to pick and justify 6 of them via a prompt requiring strict JSON output. Renders `views/jogos/recomendacao.php`.
+- `controllers/maisRecomendacoesController.php` — same flow as an AJAX/JSON endpoint for the "+ Recomendações" button, excluding games already shown (`ids_exibidos`).
+- All steps log heavily to `logs/sistema.log` via `helpers/logHelper.php::registrarLog()` — useful for debugging Gemini prompt/response issues.
+
+### External integrations
+
+- **Gemini** (`config/gemini.php`): embeddings (`models/gemini-embedding-2`) and chat (`models/gemini-2.5-flash`) via raw cURL to `generativelanguage.googleapis.com`. `CURLOPT_SSL_VERIFYPEER/HOST` are disabled to work around XAMPP's SSL setup.
+- **Ludopedia API** (`config/ludopedia.php`, `controllers/importarLudopediaController.php`): paginated import/sync of the rental shop's game collection, auto-generates Portuguese descriptions per game via Gemini, maps categories into a `categorias`/`jogos_categorias` join. Also gated by the `?token=formiga2024` query token. `relatorio_faltantes.php` cross-checks the local DB against the full Ludopedia collection to find games not yet imported.
+- **OlaClick import** (`controllers/importarOlaClickController.php`): one-off import from a pasted JSON blob (product catalog), regex-parses player count/age/duration out of free-text descriptions.
+- **WhatsApp**: no API — both `index.php` and `views/jogos/recomendacao.php` build a `wa.me` deep link with a pre-filled order message client-side.
+
+### Cart / selection state
+
+`assets/js/carrinho.js` exposes a tiny `Carrinho` object (`obter()`/`salvar()`) wrapping `localStorage` under key `formigaludica_carrinho`. Both `index.php` (catalog) and `views/jogos/recomendacao.php` (recommendation results) embed their own near-duplicate inline `<script>` blocks that read/write this same cart, so a selection made on one page persists into the other — if you change cart behavior, check both files, not just `carrinho.js`.
+
+### Data access patterns (inconsistent — know both when editing)
+
+- `controllers/listarJogosAjax.php` (catalog search/filter/infinite-scroll endpoint) uses proper `mysqli_prepare`/bound params.
+- Most CRUD controllers (`jogosController.php`, `editarJogoController.php`, `loginController.php`, `importarOlaClickController.php`, `gerarRelatorioJogosPdf.php`) interpolate `$_POST`/`$_GET` values directly into SQL strings. Be careful when touching these — follow the prepared-statement pattern from `listarJogosAjax.php` rather than the string-interpolation pattern when adding new queries.
+
+### PDF reports
+
+
+`controllers/gerarRelatorioJogosPdf.php` uses `dompdf/dompdf` (via Composer/`vendor/`) to render a filtered games table as a landscape A4 PDF, with a "sintético" vs "analítico" (includes description) mode toggle.
+
+## Project rules / preferences
+
+- Keep the project in plain PHP. Do not introduce Laravel, frameworks, routers, or MVC rewrites unless explicitly requested.
+- Prefer small, focused changes instead of large refactors.
+- When changing SQL, use prepared statements and avoid string interpolation.
+- Preserve the existing visual identity: cute/geek, playful, board-game rental theme.
+- Keep variable and function names in Portuguese when editing existing PHP/JS.
+- Do not change database structure without explaining the impact first.
+- Do not remove existing features while improving layout or code.
+- When editing cart behavior, always check both `index.php`, `views/jogos/recomendacao.php`, and `assets/js/carrinho.js`.
+- When editing recommendation logic, preserve the Gemini RAG flow unless the change is explicitly about the AI pipeline.
+- Before making changes, explain what files will be touched and why.
+- After making changes, summarize exactly what was changed.
+
+## Known risks
+
+- Some controllers still use raw SQL interpolation. New code should follow the prepared statement pattern from `controllers/listarJogosAjax.php`.
+- `config/conexao.php` may fail if `DB_PORT` is missing because `PORTA` is referenced but not defined.
+- Cart logic is duplicated in inline scripts and should be changed carefully.
+
+## Working with Laura
+
+Laura prefers incremental development.
+
+Never refactor unrelated code.
+
+Never change the project's architecture unless explicitly requested.
+
+Always explain the reasoning before modifying files.
+
+When multiple solutions exist, present the alternatives with their trade-offs instead of choosing one automatically.
+
+Prefer maintaining the current coding style over introducing new patterns.
+
+When a task affects multiple files, explain why each file needs to be modified.
+
+Always preserve the visual identity unless asked to redesign it.
