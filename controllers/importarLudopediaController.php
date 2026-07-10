@@ -148,11 +148,12 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
             continue;
         }
 
-        $nome = $detalhes['nm_jogo'] ?? '';
+        $nome    = $detalhes['nm_jogo'] ?? '';
+        $semNome = empty($nome);
 
-        if (empty($nome)) {
+        if ($semNome) {
             $nome = "SEM NOME (Ludopedia #{$idLudopedia})";
-            registrarLog('ALERTA', "Jogo sem nome recebido da API (id_ludopedia: {$idLudopedia}). Inserido com nome placeholder.");
+            registrarLog('ALERTA', "Jogo sem nome recebido da API (id_ludopedia: {$idLudopedia}). Inserido/mantido inativo com nome placeholder.");
         }
 
         // A Ludopedia manda só a miniatura ("_t"), que fica borrada quando
@@ -168,7 +169,7 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
         $linkLudo   = $detalhes['link']               ?? '';
         $categorias = $detalhes['categorias']         ?? [];
 
-        $stmt = mysqli_prepare($conexao, "SELECT id_jogo, descricao, embedding FROM jogos WHERE id_ludopedia = ?");
+        $stmt = mysqli_prepare($conexao, "SELECT id_jogo, descricao, embedding, ativo FROM jogos WHERE id_ludopedia = ?");
         mysqli_stmt_bind_param($stmt, 'i', $idLudopedia);
         mysqli_stmt_execute($stmt);
         $jogoAtual = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -183,6 +184,11 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
             $descricaoAtual = $jogoAtual['descricao'] ?? '';
             $embeddingAtual = $jogoAtual['embedding'] ?? '';
 
+            // Jogo sem nome nunca fica ativo — não aparece no catálogo nem
+            // é recomendado pela IA até alguém corrigir o nome manualmente.
+            // Se já tem nome, preserva o ativo/inativo que já estava.
+            $ativo = $semNome ? 0 : (int)$jogoAtual['ativo'];
+
             $stmt = mysqli_prepare($conexao, "
                 UPDATE jogos SET
                     nome            = ?,
@@ -193,33 +199,38 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
                     duracao_minutos = ?,
                     tp_jogo         = ?,
                     link_ludopedia  = ?,
+                    ativo           = ?,
                     atualizado_em   = NOW()
                 WHERE id_jogo = ?
             ");
-            mysqli_stmt_bind_param($stmt, 'ssiiiissi',
+            mysqli_stmt_bind_param($stmt, 'ssiiiissii',
                 $nome, $imagem, $minJog, $maxJog,
-                $idadeMin, $duracao, $tpJogo, $linkLudo, $idJogo
+                $idadeMin, $duracao, $tpJogo, $linkLudo, $ativo, $idJogo
             );
             mysqli_stmt_execute($stmt);
 
             vincularCategorias($conexao, $idJogo, $categorias);
 
-            registrarLog('INFO', "Atualizado: {$nome} (id: {$idJogo}, id_ludopedia: {$idLudopedia})");
+            registrarLog('INFO', "Atualizado: {$nome} (id: {$idJogo}, id_ludopedia: {$idLudopedia})" . ($semNome ? ' [inativo por falta de nome]' : ''));
             $resultado['atualizados']++;
 
         } else {
             // ── INSERE jogo novo SEM descrição (a Ludopedia não fornece) ──
+            // Sem nome, entra inativo — não aparece no catálogo nem é
+            // recomendado até alguém corrigir o nome manualmente.
+            $ativo = $semNome ? 0 : 1;
+
             $stmt = mysqli_prepare($conexao, "
                 INSERT INTO jogos (
                     id_ludopedia, nome, imagem, descricao,
                     min_jogadores, max_jogadores, idade_minima,
                     duracao_minutos, tp_jogo, link_ludopedia,
                     preco, ativo, origem, criado_em
-                ) VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, 0.00, 1, 'ludopedia', NOW())
+                ) VALUES (?, ?, ?, '', ?, ?, ?, ?, ?, ?, 0.00, ?, 'ludopedia', NOW())
             ");
-            mysqli_stmt_bind_param($stmt, 'issiiiiss',
+            mysqli_stmt_bind_param($stmt, 'issiiiissi',
                 $idLudopedia, $nome, $imagem,
-                $minJog, $maxJog, $idadeMin, $duracao, $tpJogo, $linkLudo
+                $minJog, $maxJog, $idadeMin, $duracao, $tpJogo, $linkLudo, $ativo
             );
             mysqli_stmt_execute($stmt);
 
@@ -232,10 +243,12 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
             $resultado['inseridos']++;
         }
 
-        // Gera descrição via IA só se o jogo não tiver nenhuma ainda.
+        // Gera descrição via IA só se o jogo não tiver nenhuma ainda (e tiver
+        // nome de verdade — sem nome, o jogo já está inativo, não vale a
+        // pena gastar chamada do Gemini com ele).
         $descricaoFoiGerada = false;
 
-        if (trim((string)$descricaoAtual) === '') {
+        if (!$semNome && trim((string)$descricaoAtual) === '') {
             try {
                 $descricaoGerada = gerarDescricaoComIA($detalhes);
 
@@ -259,7 +272,7 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
         // desatualizado). Jogos que só tiveram metadado atualizado (jogadores,
         // idade etc.) mantêm o embedding que já tinham — evita reprocessar os
         // 600+ jogos do catálogo inteiro a cada sincronização de rotina.
-        if (trim((string)$embeddingAtual) === '' || $descricaoFoiGerada) {
+        if (!$semNome && (trim((string)$embeddingAtual) === '' || $descricaoFoiGerada)) {
             $textoEmbedding = montarTextoEmbeddingJogo([
                 'nome'            => $nome,
                 'descricao'       => $descricaoAtual,
