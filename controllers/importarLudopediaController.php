@@ -180,7 +180,7 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
         $linkLudo   = $detalhes['link']               ?? '';
         $categorias = $detalhes['categorias']         ?? [];
 
-        $stmt = mysqli_prepare($conexao, "SELECT id_jogo, descricao, embedding, ativo FROM jogos WHERE id_ludopedia = ?");
+        $stmt = mysqli_prepare($conexao, "SELECT id_jogo, nome, descricao, embedding, ativo FROM jogos WHERE id_ludopedia = ?");
         mysqli_stmt_bind_param($stmt, 'i', $idLudopedia);
         mysqli_stmt_execute($stmt);
         $jogoAtual = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -197,8 +197,19 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
 
             // Jogo sem nome nunca fica ativo — não aparece no catálogo nem
             // é recomendado pela IA até alguém corrigir o nome manualmente.
-            // Se já tem nome, preserva o ativo/inativo que já estava.
-            $ativo = $semNome ? 0 : (int)$jogoAtual['ativo'];
+            // Se o nome salvo era o placeholder e agora veio um nome de
+            // verdade, reativa sozinho (provavelmente foi vítima do bug do
+            // rate limit, não uma desativação manual). Fora isso, preserva
+            // o ativo/inativo que o admin já tinha escolhido.
+            $tinhaPlaceholder = str_starts_with((string)($jogoAtual['nome'] ?? ''), 'SEM NOME (Ludopedia #');
+
+            if ($semNome) {
+                $ativo = 0;
+            } elseif ($tinhaPlaceholder) {
+                $ativo = 1;
+            } else {
+                $ativo = (int)$jogoAtual['ativo'];
+            }
 
             $stmt = mysqli_prepare($conexao, "
                 UPDATE jogos SET
@@ -222,7 +233,8 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
 
             vincularCategorias($conexao, $idJogo, $categorias);
 
-            registrarLog('INFO', "Atualizado: {$nome} (id: {$idJogo}, id_ludopedia: {$idLudopedia})" . ($semNome ? ' [inativo por falta de nome]' : ''));
+            $sufixoLog = $semNome ? ' [inativo por falta de nome]' : ($tinhaPlaceholder ? ' [nome recuperado, reativado automaticamente]' : '');
+            registrarLog('INFO', "Atualizado: {$nome} (id: {$idJogo}, id_ludopedia: {$idLudopedia}){$sufixoLog}");
             $resultado['atualizados']++;
 
         } else {
