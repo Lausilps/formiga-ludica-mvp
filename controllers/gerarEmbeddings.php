@@ -1,8 +1,11 @@
 <?php
 set_time_limit(0); // sem limite de tempo
 ini_set('max_execution_time', 0);
+
+$isCli = php_sapi_name() === 'cli';
+
 // Proteção simples: só roda via terminal ou com token
-if (php_sapi_name() !== 'cli') {
+if (!$isCli) {
     $token = $_GET['token'] ?? '';
     if ($token !== 'formiga2024') {
         die("Acesso negado. Use ?token=formiga2024");
@@ -11,18 +14,27 @@ if (php_sapi_name() !== 'cli') {
 
 require_once __DIR__ . '/../config/conexao.php';
 require_once __DIR__ . '/../config/gemini.php';
+require_once __DIR__ . '/../helpers/recomendacaoHelper.php';
 
-// Busca jogos sem embedding
+// Via CLI processa tudo de uma vez (sem risco de timeout de servidor web).
+// Via HTTP processa só um lote pequeno por requisição — quem chama (o botão
+// "Atualizar IA" no admin) encadeia as chamadas até não sobrar nada.
+$lote = $isCli ? 100000 : 8;
+
 $result = mysqli_query($conexao, "
     SELECT id_jogo, nome, descricao, resumo_regras,
            min_jogadores, max_jogadores, idade_minima,
            duracao_minutos, dificuldade
     FROM jogos
     WHERE ativo = 1 AND embedding IS NULL
+    LIMIT {$lote}
 ");
 
 $total = mysqli_num_rows($result);
-echo "Gerando embeddings para {$total} jogos...\n\n";
+
+if ($isCli) {
+    echo "Gerando embeddings para {$total} jogos...\n\n";
+}
 
 $stmt = mysqli_prepare($conexao, "
     UPDATE jogos
@@ -34,19 +46,7 @@ $processados = 0;
 $erros = 0;
 
 while ($jogo = mysqli_fetch_assoc($result)) {
-    // Monta texto rico do jogo
-    $texto  = "Jogo: {$jogo['nome']}. ";
-    $texto .= "Descrição: {$jogo['descricao']}. ";
-
-    if (!empty($jogo['resumo_regras'])) {
-        $texto .= "Regras: {$jogo['resumo_regras']}. ";
-    }
-
-    $texto .= "Jogadores: {$jogo['min_jogadores']} a {$jogo['max_jogadores']}. ";
-    $texto .= "Idade mínima: {$jogo['idade_minima']} anos. ";
-    $texto .= "Duração: {$jogo['duracao_minutos']} minutos. ";
-    $texto .= "Dificuldade: {$jogo['dificuldade']}.";
-
+    $texto = montarTextoEmbeddingJogo($jogo);
     $embedding = geminiEmbedding($texto);
 
     if (!empty($embedding)) {
@@ -54,15 +54,28 @@ while ($jogo = mysqli_fetch_assoc($result)) {
         mysqli_stmt_bind_param($stmt, 'si', $json, $jogo['id_jogo']);
         mysqli_stmt_execute($stmt);
         $processados++;
-        echo "✓ [{$processados}/{$total}] {$jogo['nome']}\n";
+        if ($isCli) echo "✓ [{$processados}/{$total}] {$jogo['nome']}\n";
     } else {
         $erros++;
-        echo "✗ Erro em: {$jogo['nome']}\n";
+        if ($isCli) echo "✗ Erro em: {$jogo['nome']}\n";
     }
 
     // Respeita rate limit do Gemini free tier
     sleep(1); // 1 segundo entre cada chamada
 }
 
-echo "\n✅ Concluído! {$processados} embeddings gerados. {$erros} erros.\n";
+$restantesResult = mysqli_query($conexao, "SELECT COUNT(*) AS total FROM jogos WHERE ativo = 1 AND embedding IS NULL");
+$restantes = (int)(mysqli_fetch_assoc($restantesResult)['total'] ?? 0);
+
+if ($isCli) {
+    echo "\n✅ Concluído! {$processados} embeddings gerados. {$erros} erros. Restantes sem embedding: {$restantes}\n";
+} else {
+    header('Content-Type: application/json');
+    echo json_encode([
+        'processados' => $processados,
+        'erros'       => $erros,
+        'restantes'   => $restantes,
+    ]);
+}
+
 mysqli_close($conexao);

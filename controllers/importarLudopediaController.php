@@ -2,7 +2,9 @@
 set_time_limit(0);
 ini_set('max_execution_time', 0);
 
-if (php_sapi_name() !== 'cli') {
+$isCli = php_sapi_name() === 'cli';
+
+if (!$isCli) {
     $token = $_GET['token'] ?? '';
     if ($token !== 'formiga2024') {
         die("Acesso negado. Use ?token=formiga2024");
@@ -13,6 +15,7 @@ require_once __DIR__ . '/../config/conexao.php';
 require_once __DIR__ . '/../config/gemini.php';
 require_once __DIR__ . '/../config/ludopedia.php';
 require_once __DIR__ . '/../helpers/logHelper.php';
+require_once __DIR__ . '/../helpers/recomendacaoHelper.php';
 
 // ============================================================
 // FUNÇÕES AUXILIARES
@@ -105,69 +108,51 @@ function vincularCategorias(mysqli $conexao, int $idJogo, array $categorias): vo
     }
 }
 
-// ============================================================
-// SCRIPT PRINCIPAL
-// ============================================================
+// Processa uma única página da coleção da Ludopedia: importa/atualiza os
+// jogos, gera descrição via IA pra quem não tem (a Ludopedia não fornece) e
+// gera o embedding na hora — sem precisar de um segundo passo manual depois.
+function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): array {
+    $resultado = [
+        'totalGeral'   => 0,
+        'processados'  => 0,
+        'inseridos'    => 0,
+        'atualizados'  => 0,
+        'erros'        => 0,
+        'colecaoVazia' => true,
+    ];
 
-registrarLog('INFO', 'Iniciando importação da Ludopedia.');
-echo "🐜 Iniciando importação da Ludopedia...\n\n";
-
-$pagina      = 1;
-$porPagina = 100;
-$totalJogos  = 0;
-$inseridos   = 0;
-$atualizados = 0;
-$erros       = 0;
-$idsVistos = [];
-$totalGeral = 0;
-
-do {
-    $url = "https://ludopedia.com.br/api/v1/colecao?lista=colecao&fl_tem=1&page={$pagina}&rows=100";
+    $url = "https://ludopedia.com.br/api/v1/colecao?lista=colecao&fl_tem=1&page={$pagina}&rows={$rows}";
     $response = ludopediaGet($url);
+
+    $resultado['totalGeral'] = (int)($response['total'] ?? 0);
 
     if (empty($response['colecao'])) {
         registrarLog('INFO', "Página {$pagina} vazia ou sem resposta. Encerrando.");
-        break;
+        return $resultado;
     }
 
     $colecao = $response['colecao'];
-    $totalGeral = $response['total'] ?? 0; // ADICIONA ESSA LINHA
-    registrarLog('INFO', "Página {$pagina}: " . count($colecao) . " jogos recebidos. Total geral: {$totalGeral}");
-    echo "📄 Página {$pagina} — " . count($colecao) . " jogos | Total na Ludopedia: {$totalGeral}\n";
+    $resultado['colecaoVazia'] = false;
+    registrarLog('INFO', "Página {$pagina}: " . count($colecao) . " jogos recebidos. Total geral: {$resultado['totalGeral']}");
 
     foreach ($colecao as $item) {
         $idLudopedia = (int)$item['id_jogo'];
-        $totalJogos++;
+        $resultado['processados']++;
 
-        // Proteção contra loop
-        if (in_array($idLudopedia, $idsVistos)) {
-            echo "  ⚠️ Loop detectado! Encerrando.\n";
-            registrarLog('ALERTA', 'Loop detectado na paginação. Encerrando importação.');
-            break 2;
-        }
-        $idsVistos[] = $idLudopedia;
-
-        registrarLog('INFO', "Processando [{$totalJogos}]: {$item['nm_jogo']} (id_ludopedia: {$idLudopedia})");
-        echo "  → [{$totalJogos}] {$item['nm_jogo']}\n";
-
-        // Busca detalhes completos do jogo
         $detalhes = ludopediaGet("https://ludopedia.com.br/api/v1/jogos/{$idLudopedia}");
 
         if (!$detalhes) {
-            echo "  ✗ Erro ao buscar detalhes: {$item['nm_jogo']}\n";
-            registrarLog('ERRO', "Falha ao buscar detalhes: {$item['nm_jogo']} (id: {$idLudopedia})");
-            $erros++;
-            usleep(500000);
+            registrarLog('ERRO', "Falha ao buscar detalhes: {$item['nm_jogo']} (id_ludopedia: {$idLudopedia})");
+            $resultado['erros']++;
+            usleep(300000);
             continue;
         }
 
-        $nome       = $detalhes['nm_jogo']           ?? '';
+        $nome = $detalhes['nm_jogo'] ?? '';
 
-        // Se vier sem nome, usa um placeholder identificável
         if (empty($nome)) {
             $nome = "SEM NOME (Ludopedia #{$idLudopedia})";
             registrarLog('ALERTA', "Jogo sem nome recebido da API (id_ludopedia: {$idLudopedia}). Inserido com nome placeholder.");
-            echo "  ⚠️ Sem nome: usando placeholder para id_ludopedia: {$idLudopedia}\n";
         }
 
         $imagem     = $detalhes['thumb']              ?? '';
@@ -179,16 +164,20 @@ do {
         $linkLudo   = $detalhes['link']               ?? '';
         $categorias = $detalhes['categorias']         ?? [];
 
-        // Verifica se jogo já existe no banco
-        $stmt = mysqli_prepare($conexao, "SELECT id_jogo, descricao FROM jogos WHERE id_ludopedia = ?");
+        $stmt = mysqli_prepare($conexao, "SELECT id_jogo, descricao, embedding FROM jogos WHERE id_ludopedia = ?");
         mysqli_stmt_bind_param($stmt, 'i', $idLudopedia);
         mysqli_stmt_execute($stmt);
-        $result    = mysqli_stmt_get_result($stmt);
-        $jogoAtual = mysqli_fetch_assoc($result);
+        $jogoAtual = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
         if ($jogoAtual) {
             // ── ATUALIZA jogo existente ──
-            $idJogo = (int)$jogoAtual['id_jogo'];
+            // Não mexe no embedding aqui: com 600+ jogos no catálogo, resetar
+            // e regerar tudo a cada sincronização (mesmo sem mudança real)
+            // deixaria a rotina inteira lenta e cara. Só gera de novo se
+            // faltar (tratado mais abaixo).
+            $idJogo         = (int)$jogoAtual['id_jogo'];
+            $descricaoAtual = $jogoAtual['descricao'] ?? '';
+            $embeddingAtual = $jogoAtual['embedding'] ?? '';
 
             $stmt = mysqli_prepare($conexao, "
                 UPDATE jogos SET
@@ -200,7 +189,6 @@ do {
                     duracao_minutos = ?,
                     tp_jogo         = ?,
                     link_ludopedia  = ?,
-                    embedding       = NULL,
                     atualizado_em   = NOW()
                 WHERE id_jogo = ?
             ");
@@ -212,12 +200,11 @@ do {
 
             vincularCategorias($conexao, $idJogo, $categorias);
 
-            echo "  ✓ Atualizado: {$nome}\n";
             registrarLog('INFO', "Atualizado: {$nome} (id: {$idJogo}, id_ludopedia: {$idLudopedia})");
-            $atualizados++;
+            $resultado['atualizados']++;
 
         } else {
-            // ── INSERE jogo novo SEM descrição ──
+            // ── INSERE jogo novo SEM descrição (a Ludopedia não fornece) ──
             $stmt = mysqli_prepare($conexao, "
                 INSERT INTO jogos (
                     id_ludopedia, nome, imagem, descricao,
@@ -232,27 +219,130 @@ do {
             );
             mysqli_stmt_execute($stmt);
 
-            $idJogo = (int)mysqli_insert_id($conexao);
+            $idJogo         = (int)mysqli_insert_id($conexao);
+            $descricaoAtual = '';
+            $embeddingAtual = '';
             vincularCategorias($conexao, $idJogo, $categorias);
 
-            echo "  ✨ Inserido: {$nome}\n";
             registrarLog('INFO', "Inserido: {$nome} (id: {$idJogo}, id_ludopedia: {$idLudopedia})");
-            $inseridos++;
+            $resultado['inseridos']++;
         }
 
-        usleep(800000); // 0.8s entre jogos — mais respeitoso com a API
+        // Gera descrição via IA só se o jogo não tiver nenhuma ainda.
+        $descricaoFoiGerada = false;
+
+        if (trim((string)$descricaoAtual) === '') {
+            try {
+                $descricaoGerada = gerarDescricaoComIA($detalhes);
+
+                if (!empty($descricaoGerada)) {
+                    $stmt = mysqli_prepare($conexao, "UPDATE jogos SET descricao = ? WHERE id_jogo = ?");
+                    mysqli_stmt_bind_param($stmt, 'si', $descricaoGerada, $idJogo);
+                    mysqli_stmt_execute($stmt);
+                    $descricaoAtual     = $descricaoGerada;
+                    $descricaoFoiGerada = true;
+                    registrarLog('INFO', "Descrição gerada via IA para: {$nome}");
+                }
+            } catch (Exception $e) {
+                registrarLog('ERRO', "Falha ao gerar descrição via IA para {$nome}: " . $e->getMessage());
+            }
+
+            sleep(1); // respeita rate limit do Gemini
+        }
+
+        // Só gera embedding se estiver faltando (jogo novo) ou se acabamos de
+        // gerar a descrição agora (o embedding antigo, se existisse, estaria
+        // desatualizado). Jogos que só tiveram metadado atualizado (jogadores,
+        // idade etc.) mantêm o embedding que já tinham — evita reprocessar os
+        // 600+ jogos do catálogo inteiro a cada sincronização de rotina.
+        if (trim((string)$embeddingAtual) === '' || $descricaoFoiGerada) {
+            $textoEmbedding = montarTextoEmbeddingJogo([
+                'nome'            => $nome,
+                'descricao'       => $descricaoAtual,
+                'resumo_regras'   => null,
+                'min_jogadores'   => $minJog,
+                'max_jogadores'   => $maxJog,
+                'idade_minima'    => $idadeMin,
+                'duracao_minutos' => $duracao,
+                'dificuldade'     => null,
+            ]);
+
+            $embedding = geminiEmbedding($textoEmbedding);
+
+            if (!empty($embedding)) {
+                $json = json_encode($embedding);
+                $stmt = mysqli_prepare($conexao, "UPDATE jogos SET embedding = ?, embedding_atualizado_em = NOW() WHERE id_jogo = ?");
+                mysqli_stmt_bind_param($stmt, 'si', $json, $idJogo);
+                mysqli_stmt_execute($stmt);
+                registrarLog('INFO', "Embedding gerado para: {$nome}");
+            } else {
+                registrarLog('ERRO', "Falha ao gerar embedding para: {$nome} (id: {$idJogo})");
+            }
+
+            sleep(1); // respeita rate limit do Gemini
+        }
+
+        usleep(300000); // pausa curta, respeitosa com a API da Ludopedia
     }
 
-    $pagina++;
-    registrarLog('INFO', "Página {$pagina} concluída.");
-    echo "✅ Página {$pagina} concluída.\n\n";
-    sleep(1); // 1s entre páginas
+    return $resultado;
+}
 
-$totalImportado = ($pagina - 1) * $porPagina + count($colecao);
-} while ($totalImportado < $totalGeral && count($colecao) > 0);
+// ============================================================
+// EXECUÇÃO
+// ============================================================
 
-$resumo = "Importação concluída! Total: {$totalJogos} | Inseridos: {$inseridos} | Atualizados: {$atualizados} | Erros: {$erros}";
-echo "\n✅ {$resumo}\n";
-registrarLog('INFO', $resumo);
+if ($isCli) {
+    // Modo CLI: processa a coleção inteira, página por página, sem limite de
+    // tempo — não tem servidor web no meio pra derrubar a conexão por timeout.
+    echo "🐜 Iniciando importação da Ludopedia...\n\n";
+
+    $pagina = 1;
+    $rows   = 50;
+    $totais = ['inseridos' => 0, 'atualizados' => 0, 'erros' => 0, 'processados' => 0];
+
+    do {
+        $r = processarPaginaLudopedia($conexao, $pagina, $rows);
+        $totais['inseridos']   += $r['inseridos'];
+        $totais['atualizados'] += $r['atualizados'];
+        $totais['erros']       += $r['erros'];
+        $totais['processados'] += $r['processados'];
+
+        echo "📄 Página {$pagina} — Inseridos: {$r['inseridos']} | Atualizados: {$r['atualizados']} | Erros: {$r['erros']}\n";
+        $pagina++;
+    } while (!$r['colecaoVazia']);
+
+    $resumo = "Importação concluída! Total: {$totais['processados']} | Inseridos: {$totais['inseridos']} | Atualizados: {$totais['atualizados']} | Erros: {$totais['erros']}";
+    echo "\n✅ {$resumo}\n";
+    registrarLog('INFO', $resumo);
+
+} else {
+    // Modo HTTP: processa só uma página pequena por requisição, pra nunca
+    // correr risco de timeout do servidor/proxy no meio da sincronização.
+    // Quem chama (o botão no admin) encadeia as chamadas até `temMais` ser falso.
+    $pagina = max(1, (int)($_GET['pagina'] ?? 1));
+    $rows   = 6;
+
+    if ($pagina === 1) {
+        registrarLog('INFO', 'Iniciando importação da Ludopedia (via admin).');
+    }
+
+    $r = processarPaginaLudopedia($conexao, $pagina, $rows);
+
+    if ($r['colecaoVazia']) {
+        registrarLog('INFO', "Importação concluída na página {$pagina}.");
+    }
+
+    header('Content-Type: application/json');
+    echo json_encode([
+        'pagina'      => $pagina,
+        'totalGeral'  => $r['totalGeral'],
+        'processados' => $r['processados'],
+        'inseridos'   => $r['inseridos'],
+        'atualizados' => $r['atualizados'],
+        'erros'       => $r['erros'],
+        'temMais'     => !$r['colecaoVazia'],
+    ]);
+}
 
 mysqli_close($conexao);

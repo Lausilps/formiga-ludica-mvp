@@ -40,6 +40,7 @@ try {
     $topJogos = rankearJogosPorSimilaridade($jogos, $queryEmbedding, 8);
 
     $contexto = montarContextoCatalogo($topJogos);
+    $qtdMaxima = min(4, count($topJogos));
 
     $prompt = <<<PROMPT
 Você é a Formiguinha, assistente especialista em jogos de tabuleiro da Formiga Lúdica, uma locadora de jogos.
@@ -48,7 +49,8 @@ Seu jeito é animado, divertido e descontraído — fala como brasileiro mesmo!
 Um cliente já viu algumas recomendações e pediu mais opções para esse perfil:
 "{$queryTexto}"
 
-Com base APENAS nos jogos do catálogo abaixo (que ainda não foram mostrados a ele), escolha até 4 que melhor combinam com o pedido.
+Com base APENAS nos jogos do catálogo abaixo (que ainda não foram mostrados a ele), escolha até {$qtdMaxima} jogo(s) que melhor combinam com o pedido.
+Nunca repita o mesmo jogo mais de uma vez na resposta — se o catálogo abaixo tiver menos de {$qtdMaxima} jogos, devolva só os que existem, sem repetir nenhum.
 Para cada um, explique em 2-3 frases descontraídas por que ele é perfeito pra essa situação.
 
 CATÁLOGO:

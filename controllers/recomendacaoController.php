@@ -53,6 +53,7 @@ try {
     registrarLog('INFO', 'Quantidade de jogos candidatos encontrados: ' . count($jogos));
 
     if (empty($jogos)) {
+        registrarLog('DIAGNOSTICO', diagnosticarZeroCandidatos($conexao, $jogadores, $idade, $tempo));
         header('Location: ../recomendacao_form.php?erro=3');
         exit;
     }
@@ -64,6 +65,7 @@ try {
 
     // 5. Monta contexto pro Gemini
     $contexto = montarContextoCatalogo($topJogos);
+    $qtdMaxima = min(6, count($topJogos));
 
     $prompt = <<<PROMPT
 Você é a Formiguinha, assistente especialista em jogos de tabuleiro da Formiga Lúdica, uma locadora de jogos.
@@ -72,7 +74,8 @@ Seu jeito é animado, divertido e descontraído — fala como brasileiro mesmo!
 Um cliente está buscando jogos com esse perfil:
 "{$queryTexto}"
 
-Com base APENAS nos jogos do catálogo abaixo, escolha os 6 que melhor combinam com o pedido.
+Com base APENAS nos jogos do catálogo abaixo, escolha até {$qtdMaxima} jogo(s) que melhor combinam com o pedido.
+Nunca repita o mesmo jogo mais de uma vez na resposta — se o catálogo abaixo tiver menos de {$qtdMaxima} jogos, devolva só os que existem, sem repetir nenhum.
 Para cada um, explique em 2-3 frases descontraídas por que ele é perfeito pra essa situação.
 
 CATÁLOGO:

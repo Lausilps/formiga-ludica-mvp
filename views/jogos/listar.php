@@ -275,46 +275,85 @@ $buscaUrl = urlencode($busca);
 
             btn.disabled = true;
             btn.style.opacity = '0.6';
-            status.textContent = '⏳ Processando... aguarde.';
 
-            fetch('../../controllers/gerarEmbeddings.php?token=formiga2024')
-                .then(res => res.text())
-                .then(txt => {
-                    const match = txt.match(/✅ Concluído!.*/);
-                    status.textContent = match ? match[0] : '✅ Concluído!';
-                    btn.disabled = false;
-                    btn.style.opacity = '';
-                })
-                .catch(() => {
-                    status.textContent = '❌ Erro ao processar.';
-                    btn.disabled = false;
-                    btn.style.opacity = '';
-                });
+            let totalProcessados = 0;
+            let totalErros = 0;
+            let semProgresso = 0;
+
+            function proximoLote() {
+                status.textContent = `⏳ Processando... (${totalProcessados} gerado(s) até agora)`;
+
+                fetch('../../controllers/gerarEmbeddings.php?token=formiga2024')
+                    .then(res => res.json())
+                    .then(data => {
+                        totalProcessados += data.processados;
+                        totalErros += data.erros;
+                        semProgresso = (data.processados === 0 && data.erros === 0) ? semProgresso + 1 : 0;
+
+                        if (data.restantes > 0 && semProgresso < 3) {
+                            proximoLote();
+                            return;
+                        }
+
+                        status.textContent = `✅ Concluído! ${totalProcessados} embedding(s) gerado(s), ${totalErros} erro(s).` +
+                            (data.restantes > 0 ? ` ${data.restantes} ainda sem embedding — tenta rodar de novo.` : '');
+                        btn.disabled = false;
+                        btn.style.opacity = '';
+                    })
+                    .catch(() => {
+                        status.textContent = `❌ Erro ao processar (${totalProcessados} gerado(s) antes de falhar).`;
+                        btn.disabled = false;
+                        btn.style.opacity = '';
+                    });
+            }
+
+            proximoLote();
         }
 
         function sincronizarLudopedia() {
             const btn = document.getElementById('btn-ludopedia');
             const status = document.getElementById('status-ludopedia');
 
-            if (!confirm('Isso vai sincronizar o catálogo com a Ludopedia. Pode levar alguns minutos. Continuar?')) return;
+            if (!confirm('Isso vai sincronizar o catálogo com a Ludopedia, gerando descrição e IA pros jogos novos. Pode levar vários minutos. Continuar?')) return;
 
             btn.disabled = true;
             btn.style.opacity = '0.6';
-            status.textContent = '⏳ Sincronizando com Ludopedia...';
 
-            fetch('../../controllers/importarLudopediaController.php?token=formiga2024')
-                .then(res => res.text())
-                .then(txt => {
-                    const match = txt.match(/✅ Importação concluída!.*/);
-                    status.textContent = match ? match[0] : '✅ Sincronização concluída!';
-                    btn.disabled = false;
-                    btn.style.opacity = '';
-                })
-                .catch(() => {
-                    status.textContent = '❌ Erro ao sincronizar.';
-                    btn.disabled = false;
-                    btn.style.opacity = '';
-                });
+            let pagina = 1;
+            let totalProcessados = 0;
+            let totalInseridos = 0;
+            let totalAtualizados = 0;
+            let totalErros = 0;
+
+            function proximaPagina() {
+                status.textContent = `⏳ Sincronizando... (${totalProcessados} jogo(s) processado(s) até agora)`;
+
+                fetch(`../../controllers/importarLudopediaController.php?token=formiga2024&pagina=${pagina}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        totalProcessados += data.processados;
+                        totalInseridos += data.inseridos;
+                        totalAtualizados += data.atualizados;
+                        totalErros += data.erros;
+
+                        if (data.temMais && pagina < 150) {
+                            pagina++;
+                            proximaPagina();
+                            return;
+                        }
+
+                        status.textContent = `✅ Sincronização concluída! ${totalProcessados} jogo(s) — ${totalInseridos} novo(s), ${totalAtualizados} atualizado(s), ${totalErros} erro(s).`;
+                        btn.disabled = false;
+                        btn.style.opacity = '';
+                    })
+                    .catch(() => {
+                        status.textContent = `❌ Erro ao sincronizar (${totalProcessados} jogo(s) processado(s) antes de falhar).`;
+                        btn.disabled = false;
+                        btn.style.opacity = '';
+                    });
+            }
+
+            proximaPagina();
         }
     </script>
 

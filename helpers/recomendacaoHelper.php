@@ -1,5 +1,24 @@
 <?php
 
+// Texto rico usado tanto pra gerar embedding em lote (gerarEmbeddings.php)
+// quanto na sincronização com a Ludopedia — mantém as duas fontes consistentes.
+function montarTextoEmbeddingJogo(array $jogo): string
+{
+    $texto  = "Jogo: {$jogo['nome']}. ";
+    $texto .= "Descrição: {$jogo['descricao']}. ";
+
+    if (!empty($jogo['resumo_regras'])) {
+        $texto .= "Regras: {$jogo['resumo_regras']}. ";
+    }
+
+    $texto .= "Jogadores: {$jogo['min_jogadores']} a {$jogo['max_jogadores']}. ";
+    $texto .= "Idade mínima: {$jogo['idade_minima']} anos. ";
+    $texto .= "Duração: {$jogo['duracao_minutos']} minutos. ";
+    $texto .= "Dificuldade: {$jogo['dificuldade']}.";
+
+    return $texto;
+}
+
 function montarQueryTextoRecomendacao(string $descricao, int $jogadores, int $idade, int $tempo): string
 {
     $queryTexto  = "Quero um jogo para: {$descricao}. ";
@@ -10,6 +29,47 @@ function montarQueryTextoRecomendacao(string $descricao, int $jogadores, int $id
         : "Sem restrição de tempo de jogo.";
 
     return $queryTexto;
+}
+
+// Usado só quando buscarJogosCandidatos() não acha nada, pra saber se é
+// "não tem jogo com esse perfil" ou "tem jogo, mas falta gerar embedding".
+function diagnosticarZeroCandidatos($conexao, int $jogadores, int $idade, int $tempo): string
+{
+    $sql = "SELECT COUNT(*) AS total,
+                   SUM(CASE WHEN embedding IS NULL THEN 1 ELSE 0 END) AS sem_embedding
+            FROM jogos
+            WHERE ativo = 1
+              AND min_jogadores <= ?
+              AND max_jogadores >= ?
+              AND idade_minima <= ?";
+
+    $tipos  = 'iii';
+    $params = [$jogadores, $jogadores, $idade];
+
+    if ($tempo < 999) {
+        $sql .= " AND (duracao_minutos <= ? OR duracao_minutos IS NULL)";
+        $tipos   .= 'i';
+        $params[] = $tempo;
+    }
+
+    $stmt = mysqli_prepare($conexao, $sql);
+    mysqli_stmt_bind_param($stmt, $tipos, ...$params);
+    mysqli_stmt_execute($stmt);
+    $resultado = mysqli_stmt_get_result($stmt);
+    $row       = mysqli_fetch_assoc($resultado);
+
+    $total        = (int)($row['total'] ?? 0);
+    $semEmbedding = (int)($row['sem_embedding'] ?? 0);
+
+    if ($total === 0) {
+        return "Nenhum jogo ativo no catálogo bate com jogadores={$jogadores}/idade={$idade}/tempo={$tempo} — não é problema de embedding, é filtro sem correspondência mesmo.";
+    }
+
+    if ($semEmbedding > 0) {
+        return "{$total} jogo(s) bateriam com esse filtro, mas {$semEmbedding} está(ão) SEM embedding gerado — rode 'Atualizar IA' no admin pra esses jogos aparecerem.";
+    }
+
+    return "{$total} jogo(s) bateriam com esse filtro e já têm embedding — investigar outra causa.";
 }
 
 function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo, array $idsExcluidos = []): array
@@ -91,11 +151,19 @@ function interpretarRespostaGemini(string $respostaTexto, array $topJogos): arra
     $resposta      = json_decode(trim($respostaTexto), true);
 
     $recomendacoes = [];
+    $idsUsados     = [];
 
     if (!empty($resposta['recomendacoes'])) {
         foreach ($resposta['recomendacoes'] as $rec) {
             foreach ($topJogos as $j) {
                 if (strtolower(trim($j['nome'])) === strtolower(trim($rec['nome']))) {
+                    // Evita que o mesmo jogo apareça repetido, caso o Gemini
+                    // devolva o mesmo nome mais de uma vez (ex: só existe 1 candidato).
+                    if (in_array($j['id_jogo'], $idsUsados, true)) {
+                        break;
+                    }
+                    $idsUsados[] = $j['id_jogo'];
+
                     $recomendacoes[] = [
                         'id'            => $j['id_jogo'],
                         'nome'          => $j['nome'],
