@@ -161,22 +161,20 @@ $buscaUrl = urlencode($busca);
 
                         <tbody>
                             <?php while ($jogo = mysqli_fetch_assoc($resultado)): ?>
+                                <?php
+                                    if (!empty($jogo['imagem'])) {
+                                        $srcImagem = str_starts_with($jogo['imagem'], 'http')
+                                            ? $jogo['imagem']
+                                            : "../../" . $jogo['imagem'];
+                                    } else {
+                                        $srcImagem = "../../assets/img/sem-imagem.png";
+                                    }
+                                ?>
                                 <tr>
                                     <td class="tooltip-imagem coluna-nome">
                                         <?= htmlspecialchars($jogo['nome']) ?>
 
                                         <?php if (!empty($jogo['imagem'])): ?>
-
-                                            <?php
-                                                $imagem = $jogo['imagem'];
-
-                                                if (str_starts_with($imagem, 'http')) {
-                                                    $srcImagem = $imagem;
-                                                } else {
-                                                    $srcImagem = "../../" . $imagem;
-                                                }
-                                            ?>
-
                                             <span class="imagem-preview">
                                                 <img src="<?= htmlspecialchars($srcImagem) ?>" alt="<?= htmlspecialchars($jogo['nome']) ?>">
 
@@ -184,7 +182,6 @@ $buscaUrl = urlencode($busca);
                                                     <?= htmlspecialchars(mb_strimwidth($jogo['descricao'] ?? '', 0, 250, '...')) ?>
                                                 </p>
                                             </span>
-
                                         <?php endif; ?>
                                     </td>
 
@@ -207,9 +204,22 @@ $buscaUrl = urlencode($busca);
                                             Editar
                                         </a>
 
-                                        <a href="detalhes.php?id=<?= $jogo['id_jogo'] ?>" class="btn-acao">
+                                        <button
+                                            type="button"
+                                            class="btn-acao btn-detalhes"
+                                            data-nome="<?= htmlspecialchars($jogo['nome']) ?>"
+                                            data-imagem="<?= htmlspecialchars($srcImagem) ?>"
+                                            data-descricao="<?= htmlspecialchars($jogo['descricao'] ?? 'Sem descrição cadastrada.') ?>"
+                                            data-preco="<?= htmlspecialchars(number_format($jogo['preco'], 2, ',', '.')) ?>"
+                                            data-min="<?= $jogo['min_jogadores'] ?>"
+                                            data-max="<?= $jogo['max_jogadores'] ?>"
+                                            data-idade="<?= $jogo['idade_minima'] ?>"
+                                            data-duracao="<?= $jogo['duracao_minutos'] ?>"
+                                            data-dificuldade="<?= htmlspecialchars(ucfirst($jogo['dificuldade'])) ?>"
+                                            data-ativo="<?= $jogo['ativo'] ? '1' : '0' ?>"
+                                        >
                                             Detalhes
-                                        </a>
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endwhile; ?>
@@ -265,6 +275,26 @@ $buscaUrl = urlencode($busca);
         <?php endif; ?>
 
     </main>
+
+    <!-- Modal de detalhes do jogo -->
+    <div class="modal" id="modal-detalhes-jogo">
+        <div class="modal-conteudo">
+            <button type="button" class="fechar-modal" id="fechar-modal-detalhes">×</button>
+            <img id="detalhes-imagem" src="" alt="">
+            <div>
+                <span class="badge-status" id="detalhes-status"></span>
+                <h2 id="detalhes-nome"></h2>
+                <p id="detalhes-descricao"></p>
+                <div class="modal-infos">
+                    <span id="detalhes-jogadores"></span>
+                    <span id="detalhes-tempo"></span>
+                    <span id="detalhes-idade"></span>
+                    <span id="detalhes-dificuldade"></span>
+                    <strong id="detalhes-preco"></strong>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         function rodarEmbeddings() {
@@ -355,6 +385,44 @@ $buscaUrl = urlencode($busca);
 
             proximaPagina();
         }
+
+        // ============================================================
+        // MODAL DE DETALHES DO JOGO
+        // ============================================================
+        const modalDetalhes = document.getElementById('modal-detalhes-jogo');
+
+        document.querySelectorAll('.btn-detalhes').forEach(function(botao) {
+            botao.addEventListener('click', function() {
+                document.getElementById('detalhes-imagem').src = botao.dataset.imagem;
+                document.getElementById('detalhes-imagem').alt = botao.dataset.nome;
+                document.getElementById('detalhes-nome').textContent = botao.dataset.nome;
+                document.getElementById('detalhes-descricao').textContent = botao.dataset.descricao;
+                document.getElementById('detalhes-jogadores').textContent = `👥 ${botao.dataset.min} - ${botao.dataset.max} jogadores`;
+                document.getElementById('detalhes-tempo').textContent = `⏱ ${botao.dataset.duracao} min`;
+                document.getElementById('detalhes-idade').textContent = `👤 ${botao.dataset.idade}+`;
+                document.getElementById('detalhes-dificuldade').textContent = `🎯 ${botao.dataset.dificuldade}`;
+                document.getElementById('detalhes-preco').textContent = `R$ ${botao.dataset.preco}`;
+
+                const status = document.getElementById('detalhes-status');
+                if (botao.dataset.ativo === '1') {
+                    status.textContent = 'Ativo';
+                    status.className = 'badge-status badge-ativo';
+                } else {
+                    status.textContent = 'Inativo';
+                    status.className = 'badge-status badge-inativo';
+                }
+
+                modalDetalhes.classList.add('ativo');
+            });
+        });
+
+        document.getElementById('fechar-modal-detalhes').addEventListener('click', function() {
+            modalDetalhes.classList.remove('ativo');
+        });
+
+        modalDetalhes.addEventListener('click', function(e) {
+            if (e.target === modalDetalhes) modalDetalhes.classList.remove('ativo');
+        });
     </script>
 
 </body>
