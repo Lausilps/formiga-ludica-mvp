@@ -7,7 +7,7 @@ protegerAdmin();
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=1024">
     <title>Importar OlaClick</title>
     <link rel="icon" type="image/png" href="../../assets/img/logo_formiga_ludica.png">
     <link rel="stylesheet" href="../../assets/css/global.css">

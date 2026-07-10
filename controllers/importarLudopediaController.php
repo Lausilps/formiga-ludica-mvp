@@ -155,7 +155,11 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
             registrarLog('ALERTA', "Jogo sem nome recebido da API (id_ludopedia: {$idLudopedia}). Inserido com nome placeholder.");
         }
 
-        $imagem     = $detalhes['thumb']              ?? '';
+        // A Ludopedia manda só a miniatura ("_t"), que fica borrada quando
+        // exibida maior no catálogo. O mesmo storage tem a versão em
+        // tamanho normal no mesmo nome de arquivo, só sem o "_t".
+        $thumb  = $detalhes['thumb'] ?? '';
+        $imagem = $thumb !== '' ? preg_replace('/_t(\.[a-zA-Z0-9]+)$/', '$1', $thumb) : '';
         $minJog     = (int)($detalhes['qt_jogadores_min'] ?? 1);
         $maxJog     = (int)($detalhes['qt_jogadores_max'] ?? 10);
         $idadeMin   = (int)($detalhes['idade_minima']     ?? 0);
