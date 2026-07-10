@@ -222,12 +222,32 @@ select:focus {
     }
 
     .recomendar-header-conteudo {
-        flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .recomendar-header-conteudo > div {
+        min-width: 0;
+    }
+
+    .recomendar-logo {
+        width: 56px;
+        flex-shrink: 0;
+    }
+
+    .recomendar-label {
+        font-size: 0.72rem;
     }
 
     .recomendar-header h1 {
-        font-size: 2.3rem;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+        overflow-wrap: break-word;
+    }
+
+    .recomendar-header p {
+        font-size: 0.88rem;
+        overflow-wrap: break-word;
     }
 
     .recomendar-container {

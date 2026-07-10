@@ -10,13 +10,23 @@
 </head>
 <body>
 
-<header class="catalogo-topo">
+<header class="topo-barra">
     <div class="info-topo">
-        <img src="../assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo">
+        <a href="../index.php"><img src="../assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo"></a>
         <div class="texto-topo">
             <span class="titulo-catalogo">RECOMENDAÇÕES</span>
             <p>A Formiguinha escolheu especialmente pra você 🐜✨</p>
         </div>
+    </div>
+    <div class="topo-acoes">
+        <a href="../recomendacao_form.php" class="mini-recomendacao">
+            <img src="../assets/img/formiguinha-rag.gif" alt="Formiguinha recomendando">
+            <span>Recomendar para mim</span>
+        </a>
+        <button type="button" class="btn-carrinho-topo" id="abrir-modal-pedido" aria-label="Ver pedido">
+            🛒
+            <span class="carrinho-badge" id="carrinho-badge">0</span>
+        </button>
     </div>
 </header>
 
@@ -98,11 +108,6 @@
                 <button type="button" id="confirmar-whatsapp">Enviar para WhatsApp</button>
             </div>
         </div>
-    </div>
-
-    <div class="barra-whatsapp" id="barra-whatsapp" style="display:none;">
-        <span id="qtd-selecionados">0 jogos selecionados</span>
-        <button type="button" id="abrir-modal-pedido">Enviar pedido</button>
     </div>
 
     <script>

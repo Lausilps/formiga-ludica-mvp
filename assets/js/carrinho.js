@@ -24,16 +24,16 @@ const Carrinho = {
         const botaoEscolherSeletor = opcoes.botaoEscolherSeletor || '.btn-escolher';
         const aoAlternarSelecao = opcoes.aoAlternarSelecao || function () {};
 
-        const barra = document.getElementById('barra-whatsapp');
-        const qtdSelecionados = document.getElementById('qtd-selecionados');
         const modalPedido = document.getElementById('modal-pedido');
+        const badgeCarrinho = document.getElementById('carrinho-badge');
 
         function atualizarBarraPedido() {
+            if (!badgeCarrinho) return;
             if (selecionados.length > 0) {
-                barra.style.display = 'flex';
-                qtdSelecionados.textContent = selecionados.length + ' jogo(s) selecionado(s)';
+                badgeCarrinho.textContent = selecionados.length;
+                badgeCarrinho.style.display = 'flex';
             } else {
-                barra.style.display = 'none';
+                badgeCarrinho.style.display = 'none';
             }
         }
 

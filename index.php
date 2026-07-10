@@ -36,22 +36,41 @@ if (!$resultado) {
 </head>
 <body>
 
-<header class="catalogo-topo">
+<header class="topo-barra">
     <div class="info-topo">
-        <img src="assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo">
+        <a href="index.php"><img src="assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="logo-topo"></a>
         <div class="texto-topo">
             <span class="titulo-catalogo">CATÁLOGO</span>
             <p>Encontre o jogo perfeito para sua próxima jogatina!</p>
         </div>
     </div>
-    <div class="box-recomendacao">
-        <img src="assets/img/formiguinha-rag.gif" alt="Formiguinha recomendando" class="gif-recomendacao">
-        <div class="texto-recomendacao">
-            <span>Não sabe o que jogar hoje?</span>
-            <a href="recomendacao_form.php" class="btn-recomendar">✨ Recomendar para mim</a>
-        </div>
+    <div class="topo-acoes">
+        <a href="recomendacao_form.php" class="mini-recomendacao">
+            <img src="assets/img/formiguinha-rag.gif" alt="Formiguinha recomendando">
+            <span>Recomendar para mim</span>
+        </a>
+        <button type="button" class="btn-carrinho-topo" id="abrir-modal-pedido" aria-label="Ver pedido">
+            🛒
+            <span class="carrinho-badge" id="carrinho-badge">0</span>
+        </button>
     </div>
 </header>
+
+<section class="catalogo-topo-wrap">
+    <div class="catalogo-topo">
+        <img src="assets/img/formiguinha-estoque.png" alt="Formiguinha" class="banner-formiguinha-img">
+        <div class="banner-texto">
+            <span class="banner-label">NÃO SABE O QUE JOGAR HOJE?</span>
+            <h2>Deixa que a <span class="destaque">Formiguinha</span> encontra o jogo perfeito para vocês! ✨</h2>
+            <div class="banner-bullets">
+                <span>❓ Responda perguntinhas rápidas</span>
+                <span>✨ Nossa IA analisa seu grupo</span>
+                <span>💛 Receba recomendações personalizadas</span>
+            </div>
+            <a href="recomendacao_form.php" class="btn-recomendar-banner">✨ Recomendar para mim</a>
+        </div>
+    </div>
+</section>
 
 <section class="filtros-catalogo">
     <input type="text" id="busca-jogo" placeholder="Buscar jogos...">
@@ -141,14 +160,11 @@ if (!$resultado) {
     </div>
 </div>
 
-<div class="barra-whatsapp" id="barra-whatsapp" style="display:none;">
-    <span id="qtd-selecionados">0 jogos selecionados</span>
-    <button type="button" id="abrir-modal-pedido">Enviar pedido</button>
-</div>
-
 <a href="https://wa.me/5537999139354" target="_blank" class="whatsapp-flutuante">
     <img src="assets/img/formiga-whatsapp.gif" alt="Chamar no WhatsApp">
 </a>
+
+<button type="button" id="btn-voltar-topo" class="btn-voltar-topo" aria-label="Voltar para os filtros">⬆</button>
 
 <script>
 // ============================================================
@@ -421,6 +437,19 @@ modalSelecionar.addEventListener('click', () => {
 // ============================================================
 document.getElementById('fechar-modal-jogo').addEventListener('click', fecharModalJogo);
 modalJogo.addEventListener('click', e => { if (e.target === modalJogo) fecharModalJogo(); });
+
+// ============================================================
+// BOTÃO VOLTAR PARA OS FILTROS (aparece ao rolar, some no topo)
+// ============================================================
+const btnVoltarTopo = document.getElementById('btn-voltar-topo');
+
+window.addEventListener('scroll', () => {
+    btnVoltarTopo.classList.toggle('visivel', window.scrollY > 300);
+});
+
+btnVoltarTopo.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 
 // ============================================================
 // INICIA

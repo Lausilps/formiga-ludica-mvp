@@ -21,7 +21,7 @@ unset($_SESSION['form_recomendacao']);
 <header class="recomendar-header">
     <div class="recomendar-header-conteudo">
 
-        <img src="assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="recomendar-logo">
+        <a href="index.php"><img src="assets/img/logo_formiga_ludica.png" alt="Formiga Lúdica" class="recomendar-logo"></a>
 
         <div>
             <span class="recomendar-label">Formiguinha IA</span>
