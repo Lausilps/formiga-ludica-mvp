@@ -21,6 +21,9 @@ require_once __DIR__ . '/../helpers/recomendacaoHelper.php';
 // FUNÇÕES AUXILIARES
 // ============================================================
 
+// Retorna null em qualquer falha (rede OU erro da API, como rate limit),
+// pra nunca confundir "a Ludopedia recusou a chamada" com "o jogo não tem
+// nome" — antes disso já causou jogo importado com nome vazio.
 function ludopediaGet(string $url): ?array {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
@@ -32,7 +35,15 @@ function ludopediaGet(string $url): ?array {
     $raw = curl_exec($ch);
     curl_close($ch);
     $response = json_decode($raw, true);
-    return $response ?? null;
+
+    if (empty($response) || isset($response['error'])) {
+        if (isset($response['error'])) {
+            registrarLog('ERRO', "Ludopedia recusou a chamada: {$response['error']} | URL: {$url}");
+        }
+        return null;
+    }
+
+    return $response;
 }
 
 function gerarDescricaoComIA(array $jogo): string {
