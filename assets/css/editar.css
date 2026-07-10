@@ -183,30 +183,5 @@ textarea:focus {
     opacity: 0.9;
 }
 
-/* RESPONSIVO */
-@media (max-width: 800px) {
-    .admin-header-conteudo {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .admin-header h1 {
-        font-size: 2.2rem;
-    }
-
-    .admin-container {
-        padding: 0 18px;
-    }
-
-    .grid-form {
-        grid-template-columns: 1fr;
-    }
-
-    .campo-grande {
-        grid-column: span 1;
-    }
-
-    .area-imagem {
-        grid-template-columns: 1fr;
-    }
-}
+/* Sem breakpoint de mobile aqui de propósito — o admin deve ficar
+   idêntico ao desktop em qualquer tamanho de tela. */

@@ -378,47 +378,8 @@
     display: none;
 }
 
-/* RESPONSIVO */
-@media (max-width: 900px) {
-    .admin-header {
-        padding: 28px 24px 80px;
-    }
-
-    .admin-header-conteudo,
-    .admin-logo-area {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .admin-header h1 {
-        font-size: 2.2rem;
-    }
-
-    .admin-container {
-        padding: 0 18px;
-    }
-
-    .form-busca {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .form-busca input {
-        max-width: none;
-    }
-
-    .acoes-admin {
-        flex-direction: column;
-        align-items: stretch;
-    }
-
-    .btn-admin {
-        text-align: center;
-    }
-    .tabela-responsiva {
-        overflow-x: auto;
-    }
-}
+/* Sem breakpoint de mobile aqui de propósito — o admin deve ficar
+   idêntico ao desktop em qualquer tamanho de tela. */
 
 /* importar do Ludopedia */
 .btn-ludopedia {
