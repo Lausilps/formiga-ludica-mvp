@@ -169,26 +169,6 @@ body {
     color: #F6C453;
 }
 
-.banner-bullets {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 14px;
-    font-size: .8rem;
-    color: rgba(255,255,255,.9);
-}
-
-.banner-bullets span {
-    flex: 1 1 0;
-    min-width: 0;
-    padding-left: 14px;
-    border-left: 2px solid rgba(255,255,255,.3);
-}
-
-.banner-bullets span:first-child {
-    padding-left: 0;
-    border-left: none;
-}
-
 .btn-recomendar-banner {
     align-self: flex-start;
     margin-top: 6px;
@@ -580,7 +560,7 @@ body {
     }
 
     .banner-formiguinha-img {
-        width: 100px;
+        width: 145px;
         flex-shrink: 0;
     }
 
@@ -590,26 +570,12 @@ body {
     }
 
     .banner-label {
-        font-size: .68rem;
+        font-size: .64rem;
     }
 
     .banner-texto h2 {
-        font-size: 1.15rem;
+        font-size: 1rem;
         line-height: 1.2;
-    }
-
-    .banner-bullets {
-        flex-direction: column;
-        flex-wrap: nowrap;
-        gap: 6px;
-        font-size: .68rem;
-    }
-
-    .banner-bullets span {
-        flex: none;
-        border-left: none;
-        padding-left: 0;
-        white-space: normal;
     }
 
     .btn-recomendar-banner {
