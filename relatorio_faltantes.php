@@ -1,6 +1,6 @@
 <?php
 require_once 'config/conexao.php';
-require_once 'config/ludopedia.php';
+require_once 'config/ludopediaLoader.php';
 
 // Busca todos os id_ludopedia que já temos no banco
 $result = mysqli_query($conexao, "SELECT id_ludopedia FROM jogos WHERE id_ludopedia IS NOT NULL");

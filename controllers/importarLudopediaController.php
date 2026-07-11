@@ -2,6 +2,11 @@
 set_time_limit(0);
 ini_set('max_execution_time', 0);
 
+// TEMPORÁRIO: desativa a geração de descrição via IA durante a sincronização
+// pra não esgotar a cota do Gemini no meio do sync. Reativar virando pra true
+// quando a cota normalizar.
+define('GERAR_DESCRICAO_VIA_IA', false);
+
 $isCli = php_sapi_name() === 'cli';
 
 if (!$isCli) {
@@ -13,7 +18,7 @@ if (!$isCli) {
 
 require_once __DIR__ . '/../config/conexao.php';
 require_once __DIR__ . '/../config/gemini.php';
-require_once __DIR__ . '/../config/ludopedia.php';
+require_once __DIR__ . '/../config/ludopediaLoader.php';
 require_once __DIR__ . '/../helpers/logHelper.php';
 require_once __DIR__ . '/../helpers/recomendacaoHelper.php';
 
@@ -271,7 +276,7 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
         // pena gastar chamada do Gemini com ele).
         $descricaoFoiGerada = false;
 
-        if (!$semNome && trim((string)$descricaoAtual) === '') {
+        if (GERAR_DESCRICAO_VIA_IA && !$semNome && trim((string)$descricaoAtual) === '') {
             try {
                 $descricaoGerada = gerarDescricaoComIA($detalhes);
 
