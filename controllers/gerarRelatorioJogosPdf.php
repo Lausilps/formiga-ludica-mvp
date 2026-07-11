@@ -16,7 +16,14 @@ $jogadores_ate = $_GET['jogadores_ate'] ?? '';
 $idade_de = $_GET['idade_de'] ?? '';
 $idade_ate = $_GET['idade_ate'] ?? '';
 $dificuldade = $_GET['dificuldade'] ?? '';
+$importado_de = $_GET['importado_de'] ?? '';
+$importado_ate = $_GET['importado_ate'] ?? '';
 $tipo = $_GET['tipo'] ?? 'sintetico';
+
+function dataValida(string $data): bool {
+    $d = DateTime::createFromFormat('Y-m-d', $data);
+    return $d && $d->format('Y-m-d') === $data;
+}
 
 $where = [];
 
@@ -40,6 +47,14 @@ if ($idade_ate !== '') $where[] = "idade_minima <= $idade_ate";
 if ($dificuldade !== '') {
     $dificuldade = mysqli_real_escape_string($conexao, $dificuldade);
     $where[] = "dificuldade = '$dificuldade'";
+}
+
+if ($importado_de !== '' && dataValida($importado_de)) {
+    $where[] = "criado_em >= '$importado_de 00:00:00'";
+}
+
+if ($importado_ate !== '' && dataValida($importado_ate)) {
+    $where[] = "criado_em <= '$importado_ate 23:59:59'";
 }
 
 if (!isset($_GET['mostrar_inativos'])) {
@@ -134,6 +149,7 @@ $html = '
             <th>Dificuldade</th>
             <th>Preco</th>
             <th>Status</th>
+            <th>Importado em</th>
         </tr>
     </thead>
     <tbody>
@@ -149,13 +165,14 @@ while ($jogo = mysqli_fetch_assoc($resultado)) {
             <td>' . ucfirst($jogo['dificuldade']) . '</td>
             <td>R$ ' . number_format($jogo['preco'], 2, ',', '.') . '</td>
             <td>' . ($jogo['ativo'] ? 'Ativo' : 'Inativo') . '</td>
+            <td>' . (!empty($jogo['criado_em']) ? date('d/m/Y', strtotime($jogo['criado_em'])) : '—') . '</td>
         </tr>
     ';
 
     if ($tipo === 'analitico') {
         $html .= '
             <tr>
-                <td colspan="7" class="descricao">
+                <td colspan="8" class="descricao">
                     <strong>Descricao:</strong> ' . nl2br(htmlspecialchars($jogo['descricao'] ?? '')) . '
                 </td>
             </tr>

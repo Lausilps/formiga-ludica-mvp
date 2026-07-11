@@ -78,6 +78,14 @@ protegerAdmin();
                 </div>
 
                 <div class="campo">
+                    <label>Importado em:</label>
+                    <div class="campo-duplo">
+                        <input type="date" name="importado_de">
+                        <input type="date" name="importado_ate">
+                    </div>
+                </div>
+
+                <div class="campo">
                     <label>Tipo do relatório:</label>
                     <select name="tipo">
                         <option value="sintetico">Sintético</option>
