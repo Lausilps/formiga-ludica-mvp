@@ -344,19 +344,27 @@ $buscaUrl = urlencode($busca);
             const btn = document.getElementById('btn-ludopedia');
             const status = document.getElementById('status-ludopedia');
 
-            if (!confirm('Isso vai sincronizar o catálogo com a Ludopedia, gerando descrição e IA pros jogos novos. Pode levar vários minutos. Continuar?')) return;
+            const CHAVE_RETOMADA = 'formigaludica_ludopedia_sync_pagina';
+            const paginaSalva = parseInt(localStorage.getItem(CHAVE_RETOMADA), 10);
+            const paginaInicial = Number.isInteger(paginaSalva) && paginaSalva > 0 ? paginaSalva : 1;
+
+            const aviso = paginaInicial > 1
+                ? `Isso vai continuar a sincronização de onde parou (página ${paginaInicial}). Pode levar vários minutos. Continuar?`
+                : 'Isso vai sincronizar o catálogo com a Ludopedia, gerando descrição e IA pros jogos novos. Pode levar vários minutos. Continuar?';
+
+            if (!confirm(aviso)) return;
 
             btn.disabled = true;
             btn.style.opacity = '0.6';
 
-            let pagina = 1;
+            let pagina = paginaInicial;
             let totalProcessados = 0;
             let totalInseridos = 0;
             let totalAtualizados = 0;
             let totalErros = 0;
 
             function proximaPagina() {
-                status.textContent = `⏳ Sincronizando... (${totalProcessados} jogo(s) processado(s) até agora)`;
+                status.textContent = `⏳ Sincronizando... (${totalProcessados} jogo(s) processado(s) até agora, na página ${pagina})`;
 
                 fetch(`../../controllers/importarLudopediaController.php?token=formiga2024&pagina=${pagina}`)
                     .then(res => res.json())
@@ -366,18 +374,34 @@ $buscaUrl = urlencode($busca);
                         totalAtualizados += data.atualizados;
                         totalErros += data.erros;
 
+                        // Falhou por rate limit (não é fim real da coleção): para
+                        // aqui, sem insistir sozinho, e guarda a página pra
+                        // continuar dali da próxima vez que clicar no botão.
+                        if (data.falhaColecao) {
+                            localStorage.setItem(CHAVE_RETOMADA, String(pagina));
+                            status.textContent = `⚠️ Parou na página ${pagina} (rate limit da Ludopedia) — ${totalProcessados} jogo(s) processado(s). Espere um pouco e clique em "Sincronizar Ludopedia" de novo: vai continuar daqui, não do zero.`;
+                            btn.disabled = false;
+                            btn.style.opacity = '';
+                            return;
+                        }
+
                         if (data.temMais && pagina < 150) {
                             pagina++;
+                            localStorage.setItem(CHAVE_RETOMADA, String(pagina));
                             proximaPagina();
                             return;
                         }
 
+                        // Chegou ao fim de verdade: limpa a retomada, próxima
+                        // sincronização volta a começar do 1.
+                        localStorage.removeItem(CHAVE_RETOMADA);
                         status.textContent = `✅ Sincronização concluída! ${totalProcessados} jogo(s) — ${totalInseridos} novo(s), ${totalAtualizados} atualizado(s), ${totalErros} erro(s).`;
                         btn.disabled = false;
                         btn.style.opacity = '';
                     })
                     .catch(() => {
-                        status.textContent = `❌ Erro ao sincronizar (${totalProcessados} jogo(s) processado(s) antes de falhar).`;
+                        localStorage.setItem(CHAVE_RETOMADA, String(pagina));
+                        status.textContent = `❌ Erro ao sincronizar (${totalProcessados} jogo(s) processado(s) antes de falhar, parou na página ${pagina}). Clique em "Sincronizar Ludopedia" de novo pra continuar daqui.`;
                         btn.disabled = false;
                         btn.style.opacity = '';
                     });

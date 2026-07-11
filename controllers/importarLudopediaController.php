@@ -129,21 +129,33 @@ function vincularCategorias(mysqli $conexao, int $idJogo, array $categorias): vo
 // gera o embedding na hora — sem precisar de um segundo passo manual depois.
 function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): array {
     $resultado = [
-        'totalGeral'   => 0,
-        'processados'  => 0,
-        'inseridos'    => 0,
-        'atualizados'  => 0,
-        'erros'        => 0,
-        'colecaoVazia' => true,
+        'totalGeral'    => 0,
+        'processados'   => 0,
+        'inseridos'     => 0,
+        'atualizados'   => 0,
+        'erros'         => 0,
+        'colecaoVazia'  => true,
+        'falhaColecao'  => false,
     ];
 
     $url = "https://ludopedia.com.br/api/v1/colecao?lista=colecao&fl_tem=1&page={$pagina}&rows={$rows}";
     $response = ludopediaGet($url);
 
+    // ludopediaGet() retorna null tanto pra "deu erro/rate limit" quanto pra
+    // "sem resposta" — mas aqui isso NÃO pode ser confundido com "acabou a
+    // coleção de verdade", senão o sync encerra cedo demais (achando que
+    // terminou) toda vez que a Ludopedia recusar essa chamada específica.
+    if ($response === null) {
+        registrarLog('ERRO', "Falha ao buscar página {$pagina} da coleção (possível rate limit). Não é fim da coleção.");
+        $resultado['colecaoVazia'] = false;
+        $resultado['falhaColecao'] = true;
+        return $resultado;
+    }
+
     $resultado['totalGeral'] = (int)($response['total'] ?? 0);
 
     if (empty($response['colecao'])) {
-        registrarLog('INFO', "Página {$pagina} vazia ou sem resposta. Encerrando.");
+        registrarLog('INFO', "Página {$pagina} vazia. Fim real da coleção.");
         return $resultado;
     }
 
@@ -380,13 +392,14 @@ if ($isCli) {
 
     header('Content-Type: application/json');
     echo json_encode([
-        'pagina'      => $pagina,
-        'totalGeral'  => $r['totalGeral'],
-        'processados' => $r['processados'],
-        'inseridos'   => $r['inseridos'],
-        'atualizados' => $r['atualizados'],
-        'erros'       => $r['erros'],
-        'temMais'     => !$r['colecaoVazia'],
+        'pagina'       => $pagina,
+        'totalGeral'   => $r['totalGeral'],
+        'processados'  => $r['processados'],
+        'inseridos'    => $r['inseridos'],
+        'atualizados'  => $r['atualizados'],
+        'erros'        => $r['erros'],
+        'temMais'      => !$r['colecaoVazia'],
+        'falhaColecao' => $r['falhaColecao'],
     ]);
 }
 
