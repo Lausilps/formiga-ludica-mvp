@@ -74,11 +74,16 @@ function diagnosticarZeroCandidatos($conexao, int $jogadores, int $idade, int $t
 
 function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo, array $idsExcluidos = []): array
 {
+    // Trava extra contra jogo placeholder "SEM NOME (Ludopedia #...)": ele
+    // já deveria estar com ativo=0, mas se um bug de sincronização deixar
+    // reativado por engano, essa condição impede que vire candidato de
+    // recomendação mesmo assim.
     $sql = "SELECT id_jogo, nome, descricao, imagem, preco,
                    min_jogadores, max_jogadores, idade_minima,
                    duracao_minutos, dificuldade, embedding
             FROM jogos
             WHERE ativo = 1
+              AND nome NOT LIKE 'SEM NOME (Ludopedia #%'
               AND embedding IS NOT NULL
               AND min_jogadores <= ?
               AND max_jogadores >= ?

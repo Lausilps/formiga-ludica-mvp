@@ -11,7 +11,7 @@ $limite   = 24;
 $temFiltro = !empty($busca) || !empty($idades) || !empty($jogadores) || !empty($tempos);
 
 // Monta WHERE
-$where = ["ativo = 1"];
+$where = ["ativo = 1", "nome NOT LIKE 'SEM NOME (Ludopedia #%'"];
 $params = [];
 $types  = '';
 

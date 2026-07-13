@@ -15,6 +15,7 @@ $sql = "SELECT
             dificuldade
         FROM jogos
         WHERE ativo = 1
+          AND nome NOT LIKE 'SEM NOME (Ludopedia #%'
         ORDER BY nome ASC";
 
 $resultado = mysqli_query($conexao, $sql);
