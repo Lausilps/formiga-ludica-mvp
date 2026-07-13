@@ -246,7 +246,19 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
                 $nome, $imagem, $minJog, $maxJog,
                 $idadeMin, $duracao, $tpJogo, $linkLudo, $ativo, $idJogo
             );
-            mysqli_stmt_execute($stmt);
+
+            try {
+                mysqli_stmt_execute($stmt);
+            } catch (\mysqli_sql_exception $e) {
+                // Nome colidindo com outro jogo já cadastrado (índice único
+                // uk_jogos_nome ignora acento/maiúscula/espaço no fim) não
+                // pode derrubar a página inteira — sem isso, a sincronização
+                // trava pra sempre nessa mesma página, repetindo o erro.
+                registrarLog('ERRO', "Falha ao atualizar '{$nome}' (id_ludopedia: {$idLudopedia}): " . $e->getMessage());
+                $resultado['erros']++;
+                usleep(300000);
+                continue;
+            }
 
             vincularCategorias($conexao, $idJogo, $categorias);
 
@@ -272,7 +284,15 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
                 $idLudopedia, $nome, $imagem,
                 $minJog, $maxJog, $idadeMin, $duracao, $tpJogo, $linkLudo, $ativo
             );
-            mysqli_stmt_execute($stmt);
+
+            try {
+                mysqli_stmt_execute($stmt);
+            } catch (\mysqli_sql_exception $e) {
+                registrarLog('ERRO', "Falha ao inserir '{$nome}' (id_ludopedia: {$idLudopedia}): " . $e->getMessage());
+                $resultado['erros']++;
+                usleep(300000);
+                continue;
+            }
 
             $idJogo         = (int)mysqli_insert_id($conexao);
             $descricaoAtual = '';
