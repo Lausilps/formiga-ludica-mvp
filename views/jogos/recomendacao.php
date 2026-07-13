@@ -223,7 +223,7 @@
     <a class="btn-voltar" href="../index.php">← Voltar ao catálogo</a>
 </div>
 
-<?php include '../partials/footer.php'; ?>
+<?php include __DIR__ . '/../partials/footer.php'; ?>
 
 </body>
 </html>
