@@ -63,8 +63,8 @@ if (!$resultado) {
         <img src="assets/img/formiguinha-estoque.png" alt="Formiguinha" class="banner-formiguinha-img">
         <div class="banner-texto">
             <span class="banner-label">NÃO SABE O QUE JOGAR HOJE?</span>
-            <h2>Deixa que a <span class="destaque">Formiguinha</span> encontra o jogo perfeito para vocês! ✨</h2>
-            <a href="recomendacao_form.php" class="btn-recomendar-banner">✨ Recomendar para mim</a>
+            <h2>Deixa que a <span class="destaque">Formiguinha</span> encontra o jogo perfeito para vocês!</h2>
+            <a href="recomendacao_form.php" class="btn-recomendar-banner">Recomendar para mim</a>
         </div>
     </div>
 </section>
@@ -375,6 +375,8 @@ document.getElementById('limpar-filtros').addEventListener('click', () => {
 // ============================================================
 // MODAL DO JOGO
 // ============================================================
+let modalJogoAberto = false;
+
 function abrirModalJogo(card) {
     jogoModalAtual = {
         nome:     card.dataset.nome,
@@ -409,11 +411,23 @@ function abrirModalJogo(card) {
 
     atualizarBotaoModal();
     modalJogo.classList.add('ativo');
+    modalJogoAberto = true;
+    history.pushState({ modal: 'jogo' }, '');
 }
 
 function fecharModalJogo() {
     modalJogo.classList.remove('ativo');
+    if (modalJogoAberto) {
+        modalJogoAberto = false;
+        history.back();
+    }
 }
+
+// Voltar do navegador/celular fecha o modal em vez de sair do site
+window.addEventListener('popstate', () => {
+    modalJogoAberto = false;
+    modalJogo.classList.remove('ativo');
+});
 
 // ============================================================
 // SELEÇÃO DE JOGOS (MODAL DE DETALHES)

@@ -173,21 +173,29 @@ body {
     align-self: flex-start;
     margin-top: 6px;
 
-    background: #F6C453;
+    background: linear-gradient(135deg, #F9D57C, #F0AE30);
     color: #2b1b12;
 
-    padding: 15px 26px;
+    padding: 15px 30px;
     border-radius: 999px;
 
     text-decoration: none;
     font-weight: 900;
+    letter-spacing: .3px;
 
     box-shadow: 0 10px 22px rgba(0,0,0,.22);
-    transition: .2s;
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
 }
 
 .btn-recomendar-banner:hover {
     transform: translateY(-3px);
+    box-shadow: 0 14px 28px rgba(0,0,0,.28);
+    filter: brightness(1.04);
+}
+
+.btn-recomendar-banner:active {
+    transform: translateY(-1px);
+    filter: brightness(.98);
 }
 
 .whatsapp-flutuante {

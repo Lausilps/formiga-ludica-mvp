@@ -26,6 +26,28 @@ const Carrinho = {
 
         const modalPedido = document.getElementById('modal-pedido');
         const badgeCarrinho = document.getElementById('carrinho-badge');
+        let modalPedidoAberto = false;
+
+        function abrirModalPedido() {
+            montarListaPedido();
+            modalPedido.classList.add('ativo');
+            modalPedidoAberto = true;
+            history.pushState({ modal: 'pedido' }, '');
+        }
+
+        function fecharModalPedido() {
+            modalPedido.classList.remove('ativo');
+            if (modalPedidoAberto) {
+                modalPedidoAberto = false;
+                history.back();
+            }
+        }
+
+        // Voltar do navegador/celular fecha o modal em vez de sair do site
+        window.addEventListener('popstate', () => {
+            modalPedidoAberto = false;
+            modalPedido.classList.remove('ativo');
+        });
 
         function atualizarBarraPedido() {
             if (!badgeCarrinho) return;
@@ -89,26 +111,19 @@ const Carrinho = {
                     montarListaPedido();
                     atualizarBarraPedido();
                     atualizarBotoesSelecionados();
-                    if (selecionados.length === 0) modalPedido.classList.remove('ativo');
+                    if (selecionados.length === 0) fecharModalPedido();
                 });
             });
         }
 
-        document.getElementById('abrir-modal-pedido').addEventListener('click', () => {
-            montarListaPedido();
-            modalPedido.classList.add('ativo');
-        });
+        document.getElementById('abrir-modal-pedido').addEventListener('click', abrirModalPedido);
 
-        document.getElementById('fechar-modal-pedido').addEventListener('click', () => {
-            modalPedido.classList.remove('ativo');
-        });
+        document.getElementById('fechar-modal-pedido').addEventListener('click', fecharModalPedido);
 
-        document.getElementById('continuar-escolhendo').addEventListener('click', () => {
-            modalPedido.classList.remove('ativo');
-        });
+        document.getElementById('continuar-escolhendo').addEventListener('click', fecharModalPedido);
 
         modalPedido.addEventListener('click', e => {
-            if (e.target === modalPedido) modalPedido.classList.remove('ativo');
+            if (e.target === modalPedido) fecharModalPedido();
         });
 
         document.getElementById('confirmar-whatsapp').addEventListener('click', () => {

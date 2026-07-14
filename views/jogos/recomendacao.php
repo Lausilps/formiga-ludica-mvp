@@ -81,7 +81,7 @@
 
     <div class="acoes-mais-recomendacoes">
             <button id="btn-mais-recomendacoes" class="btn-mais">
-                🐜 + Recomendações
+                + Recomendações
             </button>
             <p id="msg-fim-catalogo" style="display:none; color:#777; margin-top:12px;">
                 🐜 A Formiguinha já trouxe tudo que tinha no catálogo pra esse perfil!
@@ -122,7 +122,7 @@
             .map(card => card.dataset.id);
 
         btn.disabled = true;
-        btn.textContent = '🐜 Procurando mais opções...';
+        btn.textContent = 'Procurando mais opções...';
 
         const formData = new FormData();
         formData.append('descricao_sessao', document.getElementById('dados-descricao').value);
@@ -138,7 +138,7 @@
         .then(res => res.json())
         .then(data => {
             btn.disabled = false;
-            btn.textContent = '🐜 + Recomendações';
+            btn.textContent = '+ Recomendações';
 
             if (data.fim) {
                 btn.style.display = 'none';
@@ -186,7 +186,7 @@
         })
         .catch(() => {
             btn.disabled = false;
-            btn.textContent = '🐜 + Recomendações';
+            btn.textContent = '+ Recomendações';
             alert('Erro ao buscar mais recomendações. Tenta novamente!');
         });
     });
