@@ -21,10 +21,10 @@ session_start();
         </div>
     <?php endif; ?>
 
-    <form action="controllers/loginController.php" method="POST">
+    <form action="controllers/loginController.php" method="POST" id="form-login">
 
         <label>E-mail:</label>
-        <input type="email" name="email" required>
+        <input type="email" name="email" id="campo-email" autocomplete="email" required>
 
         <label>Senha:</label>
         <input type="password" name="senha" required>
@@ -32,6 +32,18 @@ session_start();
         <button type="submit">Entrar</button>
 
     </form>
+
+    <script>
+        const CHAVE_ULTIMO_EMAIL = 'formigaludica_ultimo_email';
+        const campoEmail = document.getElementById('campo-email');
+
+        const ultimoEmail = localStorage.getItem(CHAVE_ULTIMO_EMAIL);
+        if (ultimoEmail) campoEmail.value = ultimoEmail;
+
+        document.getElementById('form-login').addEventListener('submit', () => {
+            localStorage.setItem(CHAVE_ULTIMO_EMAIL, campoEmail.value);
+        });
+    </script>
 
 </body>
 </html>
