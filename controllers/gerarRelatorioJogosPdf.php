@@ -95,28 +95,52 @@ while ($linha = mysqli_fetch_assoc($resultado)) {
     $jogos[] = $linha;
 }
 
-// Marca como possível duplicado quando outro jogo do resultado tem o mesmo
-// nome (ignorando maiúsculas/espaços) ou a mesma descrição.
-$contagemNome = [];
+// Marca como possível duplicado quando outro jogo do resultado tem um nome
+// muito parecido (não precisa ser idêntico — pega acento, "de" a mais, etc.)
+// ou a mesma descrição.
+const LIMIAR_SIMILARIDADE_NOME = 85.0;
+
+function normalizarNomeJogo(string $nome): string {
+    $nome = iconv('UTF-8', 'ASCII//TRANSLIT', $nome) ?: $nome;
+    $nome = mb_strtolower($nome);
+    $nome = preg_replace('/[^a-z0-9 ]+/', ' ', $nome);
+    $nome = preg_replace('/\s+/', ' ', trim($nome));
+    return $nome;
+}
+
+$nomesNormalizados = array_map(fn($jogo) => normalizarNomeJogo($jogo['nome'] ?? ''), $jogos);
+
 $contagemDescricao = [];
-
 foreach ($jogos as $jogo) {
-    $chaveNome = mb_strtolower(trim($jogo['nome'] ?? ''));
-    if ($chaveNome !== '') {
-        $contagemNome[$chaveNome] = ($contagemNome[$chaveNome] ?? 0) + 1;
-    }
-
     $chaveDescricao = trim($jogo['descricao'] ?? '');
     if ($chaveDescricao !== '') {
         $contagemDescricao[$chaveDescricao] = ($contagemDescricao[$chaveDescricao] ?? 0) + 1;
     }
 }
 
-foreach ($jogos as &$jogo) {
-    $chaveNome = mb_strtolower(trim($jogo['nome'] ?? ''));
+$total = count($jogos);
+$duplicadoPorIndice = array_fill(0, $total, false);
+
+for ($i = 0; $i < $total; $i++) {
+    if ($nomesNormalizados[$i] === '') continue;
+
+    for ($j = $i + 1; $j < $total; $j++) {
+        if ($nomesNormalizados[$j] === '') continue;
+
+        similar_text($nomesNormalizados[$i], $nomesNormalizados[$j], $percentual);
+
+        if ($percentual >= LIMIAR_SIMILARIDADE_NOME) {
+            $duplicadoPorIndice[$i] = true;
+            $duplicadoPorIndice[$j] = true;
+        }
+    }
+}
+
+$jogos = array_values($jogos);
+foreach ($jogos as $indice => &$jogo) {
     $chaveDescricao = trim($jogo['descricao'] ?? '');
 
-    $jogo['duplicado'] = ($chaveNome !== '' && $contagemNome[$chaveNome] > 1)
+    $jogo['duplicado'] = $duplicadoPorIndice[$indice]
         || ($chaveDescricao !== '' && $contagemDescricao[$chaveDescricao] > 1);
 }
 unset($jogo);
