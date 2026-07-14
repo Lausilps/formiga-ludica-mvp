@@ -64,7 +64,7 @@ if (!$resultado) {
         <div class="banner-texto">
             <span class="banner-label">NÃO SABE O QUE JOGAR HOJE?</span>
             <h2>Deixa que a <span class="destaque">Formiguinha</span> encontra o jogo perfeito para vocês!</h2>
-            <a href="recomendacao_form.php" class="btn-recomendar-banner">Recomendar para mim</a>
+            <a href="recomendacao_form.php" class="btn-recomendar-banner">Recomendar para mim ✨</a>
         </div>
     </div>
 </section>
