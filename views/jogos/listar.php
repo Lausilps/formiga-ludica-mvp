@@ -6,6 +6,8 @@ require_once '../../helpers/authHelper.php';
 
 protegerAdmin();
 
+$tokenAdmin = getenv('ADMIN_IMPORT_TOKEN') ?: '';
+
 $busca = $_GET['busca'] ?? '';
 $pagina = (int)($_GET['pagina'] ?? 1);
 
@@ -313,7 +315,7 @@ $buscaUrl = urlencode($busca);
             function proximoLote() {
                 status.textContent = `⏳ Processando... (${totalProcessados} gerado(s) até agora)`;
 
-                fetch('../../controllers/gerarEmbeddings.php?token=formiga2024')
+                fetch('../../controllers/gerarEmbeddings.php?token=<?= urlencode($tokenAdmin) ?>')
                     .then(res => res.json())
                     .then(data => {
                         totalProcessados += data.processados;
@@ -366,7 +368,7 @@ $buscaUrl = urlencode($busca);
             function proximaPagina() {
                 status.textContent = `⏳ Sincronizando... (${totalProcessados} jogo(s) processado(s) até agora, na página ${pagina})`;
 
-                fetch(`../../controllers/importarLudopediaController.php?token=formiga2024&pagina=${pagina}`)
+                fetch(`../../controllers/importarLudopediaController.php?token=<?= urlencode($tokenAdmin) ?>&pagina=${pagina}`)
                     .then(res => res.json())
                     .then(data => {
                         totalProcessados += data.processados;

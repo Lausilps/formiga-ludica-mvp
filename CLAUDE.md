@@ -20,6 +20,7 @@ There is no framework CLI, no test suite, and no bundler/npm. Development happen
 - `config/conexao.php` reads `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_PORT` from env (falling back to XAMPP-style defaults), and connects with `mysqli_connect`. Note: the port fallback references a `PORTA` constant that is **not defined anywhere in the codebase** — if `DB_PORT` isn't set in the environment, this will fatal error.
 - `config/gemini.php` requires `GEMINI_API_KEY` in env or calls `die()`. Defines `geminiEmbedding()`, `geminiChat()`, and `cosineSimilarity()` used by the recommendation feature.
 - `config/ludopedia.php` and `config/groq.php` are **gitignored** (real API credentials live there locally, not in the repo) — `LUDOPEDIA_APP_ID`, `LUDOPEDIA_APP_SECRET`, `LUDOPEDIA_TOKEN`, `LUDOPEDIA_CALLBACK`. Anyone recreating this file locally needs Ludopedia API credentials.
+- `ADMIN_IMPORT_TOKEN` in env gates the HTTP-triggered embedding batch (`controllers/gerarEmbeddings.php`) and Ludopedia sync (`controllers/importarLudopediaController.php`) endpoints when hit outside the admin panel button. If unset, those endpoints refuse all requests (fail closed) — CLI runs are unaffected.
 - No `.sql` schema file exists in the repo — the `jogos` table structure has to be inferred from the queries in `controllers/`.
 
 ## Architecture
@@ -34,7 +35,7 @@ There is no router or front controller. Each `.php` file at the root or under `v
 ### AI recommendation flow (RAG)
 
 This is the core "smart" feature, split across:
-- `controllers/gerarEmbeddings.php` — batch job that generates a Gemini embedding for every game missing one and stores it as JSON text in the `jogos.embedding` column. Guarded by a hardcoded token (`?token=formiga2024`) when not run from CLI.
+- `controllers/gerarEmbeddings.php` — batch job that generates a Gemini embedding for every game missing one and stores it as JSON text in the `jogos.embedding` column. Guarded by a `?token=...` query token (checked against the `ADMIN_IMPORT_TOKEN` env var) when not run from CLI.
 - `controllers/recomendacaoController.php` — takes the user's free-text description + player count/age/time filters, embeds the query via Gemini, pre-filters candidate games in SQL (players/age/time), ranks by `cosineSimilarity()` computed in PHP against stored embeddings, takes the top 12, then asks Gemini to pick and justify 6 of them via a prompt requiring strict JSON output. Renders `views/jogos/recomendacao.php`.
 - `controllers/maisRecomendacoesController.php` — same flow as an AJAX/JSON endpoint for the "+ Recomendações" button, excluding games already shown (`ids_exibidos`).
 - All steps log heavily to `logs/sistema.log` via `helpers/logHelper.php::registrarLog()` — useful for debugging Gemini prompt/response issues.
@@ -42,7 +43,7 @@ This is the core "smart" feature, split across:
 ### External integrations
 
 - **Gemini** (`config/gemini.php`): embeddings (`models/gemini-embedding-2`) and chat (`models/gemini-2.5-flash`) via raw cURL to `generativelanguage.googleapis.com`. `CURLOPT_SSL_VERIFYPEER/HOST` are disabled to work around XAMPP's SSL setup.
-- **Ludopedia API** (`config/ludopedia.php`, `controllers/importarLudopediaController.php`): paginated import/sync of the rental shop's game collection, auto-generates Portuguese descriptions per game via Gemini, maps categories into a `categorias`/`jogos_categorias` join. Also gated by the `?token=formiga2024` query token. `relatorio_faltantes.php` cross-checks the local DB against the full Ludopedia collection to find games not yet imported.
+- **Ludopedia API** (`config/ludopedia.php`, `controllers/importarLudopediaController.php`): paginated import/sync of the rental shop's game collection, auto-generates Portuguese descriptions per game via Gemini, maps categories into a `categorias`/`jogos_categorias` join. Also gated by the same `?token=...`/`ADMIN_IMPORT_TOKEN` mechanism. `relatorio_faltantes.php` cross-checks the local DB against the full Ludopedia collection to find games not yet imported.
 - **OlaClick import** (`controllers/importarOlaClickController.php`): one-off import from a pasted JSON blob (product catalog), regex-parses player count/age/duration out of free-text descriptions.
 - **WhatsApp**: no API — both `index.php` and `views/jogos/recomendacao.php` build a `wa.me` deep link with a pre-filled order message client-side.
 

@@ -6,9 +6,10 @@ $isCli = php_sapi_name() === 'cli';
 
 // Proteção simples: só roda via terminal ou com token
 if (!$isCli) {
+    $tokenEsperado = getenv('ADMIN_IMPORT_TOKEN') ?: '';
     $token = $_GET['token'] ?? '';
-    if ($token !== 'formiga2024') {
-        die("Acesso negado. Use ?token=formiga2024");
+    if ($tokenEsperado === '' || $token !== $tokenEsperado) {
+        die("Acesso negado.");
     }
 }
 
