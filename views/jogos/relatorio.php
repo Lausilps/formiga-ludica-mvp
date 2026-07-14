@@ -107,6 +107,11 @@ protegerAdmin();
                     <label for="somente_incompletos">Somente jogos com informações faltantes</label>
                 </div>
 
+                <div class="campo-checkbox">
+                    <input type="checkbox" id="somente_duplicados" name="somente_duplicados" value="1">
+                    <label for="somente_duplicados">Somente possíveis duplicados</label>
+                </div>
+
             </div>
 
             <div class="acoes-relatorio">

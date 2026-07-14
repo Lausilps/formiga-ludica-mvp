@@ -90,6 +90,41 @@ if (!$resultado) {
     die('Erro ao gerar relatório.');
 }
 
+$jogos = [];
+while ($linha = mysqli_fetch_assoc($resultado)) {
+    $jogos[] = $linha;
+}
+
+// Marca como possível duplicado quando outro jogo do resultado tem o mesmo
+// nome (ignorando maiúsculas/espaços) ou a mesma descrição.
+$contagemNome = [];
+$contagemDescricao = [];
+
+foreach ($jogos as $jogo) {
+    $chaveNome = mb_strtolower(trim($jogo['nome'] ?? ''));
+    if ($chaveNome !== '') {
+        $contagemNome[$chaveNome] = ($contagemNome[$chaveNome] ?? 0) + 1;
+    }
+
+    $chaveDescricao = trim($jogo['descricao'] ?? '');
+    if ($chaveDescricao !== '') {
+        $contagemDescricao[$chaveDescricao] = ($contagemDescricao[$chaveDescricao] ?? 0) + 1;
+    }
+}
+
+foreach ($jogos as &$jogo) {
+    $chaveNome = mb_strtolower(trim($jogo['nome'] ?? ''));
+    $chaveDescricao = trim($jogo['descricao'] ?? '');
+
+    $jogo['duplicado'] = ($chaveNome !== '' && $contagemNome[$chaveNome] > 1)
+        || ($chaveDescricao !== '' && $contagemDescricao[$chaveDescricao] > 1);
+}
+unset($jogo);
+
+if (isset($_GET['somente_duplicados'])) {
+    $jogos = array_filter($jogos, fn($jogo) => $jogo['duplicado']);
+}
+
 $html = '
 <style>
     body {
@@ -132,6 +167,15 @@ $html = '
         color: #444;
         line-height: 1.4;
     }
+
+    .linha-duplicada td {
+        background: #fff3cd;
+    }
+
+    .flag-duplicado {
+        color: #8a6d00;
+        font-weight: bold;
+    }
 </style>
 
 <h1>Formiga Ludica - Relatorio de Jogos</h1>
@@ -150,14 +194,17 @@ $html = '
             <th>Preco</th>
             <th>Status</th>
             <th>Importado em</th>
+            <th>Duplicado?</th>
         </tr>
     </thead>
     <tbody>
 ';
 
-while ($jogo = mysqli_fetch_assoc($resultado)) {
+foreach ($jogos as $jogo) {
+    $classeLinha = $jogo['duplicado'] ? ' class="linha-duplicada"' : '';
+
     $html .= '
-        <tr>
+        <tr' . $classeLinha . '>
             <td>' . htmlspecialchars($jogo['nome']) . '</td>
             <td>' . $jogo['min_jogadores'] . ' a ' . $jogo['max_jogadores'] . '</td>
             <td>' . $jogo['idade_minima'] . '+</td>
@@ -166,13 +213,14 @@ while ($jogo = mysqli_fetch_assoc($resultado)) {
             <td>R$ ' . number_format($jogo['preco'], 2, ',', '.') . '</td>
             <td>' . ($jogo['ativo'] ? 'Ativo' : 'Inativo') . '</td>
             <td>' . (!empty($jogo['criado_em']) ? date('d/m/Y', strtotime($jogo['criado_em'])) : '—') . '</td>
+            <td class="flag-duplicado">' . ($jogo['duplicado'] ? '⚠ Sim' : '—') . '</td>
         </tr>
     ';
 
     if ($tipo === 'analitico') {
         $html .= '
-            <tr>
-                <td colspan="8" class="descricao">
+            <tr' . $classeLinha . '>
+                <td colspan="9" class="descricao">
                     <strong>Descricao:</strong> ' . nl2br(htmlspecialchars($jogo['descricao'] ?? '')) . '
                 </td>
             </tr>
