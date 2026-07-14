@@ -49,7 +49,7 @@ if (!$resultado) {
     <div class="topo-acoes">
         <a href="recomendacao_form.php" class="mini-recomendacao">
             <img src="assets/img/formiguinha-rag.gif" alt="Formiguinha recomendando">
-            <span>Recomendar para mim</span>
+            <span>Recomendar para mim ✨</span>
         </a>
         <button type="button" class="btn-carrinho-topo" id="abrir-modal-pedido" aria-label="Ver pedido">
             🛒
