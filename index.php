@@ -157,7 +157,7 @@ if (!$resultado) {
     </div>
 </div>
 
-<a href="https://wa.me/5537999139354" target="_blank" class="whatsapp-flutuante">
+<a href="https://wa.me/5537991121992" target="_blank" class="whatsapp-flutuante">
     <img src="assets/img/formiga-whatsapp.gif" alt="Chamar no WhatsApp">
 </a>
 

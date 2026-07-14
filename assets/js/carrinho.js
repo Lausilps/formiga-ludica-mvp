@@ -1,5 +1,5 @@
 const CARRINHO_STORAGE_KEY = 'formigaludica_carrinho';
-const CARRINHO_WHATSAPP_NUMERO = '5537999139354';
+const CARRINHO_WHATSAPP_NUMERO = '5537991121992';
 
 const Carrinho = {
     obter() {
