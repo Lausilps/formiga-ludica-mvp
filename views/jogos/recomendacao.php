@@ -70,6 +70,13 @@
                             🎯 <?= formatarDificuldade($jogo['dificuldade']) ?>
                         </p>
 
+                        <?php if (!empty($jogo['link_ver_ludopedia'])): ?>
+                            <a href="<?= htmlspecialchars($jogo['link_ver_ludopedia']) ?>" target="_blank" class="btn-ludopedia">
+                                <img src="../assets/img/logo-ludopedia.png" alt="Ludopedia">
+                                Ver na Ludopedia
+                            </a>
+                        <?php endif; ?>
+
                         <div class="rodape-card">
                             <span class="card-preco">R$ <?= number_format($jogo['preco'], 2, ',', '.') ?>/dia</span>
                             <button type="button" class="btn-escolher" data-nome="<?= htmlspecialchars($jogo['nome']) ?>">Escolher</button>
@@ -174,6 +181,11 @@
                             ⏱ ${jogo.duracao} min &nbsp;|&nbsp;
                             🎯 ${jogo.dificuldade === 'nao_informada' ? '-' : jogo.dificuldade.charAt(0).toUpperCase() + jogo.dificuldade.slice(1)}
                         </p>
+                        ${jogo.link_ver_ludopedia ? `
+                        <a href="${jogo.link_ver_ludopedia}" target="_blank" class="btn-ludopedia">
+                            <img src="../assets/img/logo-ludopedia.png" alt="Ludopedia">
+                            Ver na Ludopedia
+                        </a>` : ''}
                         <div class="rodape-card">
                             <span class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/dia</span>
                             <button type="button" class="btn-escolher" data-nome="${jogo.nome}">Escolher</button>

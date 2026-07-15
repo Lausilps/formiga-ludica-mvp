@@ -75,13 +75,13 @@ if ($temFiltro) {
     // Com filtro: traz todos de uma vez
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
                    min_jogadores, max_jogadores, idade_minima,
-                   duracao_minutos, dificuldade, link_ludopedia
+                   duracao_minutos, dificuldade, link_ludopedia, link_tutorial
             FROM jogos {$whereSQL} ORDER BY nome ASC";
 } else {
     // Sem filtro: paginação
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
                    min_jogadores, max_jogadores, idade_minima,
-                   duracao_minutos, dificuldade, link_ludopedia
+                   duracao_minutos, dificuldade, link_ludopedia, link_tutorial
             FROM jogos {$whereSQL} ORDER BY nome ASC LIMIT ? OFFSET ?";
     $params[] = $limite;
     $params[] = $offset;
@@ -117,7 +117,13 @@ while ($row = mysqli_fetch_assoc($result)) {
         'idade_minima'  => $row['idade_minima'],
         'duracao'       => $row['duracao_minutos'],
         'dificuldade'   => $row['dificuldade'],
-        'link_ludopedia'=> $row['link_ludopedia'] ?? '',
+        // 'link_ludopedia' fica reservado pro selo "integrado via Ludopedia"
+        // (só jogos sincronizados de verdade). O botão "Ver na Ludopedia" do
+        // modal usa esse fallback pra também funcionar em jogos cadastrados
+        // manualmente ou importados do OlaClick, onde o link é colado à mão
+        // no campo "Link do tutorial".
+        'link_ludopedia'     => $row['link_ludopedia'] ?? '',
+        'link_ver_ludopedia' => $row['link_ludopedia'] ?: ($row['link_tutorial'] ?? ''),
     ];
 }
 

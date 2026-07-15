@@ -66,7 +66,7 @@
     <input
         type="url"
         name="link_tutorial"
-        placeholder="Cole aqui o link do tutorial"
+        placeholder="Cole aqui o link do tutorial (ou da Ludopedia, se o jogo não veio de lá)"
         value="<?= htmlspecialchars($link_tutorial) ?>"
     >
 </div>

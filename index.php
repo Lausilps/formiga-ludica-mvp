@@ -256,7 +256,7 @@ function criarCard(jogo) {
     article.dataset.max      = jogo.max_jogadores;
     article.dataset.idade    = jogo.idade_minima;
     article.dataset.tempo    = jogo.duracao;
-    article.dataset.linkLudo = jogo.link_ludopedia ?? '';
+    article.dataset.linkLudo = jogo.link_ver_ludopedia ?? '';
 
     article.innerHTML = `
         <div class="imagem-card">

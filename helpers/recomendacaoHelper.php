@@ -83,7 +83,8 @@ function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo,
     // recomendação mesmo assim.
     $sql = "SELECT id_jogo, nome, descricao, imagem, preco,
                    min_jogadores, max_jogadores, idade_minima,
-                   duracao_minutos, dificuldade, embedding
+                   duracao_minutos, dificuldade, embedding,
+                   link_ludopedia, link_tutorial
             FROM jogos
             WHERE ativo = 1
               AND nome NOT LIKE 'SEM NOME (Ludopedia #%'
@@ -178,15 +179,19 @@ function interpretarRespostaGemini(string $respostaTexto, array $topJogos): arra
                     $idsUsados[] = $j['id_jogo'];
 
                     $recomendacoes[] = [
-                        'id'            => $j['id_jogo'],
-                        'nome'          => $j['nome'],
-                        'motivo'        => $rec['motivo'],
-                        'imagem'        => !empty($j['imagem']) ? $j['imagem'] : null,
-                        'preco'         => $j['preco'],
-                        'duracao'       => $j['duracao_minutos'],
-                        'dificuldade'   => $j['dificuldade'],
-                        'min_jogadores' => $j['min_jogadores'],
-                        'max_jogadores' => $j['max_jogadores'],
+                        'id'                 => $j['id_jogo'],
+                        'nome'               => $j['nome'],
+                        'motivo'             => $rec['motivo'],
+                        'imagem'             => !empty($j['imagem']) ? $j['imagem'] : null,
+                        'preco'              => $j['preco'],
+                        'duracao'            => $j['duracao_minutos'],
+                        'dificuldade'        => $j['dificuldade'],
+                        'min_jogadores'      => $j['min_jogadores'],
+                        'max_jogadores'      => $j['max_jogadores'],
+                        // Mesmo fallback do catálogo: link_ludopedia (jogo
+                        // sincronizado) ou, na falta dele, link_tutorial
+                        // (jogo manual/OlaClick com o link colado à mão).
+                        'link_ver_ludopedia' => $j['link_ludopedia'] ?: ($j['link_tutorial'] ?? ''),
                     ];
                     break;
                 }
