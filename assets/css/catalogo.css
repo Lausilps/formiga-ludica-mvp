@@ -1048,22 +1048,17 @@ body {
 .rodape-credito {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    margin-top: 4px;
-    opacity: 0.75;
-    font-weight: 600;
-    color: #4a3b2c;
-    text-decoration: none;
+    margin-top: 14px;
+    opacity: 0.85;
     transition: opacity 0.2s;
 }
 
 .rodape-credito:hover {
     opacity: 1;
-    text-decoration: none;
 }
 
 .rodape-credito img {
-    height: 18px;
+    height: 64px;
     width: auto;
 }
 
