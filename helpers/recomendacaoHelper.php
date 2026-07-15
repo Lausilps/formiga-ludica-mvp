@@ -14,7 +14,10 @@ function montarTextoEmbeddingJogo(array $jogo): string
     $texto .= "Jogadores: {$jogo['min_jogadores']} a {$jogo['max_jogadores']}. ";
     $texto .= "Idade mínima: {$jogo['idade_minima']} anos. ";
     $texto .= "Duração: {$jogo['duracao_minutos']} minutos. ";
-    $texto .= "Dificuldade: {$jogo['dificuldade']}.";
+
+    if (!empty($jogo['dificuldade']) && $jogo['dificuldade'] !== 'nao_informada') {
+        $texto .= "Dificuldade: {$jogo['dificuldade']}.";
+    }
 
     return $texto;
 }
@@ -143,7 +146,12 @@ function montarContextoCatalogo(array $topJogos): string
     foreach ($topJogos as $j) {
         $contexto .= "- {$j['nome']}: {$j['descricao']} ";
         $contexto .= "({$j['min_jogadores']}-{$j['max_jogadores']} jogadores, ";
-        $contexto .= "{$j['duracao_minutos']}min, dificuldade: {$j['dificuldade']}, ";
+        $contexto .= "{$j['duracao_minutos']}min, ";
+
+        if (!empty($j['dificuldade']) && $j['dificuldade'] !== 'nao_informada') {
+            $contexto .= "dificuldade: {$j['dificuldade']}, ";
+        }
+
         $contexto .= "idade mínima: {$j['idade_minima']} anos)\n";
     }
 

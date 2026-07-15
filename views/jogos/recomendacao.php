@@ -67,7 +67,7 @@
                         <p class="card-meta">
                             👥 <?= $jogo['min_jogadores'] ?>–<?= $jogo['max_jogadores'] ?> jogadores &nbsp;|&nbsp;
                             ⏱ <?= $jogo['duracao'] ?> min &nbsp;|&nbsp;
-                            🎯 <?= ucfirst($jogo['dificuldade']) ?>
+                            🎯 <?= formatarDificuldade($jogo['dificuldade']) ?>
                         </p>
 
                         <div class="rodape-card">
@@ -172,7 +172,7 @@
                         <p class="card-meta">
                             👥 ${jogo.min_jogadores}–${jogo.max_jogadores} jogadores &nbsp;|&nbsp;
                             ⏱ ${jogo.duracao} min &nbsp;|&nbsp;
-                            🎯 ${jogo.dificuldade.charAt(0).toUpperCase() + jogo.dificuldade.slice(1)}
+                            🎯 ${jogo.dificuldade === 'nao_informada' ? '-' : jogo.dificuldade.charAt(0).toUpperCase() + jogo.dificuldade.slice(1)}
                         </p>
                         <div class="rodape-card">
                             <span class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/dia</span>

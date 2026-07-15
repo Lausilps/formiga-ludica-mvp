@@ -2,6 +2,7 @@
 
 require_once '../config/conexao.php';
 require_once '../helpers/logHelper.php';
+require_once '../helpers/jogoHelper.php';
 require_once '../vendor/autoload.php';
 
 use Dompdf\Dompdf;
@@ -233,7 +234,7 @@ foreach ($jogos as $jogo) {
             <td>' . $jogo['min_jogadores'] . ' a ' . $jogo['max_jogadores'] . '</td>
             <td>' . $jogo['idade_minima'] . '+</td>
             <td>' . $jogo['duracao_minutos'] . ' min</td>
-            <td>' . ucfirst($jogo['dificuldade']) . '</td>
+            <td>' . formatarDificuldade($jogo['dificuldade']) . '</td>
             <td>R$ ' . number_format($jogo['preco'], 2, ',', '.') . '</td>
             <td>' . ($jogo['ativo'] ? 'Ativo' : 'Inativo') . '</td>
             <td>' . (!empty($jogo['criado_em']) ? date('d/m/Y', strtotime($jogo['criado_em'])) : '—') . '</td>

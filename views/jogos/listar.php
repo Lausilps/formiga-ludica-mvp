@@ -3,6 +3,7 @@
 require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
 require_once '../../helpers/authHelper.php';
+require_once '../../helpers/jogoHelper.php';
 
 protegerAdmin();
 
@@ -190,7 +191,7 @@ $buscaUrl = urlencode($busca);
                                     <td><?= $jogo['min_jogadores'] ?> a <?= $jogo['max_jogadores'] ?></td>
                                     <td><?= $jogo['idade_minima'] ?>+</td>
                                     <td><?= $jogo['duracao_minutos'] ?> min</td>
-                                    <td><?= ucfirst($jogo['dificuldade']) ?></td>
+                                    <td><?= formatarDificuldade($jogo['dificuldade']) ?></td>
                                     <td>R$ <?= number_format($jogo['preco'], 2, ',', '.') ?></td>
 
                                     <td>
@@ -217,7 +218,7 @@ $buscaUrl = urlencode($busca);
                                             data-max="<?= $jogo['max_jogadores'] ?>"
                                             data-idade="<?= $jogo['idade_minima'] ?>"
                                             data-duracao="<?= $jogo['duracao_minutos'] ?>"
-                                            data-dificuldade="<?= htmlspecialchars(ucfirst($jogo['dificuldade'])) ?>"
+                                            data-dificuldade="<?= htmlspecialchars(formatarDificuldade($jogo['dificuldade'])) ?>"
                                             data-ativo="<?= $jogo['ativo'] ? '1' : '0' ?>"
                                         >
                                             Detalhes

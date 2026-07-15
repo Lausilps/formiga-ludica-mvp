@@ -49,6 +49,11 @@ function uploadImagemJogo(?array $arquivo): ?string
     return 'uploads/jogos/' . $nomeArquivo;
 }
 
+function formatarDificuldade(?string $dificuldade): string
+{
+    return $dificuldade === 'nao_informada' ? '-' : ucfirst((string)$dificuldade);
+}
+
 function redirecionarComDados(string $url, string $erro, array $dados): void
 {
     $dados['erro'] = $erro;

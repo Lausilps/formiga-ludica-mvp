@@ -52,6 +52,7 @@
         <option value="facil" <?= $dificuldade == 'facil' ? 'selected' : '' ?>>Fácil</option>
         <option value="media" <?= $dificuldade == 'media' ? 'selected' : '' ?>>Média</option>
         <option value="dificil" <?= $dificuldade == 'dificil' ? 'selected' : '' ?>>Difícil</option>
+        <option value="nao_informada" <?= $dificuldade == 'nao_informada' ? 'selected' : '' ?>>Não informada (-)</option>
     </select>
 </div>
 

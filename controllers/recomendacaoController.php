@@ -5,6 +5,7 @@ require_once __DIR__ . '/../config/conexao.php';
 require_once __DIR__ . '/../config/gemini.php';
 require_once __DIR__ . '/../helpers/logHelper.php';
 require_once __DIR__ . '/../helpers/recomendacaoHelper.php';
+require_once __DIR__ . '/../helpers/jogoHelper.php';
 
 // Recebe dados do formulário
 $descricao = trim($_POST['descricao_sessao'] ?? '');

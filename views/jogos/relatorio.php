@@ -42,6 +42,7 @@ protegerAdmin();
                         <option value="facil">Fácil</option>
                         <option value="media">Média</option>
                         <option value="dificil">Difícil</option>
+                        <option value="nao_informada">Não informada (-)</option>
                     </select>
                 </div>
 
