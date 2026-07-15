@@ -134,6 +134,7 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
         'processados'   => 0,
         'inseridos'     => 0,
         'atualizados'   => 0,
+        'pulados'       => 0,
         'erros'         => 0,
         'colecaoVazia'  => true,
         'falhaColecao'  => false,
@@ -164,9 +165,30 @@ function processarPaginaLudopedia(mysqli $conexao, int $pagina, int $rows): arra
     $resultado['colecaoVazia'] = false;
     registrarLog('INFO', "Página {$pagina}: " . count($colecao) . " jogos recebidos. Total geral: {$resultado['totalGeral']}");
 
+    // Jogos já importados e completos (com nome de verdade, não o placeholder
+    // "SEM NOME") não precisam de nova busca de detalhe: nada nesses campos
+    // muda depois de cadastrado (jogadores, tempo etc. são fixos do jogo).
+    // Isso evita gastar uma chamada de API + pausa por jogo já conhecido a
+    // cada sincronização — só os IDs novos (ou com nome pendente) são
+    // realmente processados. Jogos que falharam antes (erro/rate limit)
+    // nunca chegam a ser inseridos, então continuam "novos" e são
+    // automaticamente tentados de novo, sem precisar de lógica extra.
+    $jogosCompletos = [];
+    $resSet = mysqli_query($conexao, "SELECT id_ludopedia, nome FROM jogos WHERE id_ludopedia IS NOT NULL");
+    while ($row = mysqli_fetch_assoc($resSet)) {
+        if (!str_starts_with((string)$row['nome'], 'SEM NOME (Ludopedia #')) {
+            $jogosCompletos[(int)$row['id_ludopedia']] = true;
+        }
+    }
+
     foreach ($colecao as $item) {
         $idLudopedia = (int)$item['id_jogo'];
         $resultado['processados']++;
+
+        if (isset($jogosCompletos[$idLudopedia])) {
+            $resultado['pulados']++;
+            continue;
+        }
 
         $detalhes = ludopediaGet("https://ludopedia.com.br/api/v1/jogos/{$idLudopedia}");
 
@@ -377,20 +399,21 @@ if ($isCli) {
 
     $pagina = 1;
     $rows   = 50;
-    $totais = ['inseridos' => 0, 'atualizados' => 0, 'erros' => 0, 'processados' => 0];
+    $totais = ['inseridos' => 0, 'atualizados' => 0, 'pulados' => 0, 'erros' => 0, 'processados' => 0];
 
     do {
         $r = processarPaginaLudopedia($conexao, $pagina, $rows);
         $totais['inseridos']   += $r['inseridos'];
         $totais['atualizados'] += $r['atualizados'];
+        $totais['pulados']     += $r['pulados'];
         $totais['erros']       += $r['erros'];
         $totais['processados'] += $r['processados'];
 
-        echo "📄 Página {$pagina} — Inseridos: {$r['inseridos']} | Atualizados: {$r['atualizados']} | Erros: {$r['erros']}\n";
+        echo "📄 Página {$pagina} — Inseridos: {$r['inseridos']} | Atualizados: {$r['atualizados']} | Pulados: {$r['pulados']} | Erros: {$r['erros']}\n";
         $pagina++;
     } while (!$r['colecaoVazia']);
 
-    $resumo = "Importação concluída! Total: {$totais['processados']} | Inseridos: {$totais['inseridos']} | Atualizados: {$totais['atualizados']} | Erros: {$totais['erros']}";
+    $resumo = "Importação concluída! Total: {$totais['processados']} | Inseridos: {$totais['inseridos']} | Atualizados: {$totais['atualizados']} | Pulados: {$totais['pulados']} | Erros: {$totais['erros']}";
     echo "\n✅ {$resumo}\n";
     registrarLog('INFO', $resumo);
 
@@ -418,6 +441,7 @@ if ($isCli) {
         'processados'  => $r['processados'],
         'inseridos'    => $r['inseridos'],
         'atualizados'  => $r['atualizados'],
+        'pulados'      => $r['pulados'],
         'erros'        => $r['erros'],
         'temMais'      => !$r['colecaoVazia'],
         'falhaColecao' => $r['falhaColecao'],

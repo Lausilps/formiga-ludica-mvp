@@ -364,6 +364,7 @@ $buscaUrl = urlencode($busca);
             let totalProcessados = 0;
             let totalInseridos = 0;
             let totalAtualizados = 0;
+            let totalPulados = 0;
             let totalErros = 0;
 
             function proximaPagina() {
@@ -375,6 +376,7 @@ $buscaUrl = urlencode($busca);
                         totalProcessados += data.processados;
                         totalInseridos += data.inseridos;
                         totalAtualizados += data.atualizados;
+                        totalPulados += data.pulados;
                         totalErros += data.erros;
 
                         // Falhou por rate limit (não é fim real da coleção): para
@@ -398,7 +400,7 @@ $buscaUrl = urlencode($busca);
                         // Chegou ao fim de verdade: limpa a retomada, próxima
                         // sincronização volta a começar do 1.
                         localStorage.removeItem(CHAVE_RETOMADA);
-                        status.textContent = `✅ Sincronização concluída! ${totalProcessados} jogo(s) — ${totalInseridos} novo(s), ${totalAtualizados} atualizado(s), ${totalErros} erro(s).`;
+                        status.textContent = `✅ Sincronização concluída! ${totalProcessados} jogo(s) — ${totalInseridos} novo(s), ${totalAtualizados} atualizado(s), ${totalPulados} já cadastrado(s) (pulado(s)), ${totalErros} erro(s).`;
                         btn.disabled = false;
                         btn.style.opacity = '';
                     })
