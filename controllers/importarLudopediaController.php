@@ -2,10 +2,11 @@
 set_time_limit(0);
 ini_set('max_execution_time', 0);
 
-// TEMPORÁRIO: desativa a geração de descrição via IA durante a sincronização
-// pra não esgotar a cota do Gemini no meio do sync. Reativar virando pra true
-// quando a cota normalizar.
-define('GERAR_DESCRICAO_VIA_IA', false);
+// Gera descrição via IA só para jogos novos (quem já está importado é
+// pulado antes de chegar nessa checagem — ver processarPaginaLudopedia()),
+// então o consumo de cota do Gemini fica restrito aos jogos que o Jander
+// cadastrar de agora em diante.
+define('GERAR_DESCRICAO_VIA_IA', true);
 
 $isCli = php_sapi_name() === 'cli';
 

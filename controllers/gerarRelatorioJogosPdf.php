@@ -97,8 +97,11 @@ while ($linha = mysqli_fetch_assoc($resultado)) {
 }
 
 // Marca como possível duplicado quando outro jogo do resultado tem um nome
-// muito parecido (não precisa ser idêntico — pega acento, "de" a mais, etc.)
-// ou a mesma descrição.
+// muito parecido (não precisa ser idêntico — pega acento, "de" a mais, etc.),
+// quando um nome é o outro com um sufixo de edição/ano na frente (ex:
+// "Acquire" vs "Acquire (2023 Edition)" — o similar_text() sozinho não pega
+// esse caso: nome base curto + sufixo comprido derruba o percentual), ou
+// quando têm a mesma descrição.
 const LIMIAR_SIMILARIDADE_NOME = 85.0;
 
 function normalizarNomeJogo(string $nome): string {
@@ -107,6 +110,17 @@ function normalizarNomeJogo(string $nome): string {
     $nome = preg_replace('/[^a-z0-9 ]+/', ' ', $nome);
     $nome = preg_replace('/\s+/', ' ', trim($nome));
     return $nome;
+}
+
+// Verifica se $curto é o começo de $longo terminando em fronteira de palavra
+// (não um trecho solto no meio). Exige tamanho mínimo pra não marcar nomes
+// curtos genéricos (ex: "Go") como prefixo de qualquer coisa.
+function nomeEhPrefixoDoOutro(string $curto, string $longo): bool {
+    if ($curto === '' || $curto === $longo || mb_strlen($curto) < 4) {
+        return false;
+    }
+
+    return (bool) preg_match('/^' . preg_quote($curto, '/') . '(\s|$)/', $longo);
 }
 
 $nomesNormalizados = array_map(fn($jogo) => normalizarNomeJogo($jogo['nome'] ?? ''), $jogos);
@@ -130,7 +144,11 @@ for ($i = 0; $i < $total; $i++) {
 
         similar_text($nomesNormalizados[$i], $nomesNormalizados[$j], $percentual);
 
-        if ($percentual >= LIMIAR_SIMILARIDADE_NOME) {
+        $nomeParecido = $percentual >= LIMIAR_SIMILARIDADE_NOME
+            || nomeEhPrefixoDoOutro($nomesNormalizados[$i], $nomesNormalizados[$j])
+            || nomeEhPrefixoDoOutro($nomesNormalizados[$j], $nomesNormalizados[$i]);
+
+        if ($nomeParecido) {
             $duplicadoPorIndice[$i] = true;
             $duplicadoPorIndice[$j] = true;
         }
