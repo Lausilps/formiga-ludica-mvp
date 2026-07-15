@@ -17,6 +17,7 @@ $jogadores_ate = $_GET['jogadores_ate'] ?? '';
 $idade_de = $_GET['idade_de'] ?? '';
 $idade_ate = $_GET['idade_ate'] ?? '';
 $dificuldade = $_GET['dificuldade'] ?? '';
+$origem = $_GET['origem'] ?? '';
 $importado_de = $_GET['importado_de'] ?? '';
 $importado_ate = $_GET['importado_ate'] ?? '';
 $tipo = $_GET['tipo'] ?? 'sintetico';
@@ -48,6 +49,10 @@ if ($idade_ate !== '') $where[] = "idade_minima <= $idade_ate";
 if ($dificuldade !== '') {
     $dificuldade = mysqli_real_escape_string($conexao, $dificuldade);
     $where[] = "dificuldade = '$dificuldade'";
+}
+
+if ($origem === 'manual' || $origem === 'ludopedia') {
+    $where[] = "origem = '$origem'";
 }
 
 if ($importado_de !== '' && dataValida($importado_de)) {
@@ -237,6 +242,7 @@ $html = '
             <th>Preco</th>
             <th>Status</th>
             <th>Importado em</th>
+            <th>Importado?</th>
             <th>Duplicado?</th>
         </tr>
     </thead>
@@ -256,6 +262,7 @@ foreach ($jogos as $jogo) {
             <td>R$ ' . number_format($jogo['preco'], 2, ',', '.') . '</td>
             <td>' . ($jogo['ativo'] ? 'Ativo' : 'Inativo') . '</td>
             <td>' . (!empty($jogo['criado_em']) ? date('d/m/Y', strtotime($jogo['criado_em'])) : '—') . '</td>
+            <td>' . ($jogo['origem'] === 'ludopedia' ? 'Sim' : 'Não') . '</td>
             <td class="flag-duplicado">' . ($jogo['duplicado'] ? '⚠ Sim' : '—') . '</td>
         </tr>
     ';
@@ -263,7 +270,7 @@ foreach ($jogos as $jogo) {
     if ($tipo === 'analitico') {
         $html .= '
             <tr' . $classeLinha . '>
-                <td colspan="9" class="descricao">
+                <td colspan="10" class="descricao">
                     <strong>Descricao:</strong> ' . nl2br(htmlspecialchars($jogo['descricao'] ?? '')) . '
                 </td>
             </tr>

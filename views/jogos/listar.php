@@ -48,7 +48,8 @@ $sql = "SELECT
             idade_minima,
             duracao_minutos,
             dificuldade,
-            ativo
+            ativo,
+            origem
         FROM jogos
         $where
         ORDER BY nome ASC
@@ -176,6 +177,10 @@ $buscaUrl = urlencode($busca);
                                 <tr>
                                     <td class="tooltip-imagem coluna-nome">
                                         <?= htmlspecialchars($jogo['nome']) ?>
+
+                                        <?php if ($jogo['origem'] === 'ludopedia'): ?>
+                                            <img src="../../assets/img/logo-ludopedia.png" alt="Ludopedia" title="Importado da Ludopedia" class="icone-origem-ludopedia">
+                                        <?php endif; ?>
 
                                         <?php if (!empty($jogo['imagem'])): ?>
                                             <span class="imagem-preview">

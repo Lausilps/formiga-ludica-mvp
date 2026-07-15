@@ -47,6 +47,15 @@ protegerAdmin();
                 </div>
 
                 <div class="campo">
+                    <label>Origem:</label>
+                    <select name="origem">
+                        <option value="">Todos</option>
+                        <option value="manual">Cadastrado manualmente</option>
+                        <option value="ludopedia">Importado (Ludopedia)</option>
+                    </select>
+                </div>
+
+                <div class="campo">
                     <label>Preço:</label>
                     <div class="campo-duplo">
                         <input type="number" step="0.01" name="preco_de" placeholder="De R$">
