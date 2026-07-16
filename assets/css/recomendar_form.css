@@ -271,9 +271,9 @@ select:focus {
 
 .rodape-site {
     text-align: center;
-    padding: 28px 20px 22px;
-    color: #4a3b2c;
-    border-top: 10px solid #2d0b5f;
+    padding: 20px 20px 18px;
+    color: #f0e9ff;
+    background: #2d0b5f;
 }
 
 .rodape-site p {
