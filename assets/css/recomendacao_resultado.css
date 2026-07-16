@@ -118,7 +118,7 @@
     transform: translateY(-3px);
 }
 
-.card-recomendacao img {
+.card-recomendacao > img {
     width: 100%;
     height: 210px;
     object-fit: contain;

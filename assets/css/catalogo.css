@@ -1038,6 +1038,7 @@ body {
     text-align: center;
     padding: 28px 20px 22px;
     color: #4a3b2c;
+    border-top: 10px solid #2d0b5f;
 }
 
 .rodape-site p {
