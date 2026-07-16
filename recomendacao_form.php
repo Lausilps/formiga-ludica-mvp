@@ -141,7 +141,7 @@ unset($_SESSION['form_recomendacao']);
 
 <div id="overlay-carregando">
     <div class="modal-carregando">
-        <img src="assets/img/formiguinha-pesquisando.gif" alt="Formiguinha pesquisando" class="gif-formiguinha">
+        <video src="assets/img/formiguinha-pesquisando.mp4" class="gif-formiguinha" autoplay loop muted playsinline></video>
         <p>🐜 A Formiguinha está fuçando o catálogo pra achar os jogos perfeitos pra você...</p>
     </div>
 </div>

@@ -79,6 +79,9 @@ Com base APENAS nos jogos do catálogo abaixo, escolha até {$qtdMaxima} jogo(s)
 Nunca repita o mesmo jogo mais de uma vez na resposta — se o catálogo abaixo tiver menos de {$qtdMaxima} jogos, devolva só os que existem, sem repetir nenhum.
 Para cada um, explique em 2-3 frases descontraídas por que ele é perfeito pra essa situação.
 
+Para o campo "intro", invente uma abertura nova a cada vez, com base nos detalhes específicos desse pedido (perfil, jogadores, ocasião).
+Não comece sempre da mesma forma (nada de sempre "E aí, galera da Formiga Lúdica" ou qualquer saudação fixa repetida) — varie o gancho, o tom e as palavras a cada resposta.
+
 CATÁLOGO:
 {$contexto}
 

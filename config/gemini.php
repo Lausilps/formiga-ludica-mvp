@@ -42,7 +42,8 @@ function geminiChat(string $prompt): string {
          . GEMINI_LLM_MODEL . ":generateContent?key=" . GEMINI_API_KEY;
 
     $body = json_encode([
-        "contents" => [["parts" => [["text" => $prompt]]]]
+        "contents"         => [["parts" => [["text" => $prompt]]]],
+        "generationConfig" => ["temperature" => 1.2]
     ]);
 
     $ch = curl_init($url);
