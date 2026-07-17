@@ -1,5 +1,12 @@
 <?php
 
+// O dompdf consome muita memória ao montar o CSS/DOM interno, proporcional
+// ao número de linhas da tabela — o padrão de 128M do PHP estoura ao gerar
+// o relatório sem filtro (catálogo inteiro) no modo analítico, que dobra as
+// linhas com a descrição de cada jogo.
+ini_set('memory_limit', '512M');
+ini_set('max_execution_time', 0);
+
 require_once '../config/conexao.php';
 require_once '../helpers/logHelper.php';
 require_once '../helpers/jogoHelper.php';

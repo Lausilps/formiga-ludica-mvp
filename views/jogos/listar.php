@@ -49,7 +49,8 @@ $sql = "SELECT
             duracao_minutos,
             dificuldade,
             ativo,
-            origem
+            origem,
+            link_ludopedia
         FROM jogos
         $where
         ORDER BY nome ASC
@@ -126,6 +127,12 @@ $buscaUrl = urlencode($busca);
             <span id="status-embeddings" class="status-embeddings"></span>
             <span id="status-ludopedia" class="status-embeddings"></span>
         </section>
+
+        <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 'excluido'): ?>
+            <div class="alerta alerta-sucesso">
+                Jogo excluído com sucesso.
+            </div>
+        <?php endif; ?>
 
         <?php if (mysqli_num_rows($resultado) == 0): ?>
 
@@ -225,6 +232,7 @@ $buscaUrl = urlencode($busca);
                                             data-duracao="<?= $jogo['duracao_minutos'] ?>"
                                             data-dificuldade="<?= htmlspecialchars(formatarDificuldade($jogo['dificuldade'])) ?>"
                                             data-ativo="<?= $jogo['ativo'] ? '1' : '0' ?>"
+                                            data-link-ludopedia="<?= htmlspecialchars($jogo['link_ludopedia'] ?? '') ?>"
                                         >
                                             Detalhes
                                         </button>
@@ -299,6 +307,13 @@ $buscaUrl = urlencode($busca);
                     <span id="detalhes-idade"></span>
                     <span id="detalhes-dificuldade"></span>
                     <strong id="detalhes-preco"></strong>
+                </div>
+
+                <div id="detalhes-ludopedia" style="display:none; margin-top:12px;">
+                    <a id="detalhes-link-ludopedia" href="#" target="_blank" class="btn-ludopedia">
+                        <img src="../../assets/img/logo-ludopedia.png" alt="Ludopedia">
+                        Ver na Ludopedia
+                    </a>
                 </div>
             </div>
         </div>
@@ -444,6 +459,16 @@ $buscaUrl = urlencode($busca);
                 } else {
                     status.textContent = 'Inativo';
                     status.className = 'badge-status badge-inativo';
+                }
+
+                const linkLudopedia = document.getElementById('detalhes-link-ludopedia');
+                const blocoLudopedia = document.getElementById('detalhes-ludopedia');
+
+                if (botao.dataset.linkLudopedia) {
+                    linkLudopedia.href = botao.dataset.linkLudopedia;
+                    blocoLudopedia.style.display = 'block';
+                } else {
+                    blocoLudopedia.style.display = 'none';
                 }
 
                 modalDetalhes.classList.add('ativo');

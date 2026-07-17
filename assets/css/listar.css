@@ -497,3 +497,28 @@
     background: #7C3AED;
     color: white;
 }
+
+/* BOTÃO LUDOPEDIA NO MODAL DE DETALHES */
+.btn-ludopedia {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff8e6;
+    border: 1px solid #f0c040;
+    color: #7a5c00;
+    padding: 9px 16px 9px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.9rem;
+}
+
+.btn-ludopedia:hover {
+    background: #fef0b0;
+}
+
+.btn-ludopedia img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}

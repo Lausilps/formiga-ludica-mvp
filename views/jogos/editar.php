@@ -85,6 +85,12 @@ if (!empty($jogo['imagem'])) {
         </div>
     <?php endif; ?>
 
+    <?php if (isset($_GET['erro']) && $_GET['erro'] == 'falha_exclusao'): ?>
+        <div class="alerta alerta-erro">
+            Não foi possível excluir o jogo. Tente novamente.
+        </div>
+    <?php endif; ?>
+
     <section class="card-admin">
 
         <form action="../../controllers/editarJogoController.php" method="POST" enctype="multipart/form-data" class="form-editar">
@@ -124,8 +130,13 @@ if (!empty($jogo['imagem'])) {
             <div class="acoes-form">
                 <button type="submit" class="btn-salvar">Salvar alterações</button>
                 <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
+                <button type="button" class="btn-excluir" onclick="confirmarExclusao()">🗑️ Excluir jogo</button>
             </div>
 
+        </form>
+
+        <form id="form-excluir-jogo" action="../../controllers/excluirJogoController.php" method="POST" style="display:none;">
+            <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
         </form>
 
     </section>
@@ -135,6 +146,14 @@ if (!empty($jogo['imagem'])) {
 <script src="../../assets/js/preview-imagem.js"></script>
 <script>
     inicializarPreviewImagem('imagem', 'preview-imagem');
+
+    function confirmarExclusao() {
+        const nomeJogo = <?= json_encode($jogo['nome'], JSON_UNESCAPED_UNICODE) ?>;
+
+        if (confirm(`Tem certeza que deseja excluir "${nomeJogo}"? Essa ação não pode ser desfeita.`)) {
+            document.getElementById('form-excluir-jogo').submit();
+        }
+    }
 </script>
 
 </body>
