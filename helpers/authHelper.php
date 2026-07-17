@@ -4,13 +4,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-function protegerAdmin()
+function protegerAdmin(string $caminhoLogin = '../../login.php')
 {
     if (
         !isset($_SESSION['id_usuario']) ||
         $_SESSION['tipo'] !== 'admin'
     ) {
-        header("Location: ../../login.php");
+        header("Location: $caminhoLogin");
         exit;
     }
 }

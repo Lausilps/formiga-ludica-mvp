@@ -137,6 +137,14 @@ select:focus {
     cursor: pointer;
 }
 
+.btn-planilha {
+    background: linear-gradient(135deg, #1a8a4a, #25a85c);
+}
+
+.btn-gerar:hover {
+    opacity: 0.9;
+}
+
 .btn-voltar {
     background: #F6C453;
     color: #2b1b12;

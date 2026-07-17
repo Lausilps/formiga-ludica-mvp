@@ -126,6 +126,14 @@ protegerAdmin();
 
             <div class="acoes-relatorio">
                 <button type="submit" class="btn-gerar">Gerar PDF</button>
+                <button
+                    type="submit"
+                    formaction="../../controllers/gerarRelatorioJogosCsv.php"
+                    formtarget="_self"
+                    class="btn-gerar btn-planilha"
+                >
+                    📊 Gerar Planilha
+                </button>
                 <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
             </div>
 

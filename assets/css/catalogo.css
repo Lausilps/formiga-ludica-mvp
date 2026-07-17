@@ -802,6 +802,10 @@ body {
 }
 
 .fechar-modal {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+
     width: 42px;
     height: 42px;
 

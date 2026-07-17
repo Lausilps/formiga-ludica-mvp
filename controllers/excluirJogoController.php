@@ -4,7 +4,7 @@ require_once '../config/conexao.php';
 require_once '../helpers/logHelper.php';
 require_once '../helpers/authHelper.php';
 
-protegerAdmin();
+protegerAdmin('../login.php');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id_jogo'])) {
     registrarLog('ERRO', 'Tentativa de exclusão sem informar ID do jogo.');
