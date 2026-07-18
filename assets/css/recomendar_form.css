@@ -196,7 +196,7 @@ select:focus {
 }
 
 .modal-carregando {
-    background: rgba(255,255,255,.96);
+    background: #fff;
     border-radius: 28px;
     padding: 34px;
     max-width: 430px;
@@ -205,7 +205,7 @@ select:focus {
 }
 
 .gif-formiguinha {
-    width: 150px;
+    width: 180px;
     margin-bottom: 18px;
 }
 

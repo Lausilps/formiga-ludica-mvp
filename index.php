@@ -48,7 +48,7 @@ if (!$resultado) {
     </div>
     <div class="topo-acoes">
         <a href="recomendacao_form.php" class="mini-recomendacao">
-            <img src="assets/img/formiguinha-rag.gif" alt="Formiguinha recomendando">
+            <img src="assets/img/formiguinha-rag.webp" alt="Formiguinha recomendando">
             <span>Recomendar para mim ✨</span>
         </a>
         <button type="button" class="btn-carrinho-topo" id="abrir-modal-pedido" aria-label="Ver pedido">
@@ -60,7 +60,7 @@ if (!$resultado) {
 
 <section class="catalogo-topo-wrap">
     <div class="catalogo-topo">
-        <img src="assets/img/formiguinha-estoque.png" alt="Formiguinha" class="banner-formiguinha-img">
+        <img src="assets/img/formiguinha-estoque.webp" alt="Formiguinha" class="banner-formiguinha-img">
         <div class="banner-texto">
             <span class="banner-label">NÃO SABE O QUE JOGAR HOJE?</span>
             <h2>Deixa que a <span class="destaque">Formiguinha</span> encontra o jogo perfeito para vocês!</h2>
