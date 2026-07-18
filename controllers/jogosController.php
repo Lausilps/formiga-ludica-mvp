@@ -4,6 +4,7 @@ require_once '../config/conexao.php';
 
 require_once '../helpers/logHelper.php';
 require_once '../helpers/jogoHelper.php';
+require_once '../helpers/jogoImagensHelper.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -99,6 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     if (mysqli_stmt_execute($stmt)) {
+
+        if ($imagem !== null) {
+            adicionarImagemJogo($conexao, (int) mysqli_insert_id($conexao), $imagem);
+        }
 
         registrarLog(
             'INFO',

@@ -3,6 +3,7 @@
 require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
 require_once '../../helpers/authHelper.php';
+require_once '../../helpers/jogoImagensHelper.php';
 
 protegerAdmin();
 
@@ -22,6 +23,7 @@ if (!$resultado || mysqli_num_rows($resultado) == 0) {
 }
 
 $jogo = mysqli_fetch_assoc($resultado);
+$imagensGaleria = listarImagensJogo($conexao, $id_jogo);
 
 $nome = $_GET['nome'] ?? $jogo['nome'];
 $descricao = $_GET['descricao'] ?? $jogo['descricao'];
@@ -34,16 +36,6 @@ $dificuldade = $_GET['dificuldade'] ?? $jogo['dificuldade'];
 $resumo_regras = $_GET['resumo_regras'] ?? $jogo['resumo_regras'];
 $link_tutorial = $_GET['link_tutorial'] ?? $jogo['link_tutorial'];
 $ativo = $_GET['ativo'] ?? $jogo['ativo'];
-
-$srcImagemAtual = '';
-
-if (!empty($jogo['imagem'])) {
-    if (str_starts_with($jogo['imagem'], 'http')) {
-        $srcImagemAtual = $jogo['imagem'];
-    } else {
-        $srcImagemAtual = "../../" . $jogo['imagem'];
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -101,32 +93,6 @@ if (!empty($jogo['imagem'])) {
                 <?php $modoEdicao = true; include '../partials/jogo_form_campos.php'; ?>
             </div>
 
-            <div class="area-imagem">
-
-                <?php if (!empty($srcImagemAtual)): ?>
-                    <div>
-                        <label>Imagem atual:</label>
-
-                        <div class="preview-atual">
-                            <img src="<?= htmlspecialchars($srcImagemAtual) ?>" alt="<?= htmlspecialchars($jogo['nome']) ?>">
-                        </div>
-                    </div>
-                <?php endif; ?>
-
-                <div>
-                    <label>Nova imagem:</label>
-                    <input type="file" name="imagem" id="imagem" accept="image/*">
-
-                    <img
-                        id="preview-imagem"
-                        src=""
-                        alt="Prévia da nova imagem"
-                        class="preview-nova"
-                    >
-                </div>
-
-            </div>
-
             <div class="acoes-form">
                 <button type="submit" class="btn-salvar">Salvar alterações</button>
                 <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
@@ -139,19 +105,89 @@ if (!empty($jogo['imagem'])) {
             <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
         </form>
 
+        <div class="area-galeria">
+
+            <h2>Galeria de fotos</h2>
+            <p class="descricao-galeria">A primeira foto é a capa usada no catálogo e na listagem. Use as setas pra reordenar ou a estrela pra trocar a capa.</p>
+
+            <?php if (empty($imagensGaleria)): ?>
+                <p class="sem-fotos">Nenhuma foto cadastrada ainda.</p>
+            <?php else: ?>
+                <div class="galeria-fotos">
+                    <?php foreach ($imagensGaleria as $indice => $imagem): ?>
+                        <?php
+                            $srcGaleria = str_starts_with($imagem['caminho'], 'http')
+                                ? $imagem['caminho']
+                                : '../../' . $imagem['caminho'];
+                        ?>
+                        <div class="foto-galeria">
+                            <img src="<?= htmlspecialchars($srcGaleria) ?>" alt="Foto <?= $indice + 1 ?> de <?= htmlspecialchars($jogo['nome']) ?>">
+
+                            <?php if ($indice === 0): ?>
+                                <span class="etiqueta-capa">Capa</span>
+                            <?php endif; ?>
+
+                            <div class="acoes-foto-galeria">
+                                <?php if ($indice !== 0): ?>
+                                    <button type="button" class="btn-foto" onclick="acaoGaleria('capa', <?= $imagem['id_imagem'] ?>)" title="Tornar capa">★</button>
+                                <?php endif; ?>
+
+                                <?php if ($indice > 0): ?>
+                                    <button type="button" class="btn-foto" onclick="acaoGaleria('mover', <?= $imagem['id_imagem'] ?>, 'esquerda')" title="Mover pra esquerda">←</button>
+                                <?php endif; ?>
+
+                                <?php if ($indice < count($imagensGaleria) - 1): ?>
+                                    <button type="button" class="btn-foto" onclick="acaoGaleria('mover', <?= $imagem['id_imagem'] ?>, 'direita')" title="Mover pra direita">→</button>
+                                <?php endif; ?>
+
+                                <button type="button" class="btn-foto btn-foto-excluir" onclick="excluirFotoGaleria(<?= $imagem['id_imagem'] ?>)" title="Excluir foto">🗑</button>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+
+            <form action="../../controllers/jogoImagensController.php" method="POST" enctype="multipart/form-data" class="form-upload-galeria">
+                <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
+                <input type="hidden" name="acao" value="upload">
+
+                <label>Adicionar fotos:</label>
+                <input type="file" name="imagens[]" accept="image/*" multiple required>
+                <button type="submit" class="btn-add-foto">Enviar fotos</button>
+            </form>
+
+            <form id="form-acao-galeria" action="../../controllers/jogoImagensController.php" method="POST" style="display:none;">
+                <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
+                <input type="hidden" name="acao" id="galeria-acao">
+                <input type="hidden" name="id_imagem" id="galeria-id-imagem">
+                <input type="hidden" name="direcao" id="galeria-direcao">
+            </form>
+
+        </div>
+
     </section>
 
 </main>
 
-<script src="../../assets/js/preview-imagem.js"></script>
 <script>
-    inicializarPreviewImagem('imagem', 'preview-imagem');
-
     function confirmarExclusao() {
         const nomeJogo = <?= json_encode($jogo['nome'], JSON_UNESCAPED_UNICODE) ?>;
 
         if (confirm(`Tem certeza que deseja excluir "${nomeJogo}"? Essa ação não pode ser desfeita.`)) {
             document.getElementById('form-excluir-jogo').submit();
+        }
+    }
+
+    function acaoGaleria(acao, idImagem, direcao) {
+        document.getElementById('galeria-acao').value = acao;
+        document.getElementById('galeria-id-imagem').value = idImagem;
+        document.getElementById('galeria-direcao').value = direcao || '';
+        document.getElementById('form-acao-galeria').submit();
+    }
+
+    function excluirFotoGaleria(idImagem) {
+        if (confirm('Tem certeza que deseja excluir essa foto?')) {
+            acaoGaleria('excluir', idImagem);
         }
     }
 </script>

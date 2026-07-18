@@ -71,95 +71,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         redirecionarComDados('../views/jogos/editar.php', 'duplicado', $dadosFormulario);
     }
 
-    // Tratamento da imagem
-    $novaImagem = uploadImagemJogo($_FILES['imagem'] ?? null);
+    // Atualização (a foto é gerenciada à parte, pela galeria — ver
+    // controllers/jogoImagensController.php)
+    $sql = "UPDATE jogos SET
+                nome = ?,
+                descricao = ?,
+                preco = ?,
+                min_jogadores = ?,
+                max_jogadores = ?,
+                idade_minima = ?,
+                duracao_minutos = ?,
+                dificuldade = ?,
+                resumo_regras = ?,
+                link_tutorial = ?,
+                ativo = ?
+            WHERE id_jogo = ?";
 
-    if ($novaImagem !== null) {
-
-        registrarLog(
-            'INFO',
-            "Imagem atualizada para o jogo ID: $id_jogo | Arquivo: $novaImagem"
-        );
-
-    } elseif (isset($_FILES['imagem']) && $_FILES['imagem']['error'] !== UPLOAD_ERR_NO_FILE) {
-
-        registrarLog(
-            'ERRO',
-            "Erro no upload da imagem do jogo ID: $id_jogo | Código: " . $_FILES['imagem']['error']
-        );
-    }
-
-    // Atualização
-    if ($novaImagem !== null) {
-
-        $sql = "UPDATE jogos SET
-                    nome = ?,
-                    descricao = ?,
-                    preco = ?,
-                    min_jogadores = ?,
-                    max_jogadores = ?,
-                    idade_minima = ?,
-                    duracao_minutos = ?,
-                    dificuldade = ?,
-                    resumo_regras = ?,
-                    link_tutorial = ?,
-                    ativo = ?,
-                    imagem = ?
-                WHERE id_jogo = ?";
-
-        $stmt = mysqli_prepare($conexao, $sql);
-        mysqli_stmt_bind_param(
-            $stmt,
-            'sssssssssssss',
-            $nome,
-            $descricao,
-            $preco,
-            $min_jogadores,
-            $max_jogadores,
-            $idade_minima,
-            $duracao_minutos,
-            $dificuldade,
-            $resumo_regras,
-            $link_tutorial,
-            $ativo,
-            $novaImagem,
-            $id_jogo
-        );
-
-    } else {
-
-        $sql = "UPDATE jogos SET
-                    nome = ?,
-                    descricao = ?,
-                    preco = ?,
-                    min_jogadores = ?,
-                    max_jogadores = ?,
-                    idade_minima = ?,
-                    duracao_minutos = ?,
-                    dificuldade = ?,
-                    resumo_regras = ?,
-                    link_tutorial = ?,
-                    ativo = ?
-                WHERE id_jogo = ?";
-
-        $stmt = mysqli_prepare($conexao, $sql);
-        mysqli_stmt_bind_param(
-            $stmt,
-            'ssssssssssss',
-            $nome,
-            $descricao,
-            $preco,
-            $min_jogadores,
-            $max_jogadores,
-            $idade_minima,
-            $duracao_minutos,
-            $dificuldade,
-            $resumo_regras,
-            $link_tutorial,
-            $ativo,
-            $id_jogo
-        );
-    }
+    $stmt = mysqli_prepare($conexao, $sql);
+    mysqli_stmt_bind_param(
+        $stmt,
+        'ssssssssssss',
+        $nome,
+        $descricao,
+        $preco,
+        $min_jogadores,
+        $max_jogadores,
+        $idade_minima,
+        $duracao_minutos,
+        $dificuldade,
+        $resumo_regras,
+        $link_tutorial,
+        $ativo,
+        $id_jogo
+    );
 
     if (mysqli_stmt_execute($stmt)) {
 
