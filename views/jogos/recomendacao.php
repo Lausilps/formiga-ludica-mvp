@@ -50,9 +50,14 @@
             <?php foreach ($recomendacoes as $jogo): ?>
                 <div class="card-recomendacao" data-id="<?= $jogo['id'] ?>" data-nome="<?= htmlspecialchars($jogo['nome']) ?>" data-preco="<?= $jogo['preco'] ?>">
                     <?php
-                        $imgSrc = !empty($jogo['imagem'])
-                            ? htmlspecialchars($jogo['imagem'])
-                            : '../assets/img/sem-imagem.png';
+                        if (!empty($jogo['imagem'])) {
+                            $imgSrc = str_starts_with($jogo['imagem'], 'http')
+                                ? $jogo['imagem']
+                                : '../' . $jogo['imagem'];
+                            $imgSrc = htmlspecialchars($imgSrc);
+                        } else {
+                            $imgSrc = '../assets/img/sem-imagem.png';
+                        }
                     ?>
 
                     <img src="<?= $imgSrc ?>" alt="<?= htmlspecialchars($jogo['nome']) ?>">
@@ -165,7 +170,9 @@
 
             // Adiciona os novos cards no grid
             data.recomendacoes.forEach(jogo => {
-                const imgSrc = jogo.imagem ? jogo.imagem : '../assets/img/sem-imagem.png';
+                const imgSrc = jogo.imagem
+                    ? (jogo.imagem.startsWith('http') ? jogo.imagem : '../' + jogo.imagem)
+                    : '../assets/img/sem-imagem.png';
                 const card = document.createElement('div');
                 card.className = 'card-recomendacao';
                 card.dataset.id = jogo.id;
