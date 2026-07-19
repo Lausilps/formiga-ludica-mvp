@@ -2,7 +2,7 @@
 
 <div class="campo campo-grande">
     <label>Nome<?= $modoEdicao ? '' : ' do jogo' ?>:</label>
-    <input type="text" name="nome" required value="<?= htmlspecialchars($nome) ?>">
+    <input type="text" name="nome" required value="<?= htmlspecialchars((string) $nome) ?>">
 </div>
 
 <?php if ($modoEdicao): ?>
@@ -17,32 +17,32 @@
 
 <div class="campo campo-grande">
     <label>Descrição:</label>
-    <textarea name="descricao" required><?= htmlspecialchars($descricao) ?></textarea>
+    <textarea name="descricao" required><?= htmlspecialchars((string) $descricao) ?></textarea>
 </div>
 
 <div class="campo">
     <label>Preço:</label>
-    <input type="number" name="preco" step="0.01" required value="<?= htmlspecialchars($preco) ?>">
+    <input type="number" name="preco" step="0.01" required value="<?= htmlspecialchars((string) $preco) ?>">
 </div>
 
 <div class="campo">
     <label>Mínimo de jogadores:</label>
-    <input type="number" name="min_jogadores" required value="<?= htmlspecialchars($min_jogadores) ?>">
+    <input type="number" name="min_jogadores" required value="<?= htmlspecialchars((string) $min_jogadores) ?>">
 </div>
 
 <div class="campo">
     <label>Máximo de jogadores:</label>
-    <input type="number" name="max_jogadores" required value="<?= htmlspecialchars($max_jogadores) ?>">
+    <input type="number" name="max_jogadores" required value="<?= htmlspecialchars((string) $max_jogadores) ?>">
 </div>
 
 <div class="campo">
     <label>Idade mínima:</label>
-    <input type="number" name="idade_minima" required value="<?= htmlspecialchars($idade_minima) ?>">
+    <input type="number" name="idade_minima" required value="<?= htmlspecialchars((string) $idade_minima) ?>">
 </div>
 
 <div class="campo">
     <label>Duração média:</label>
-    <input type="number" name="duracao_minutos" required value="<?= htmlspecialchars($duracao_minutos) ?>">
+    <input type="number" name="duracao_minutos" required value="<?= htmlspecialchars((string) $duracao_minutos) ?>">
 </div>
 
 <div class="campo">
@@ -58,7 +58,7 @@
 
 <div class="campo campo-grande">
     <label>Resumo das regras:</label>
-    <textarea name="resumo_regras"><?= htmlspecialchars($resumo_regras) ?></textarea>
+    <textarea name="resumo_regras"><?= htmlspecialchars((string) $resumo_regras) ?></textarea>
 </div>
 
 <div class="campo campo-grande">
@@ -67,6 +67,6 @@
         type="url"
         name="link_tutorial"
         placeholder="Cole aqui o link do tutorial (ou da Ludopedia, se o jogo não veio de lá)"
-        value="<?= htmlspecialchars($link_tutorial) ?>"
+        value="<?= htmlspecialchars((string) $link_tutorial) ?>"
     >
 </div>

@@ -39,7 +39,7 @@
         <div class="balao-fala">
             <span class="selo-formiguinha">🐜 Formiguinha</span>
             <h2>Acho que encontrei algo...</h2>
-            <p><?= htmlspecialchars($intro) ?></p>
+            <p><?= htmlspecialchars((string) $intro) ?></p>
         </div>
     </section>
 
@@ -61,7 +61,7 @@
                         <h3><?= htmlspecialchars($jogo['nome']) ?></h3>
 
                         <p class="card-motivo">
-                            <?= htmlspecialchars($jogo['motivo']) ?>
+                            <?= htmlspecialchars((string) ($jogo['motivo'] ?? '')) ?>
                         </p>
 
                         <p class="card-meta">
