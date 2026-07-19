@@ -46,70 +46,82 @@ $jogosAfetados = [];
 
 while ($linha = mysqli_fetch_assoc($resultado)) {
 
-    $caminho = $linha['caminho'];
+    // Cada foto é isolada num try/catch — se uma der um erro inesperado
+    // (não só os "esperados" já tratados abaixo), a migração não pode
+    // travar no meio de 600+ fotos por causa de uma só.
+    try {
 
-    if ($caminho === '' || str_starts_with($caminho, 'imagem.php?arquivo=')) {
-        $puladas++;
-        continue;
-    }
+        $caminho = $linha['caminho'];
 
-    if (str_starts_with($caminho, 'http') && $linha['origem'] === 'ludopedia') {
-        $puladas++;
-        continue;
-    }
+        if ($caminho === '' || str_starts_with($caminho, 'imagem.php?arquivo=')) {
+            $puladas++;
+            continue;
+        }
 
-    if (str_starts_with($caminho, 'http')) {
-        // Link externo que não é da Ludopedia (OlaClick, ou link colado à mão)
-        $conteudo = @file_get_contents($caminho);
+        if (str_starts_with($caminho, 'http') && $linha['origem'] === 'ludopedia') {
+            $puladas++;
+            continue;
+        }
 
-        if ($conteudo === false) {
-            echo "  ✗ Falha ao baixar: {$linha['nome']} ($caminho)\n";
-            registrarLog('ERRO', "Falha ao baixar imagem externa na migração pro bucket: {$linha['nome']} | $caminho");
+        if (str_starts_with($caminho, 'http')) {
+            // Link externo que não é da Ludopedia (OlaClick, ou link colado à mão)
+            $conteudo = @file_get_contents($caminho);
+
+            if ($conteudo === false) {
+                echo "  ✗ Falha ao baixar: {$linha['nome']} ($caminho)\n";
+                registrarLog('ERRO', "Falha ao baixar imagem externa na migração pro bucket: {$linha['nome']} | $caminho");
+                $erros++;
+                continue;
+            }
+
+            $extensao = strtolower(pathinfo(parse_url($caminho, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION)) ?: 'jpg';
+
+        } else {
+            // Arquivo em disco local (de antes do bucket existir)
+            $caminhoLocal = __DIR__ . '/../' . $caminho;
+
+            if (!is_file($caminhoLocal)) {
+                echo "  ✗ Arquivo local não encontrado: {$linha['nome']} ($caminho)\n";
+                $erros++;
+                continue;
+            }
+
+            $conteudo = file_get_contents($caminhoLocal);
+            $extensao = strtolower(pathinfo($caminho, PATHINFO_EXTENSION)) ?: 'jpg';
+        }
+
+        $arquivoTemp = tempnam(sys_get_temp_dir(), 'migr_');
+        file_put_contents($arquivoTemp, $conteudo);
+
+        $tipoConteudo = mime_content_type($arquivoTemp) ?: 'image/jpeg';
+        $chaveObjeto = 'jogos/' . uniqid('jogo_') . '.' . $extensao;
+
+        $sucesso = enviarArquivoParaBucket($arquivoTemp, $chaveObjeto, $tipoConteudo);
+        unlink($arquivoTemp);
+
+        if (!$sucesso) {
+            echo "  ✗ Falha ao enviar pro bucket: {$linha['nome']}\n";
             $erros++;
             continue;
         }
 
-        $extensao = strtolower(pathinfo(parse_url($caminho, PHP_URL_PATH) ?? '', PATHINFO_EXTENSION)) ?: 'jpg';
+        $novoCaminho = 'imagem.php?arquivo=' . urlencode($chaveObjeto);
 
-    } else {
-        // Arquivo em disco local (de antes do bucket existir)
-        $caminhoLocal = __DIR__ . '/../' . $caminho;
+        $stmt = mysqli_prepare($conexao, "UPDATE jogos_imagens SET caminho = ? WHERE id_imagem = ?");
+        mysqli_stmt_bind_param($stmt, 'si', $novoCaminho, $linha['id_imagem']);
+        mysqli_stmt_execute($stmt);
 
-        if (!is_file($caminhoLocal)) {
-            echo "  ✗ Arquivo local não encontrado: {$linha['nome']} ($caminho)\n";
-            $erros++;
-            continue;
-        }
+        $jogosAfetados[$linha['id_jogo']] = true;
 
-        $conteudo = file_get_contents($caminhoLocal);
-        $extensao = strtolower(pathinfo($caminho, PATHINFO_EXTENSION)) ?: 'jpg';
-    }
+        echo "  ✓ Migrada: {$linha['nome']}\n";
+        $migradas++;
 
-    $arquivoTemp = tempnam(sys_get_temp_dir(), 'migr_');
-    file_put_contents($arquivoTemp, $conteudo);
-
-    $tipoConteudo = mime_content_type($arquivoTemp) ?: 'image/jpeg';
-    $chaveObjeto = 'jogos/' . uniqid('jogo_') . '.' . $extensao;
-
-    $sucesso = enviarArquivoParaBucket($arquivoTemp, $chaveObjeto, $tipoConteudo);
-    unlink($arquivoTemp);
-
-    if (!$sucesso) {
-        echo "  ✗ Falha ao enviar pro bucket: {$linha['nome']}\n";
+    } catch (\Throwable $e) {
+        echo "  ✗ Erro inesperado: {$linha['nome']} — {$e->getMessage()}\n";
+        registrarLog('ERRO', "Erro inesperado na migração pro bucket: {$linha['nome']} | " . $e->getMessage());
         $erros++;
         continue;
     }
-
-    $novoCaminho = 'imagem.php?arquivo=' . urlencode($chaveObjeto);
-
-    $stmt = mysqli_prepare($conexao, "UPDATE jogos_imagens SET caminho = ? WHERE id_imagem = ?");
-    mysqli_stmt_bind_param($stmt, 'si', $novoCaminho, $linha['id_imagem']);
-    mysqli_stmt_execute($stmt);
-
-    $jogosAfetados[$linha['id_jogo']] = true;
-
-    echo "  ✓ Migrada: {$linha['nome']}\n";
-    $migradas++;
 }
 
 foreach (array_keys($jogosAfetados) as $idJogo) {
