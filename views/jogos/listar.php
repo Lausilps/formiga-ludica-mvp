@@ -116,6 +116,10 @@ $buscaUrl = urlencode($busca);
                 Gerar relatório
             </a>
 
+            <a href="../usuarios/criar.php" class="btn-admin btn-contorno">
+                + Novo usuário
+            </a>
+
             <button type="button" onclick="rodarEmbeddings()" id="btn-embeddings" class="btn-admin btn-ia">
                 🧠 Atualizar IA
             </button>

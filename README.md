@@ -120,9 +120,15 @@ Não existe um arquivo `.sql` de schema no repositório — as tabelas usadas ho
 - **`usuarios`** — login do admin (`id_usuario`, `nome`, `email`, `senha` com hash bcrypt, `tipo`, `ativo`)
 - **`categorias`** / **`jogos_categorias`** — categorias dos jogos, mapeadas na importação da Ludopedia
 
-### Criar o primeiro usuário admin
+### Criar um novo usuário admin
 
-Não existe tela de cadastro de usuário — é feito direto no banco. Gere o hash da senha:
+Já logado no painel, tem um botão "+ Novo usuário" na listagem de jogos
+(`views/usuarios/criar.php` / `controllers/criarUsuarioController.php`) —
+só quem já está autenticado como admin consegue criar outro. Não existe
+cadastro público.
+
+Pro **primeiro** usuário (antes de existir qualquer admin pra criar os
+próximos), ainda é preciso inserir direto no banco. Gere o hash da senha:
 ```bash
 php -r "echo password_hash('SUA_SENHA_AQUI', PASSWORD_DEFAULT), PHP_EOL;"
 ```
