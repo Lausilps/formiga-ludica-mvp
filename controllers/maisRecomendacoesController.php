@@ -1,11 +1,12 @@
 <?php
-session_start();
 header('Content-Type: application/json');
 
 require_once __DIR__ . '/../config/conexao.php';
 require_once __DIR__ . '/../config/gemini.php';
 require_once __DIR__ . '/../helpers/logHelper.php';
 require_once __DIR__ . '/../helpers/recomendacaoHelper.php';
+require_once __DIR__ . '/../helpers/sessaoHelper.php';
+iniciarSessaoPersistente();
 
 $descricao   = trim($_POST['descricao_sessao'] ?? '');
 $jogadores   = (int)($_POST['jogadores'] ?? 4);

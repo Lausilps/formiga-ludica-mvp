@@ -1,6 +1,7 @@
 <?php
-session_start();
 require_once 'config/conexao.php';
+require_once 'helpers/sessaoHelper.php';
+iniciarSessaoPersistente();
 
 $dadosAnteriores = $_SESSION['form_recomendacao'] ?? [];
 unset($_SESSION['form_recomendacao']);

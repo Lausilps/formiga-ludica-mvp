@@ -1,8 +1,7 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once __DIR__ . '/sessaoHelper.php';
+iniciarSessaoPersistente();
 
 function protegerAdmin(string $caminhoLogin = '../../login.php')
 {
