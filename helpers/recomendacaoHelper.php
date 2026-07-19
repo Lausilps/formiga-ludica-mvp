@@ -150,16 +150,30 @@ function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo,
     return $jogos;
 }
 
-function rankearJogosPorSimilaridade(array $jogos, array $queryEmbedding, int $limite): array
+// $jogadores > 0 garante prioridade (não só tendência) pra quem realmente
+// comporta o grupo inteiro: esses vêm sempre antes dos que não comportam,
+// e só dentro de cada um desses dois grupos a ordem é por similaridade.
+// Pra grupo grande (>16), onde buscarJogosCandidatos() não filtra mais por
+// max_jogadores, isso é o que garante que os jogos que chegam mais perto
+// do tamanho pedido apareçam primeiro em vez de ficar só na sorte da
+// semântica.
+function rankearJogosPorSimilaridade(array $jogos, array $queryEmbedding, int $limite, int $jogadores = 0): array
 {
     foreach ($jogos as &$jogo) {
         $embJogo           = json_decode($jogo['embedding'], true);
         $jogo['score']      = cosineSimilarity($queryEmbedding, $embJogo);
         $jogo['embedding']  = null;
+        $jogo['atendeGrupoTodo'] = $jogadores > 0 && (int) $jogo['max_jogadores'] >= $jogadores;
     }
     unset($jogo);
 
-    usort($jogos, fn($a, $b) => $b['score'] <=> $a['score']);
+    usort($jogos, function ($a, $b) {
+        if ($a['atendeGrupoTodo'] !== $b['atendeGrupoTodo']) {
+            return $b['atendeGrupoTodo'] <=> $a['atendeGrupoTodo'];
+        }
+
+        return $b['score'] <=> $a['score'];
+    });
 
     return array_slice($jogos, 0, $limite);
 }

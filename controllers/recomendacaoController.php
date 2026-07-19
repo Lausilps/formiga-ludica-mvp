@@ -60,7 +60,7 @@ try {
     }
 
     // 4. Ordena por similaridade e pega top 12
-    $topJogos = rankearJogosPorSimilaridade($jogos, $queryEmbedding, 12);
+    $topJogos = rankearJogosPorSimilaridade($jogos, $queryEmbedding, 12, $jogadores);
 
     registrarLog('INFO', 'Top jogos selecionados: ' . implode(', ', array_column($topJogos, 'nome')));
 

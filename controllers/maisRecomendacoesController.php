@@ -38,7 +38,7 @@ try {
         exit;
     }
 
-    $topJogos = rankearJogosPorSimilaridade($jogos, $queryEmbedding, 8);
+    $topJogos = rankearJogosPorSimilaridade($jogos, $queryEmbedding, 8, $jogadores);
 
     $contexto = montarContextoCatalogo($topJogos);
     $qtdMaxima = min(4, count($topJogos));
