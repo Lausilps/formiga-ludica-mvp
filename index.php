@@ -120,7 +120,12 @@ if (!$resultado) {
 <div class="modal" id="modal-jogo">
     <div class="modal-conteudo">
         <button type="button" class="fechar-modal" id="fechar-modal-jogo">×</button>
-        <img id="modal-imagem" src="" alt="">
+        <div class="modal-imagem-area">
+            <img id="modal-imagem" src="" alt="">
+            <button type="button" id="modal-imagem-anterior" class="modal-imagem-nav modal-imagem-nav-esquerda" title="Foto anterior" style="display:none;">‹</button>
+            <button type="button" id="modal-imagem-proxima" class="modal-imagem-nav modal-imagem-nav-direita" title="Próxima foto" style="display:none;">›</button>
+            <div id="modal-imagem-contador" class="modal-imagem-contador" style="display:none;"></div>
+        </div>
         <div>
             <h2 id="modal-nome"></h2>
             <p id="modal-descricao"></p>
@@ -188,6 +193,9 @@ const sentinel       = document.getElementById('sentinel');
 const loadingMais    = document.getElementById('loading-mais');
 const modalJogo      = document.getElementById('modal-jogo');
 const modalImagem    = document.getElementById('modal-imagem');
+const modalImagemAnterior = document.getElementById('modal-imagem-anterior');
+const modalImagemProxima  = document.getElementById('modal-imagem-proxima');
+const modalImagemContador = document.getElementById('modal-imagem-contador');
 const modalNome      = document.getElementById('modal-nome');
 const modalDescricao = document.getElementById('modal-descricao');
 const modalJogadores = document.getElementById('modal-jogadores');
@@ -257,6 +265,7 @@ function criarCard(jogo) {
     article.dataset.idade    = jogo.idade_minima;
     article.dataset.tempo    = jogo.duracao;
     article.dataset.linkLudo = jogo.link_ver_ludopedia ?? '';
+    article._imagens = jogo.imagens && jogo.imagens.length ? jogo.imagens : [jogo.imagem];
 
     article.innerHTML = `
         <div class="imagem-card">
@@ -278,6 +287,27 @@ function criarCard(jogo) {
             </div>
         </div>
     `;
+
+    // Passa as fotos automaticamente enquanto o mouse fica em cima do card
+    // (só se tiver mais de uma foto)
+    if (article._imagens.length > 1) {
+        const imgCard = article.querySelector('.imagem-card img');
+        let indiceHover = 0;
+        let intervaloHover = null;
+
+        article.addEventListener('mouseenter', function() {
+            indiceHover = 0;
+            intervaloHover = setInterval(function() {
+                indiceHover = (indiceHover + 1) % article._imagens.length;
+                imgCard.src = article._imagens[indiceHover];
+            }, 1200);
+        });
+
+        article.addEventListener('mouseleave', function() {
+            clearInterval(intervaloHover);
+            imgCard.src = article._imagens[0];
+        });
+    }
 
     // Abre modal ao clicar no card
     article.addEventListener('click', function(e) {
@@ -377,6 +407,23 @@ document.getElementById('limpar-filtros').addEventListener('click', () => {
 // ============================================================
 let modalJogoAberto = false;
 
+let modalImagens = [];
+let modalIndiceImagem = 0;
+
+function atualizarImagemModal() {
+    modalImagem.src = modalImagens[modalIndiceImagem];
+    modalImagem.alt = jogoModalAtual.nome;
+
+    const temVarias = modalImagens.length > 1;
+    modalImagemAnterior.style.display = temVarias ? 'flex' : 'none';
+    modalImagemProxima.style.display  = temVarias ? 'flex' : 'none';
+    modalImagemContador.style.display = temVarias ? 'block' : 'none';
+
+    if (temVarias) {
+        modalImagemContador.textContent = `${modalIndiceImagem + 1} / ${modalImagens.length}`;
+    }
+}
+
 function abrirModalJogo(card) {
     jogoModalAtual = {
         nome:     card.dataset.nome,
@@ -390,8 +437,10 @@ function abrirModalJogo(card) {
         linkLudo: card.dataset.linkLudo,
     };
 
-    modalImagem.src          = jogoModalAtual.imagem;
-    modalImagem.alt          = jogoModalAtual.nome;
+    modalImagens = card._imagens && card._imagens.length ? card._imagens : [jogoModalAtual.imagem];
+    modalIndiceImagem = 0;
+    atualizarImagemModal();
+
     modalNome.textContent    = jogoModalAtual.nome;
     modalDescricao.textContent = jogoModalAtual.descricao;
     modalJogadores.textContent = `👥 ${jogoModalAtual.min} - ${jogoModalAtual.max} jogadores`;
@@ -427,6 +476,16 @@ function fecharModalJogo() {
 window.addEventListener('popstate', () => {
     modalJogoAberto = false;
     modalJogo.classList.remove('ativo');
+});
+
+modalImagemAnterior.addEventListener('click', () => {
+    modalIndiceImagem = (modalIndiceImagem - 1 + modalImagens.length) % modalImagens.length;
+    atualizarImagemModal();
+});
+
+modalImagemProxima.addEventListener('click', () => {
+    modalIndiceImagem = (modalIndiceImagem + 1) % modalImagens.length;
+    atualizarImagemModal();
 });
 
 // ============================================================

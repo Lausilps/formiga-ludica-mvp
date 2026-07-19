@@ -95,8 +95,33 @@ if (!empty($params)) {
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
-$jogos = [];
+$linhas = [];
 while ($row = mysqli_fetch_assoc($result)) {
+    $linhas[] = $row;
+}
+
+// Galeria de fotos de cada jogo visível nessa página, numa única consulta
+// (evita uma query por jogo). Usada pro carrossel no hover do card e no
+// modal de detalhes.
+$idsJogos = array_column($linhas, 'id_jogo');
+$imagensPorJogo = [];
+
+if (!empty($idsJogos)) {
+    $placeholders = implode(',', array_fill(0, count($idsJogos), '?'));
+    $tiposImg = str_repeat('i', count($idsJogos));
+
+    $stmtImg = mysqli_prepare($conexao, "SELECT id_jogo, caminho FROM jogos_imagens WHERE id_jogo IN ($placeholders) ORDER BY id_jogo, ordem ASC");
+    mysqli_stmt_bind_param($stmtImg, $tiposImg, ...$idsJogos);
+    mysqli_stmt_execute($stmtImg);
+    $resultImg = mysqli_stmt_get_result($stmtImg);
+
+    while ($linhaImg = mysqli_fetch_assoc($resultImg)) {
+        $imagensPorJogo[$linhaImg['id_jogo']][] = $linhaImg['caminho'];
+    }
+}
+
+$jogos = [];
+foreach ($linhas as $row) {
     // Trata imagem
     if (!empty($row['imagem']) && str_starts_with($row['imagem'], 'http')) {
         $srcImagem = $row['imagem'];
@@ -124,6 +149,7 @@ while ($row = mysqli_fetch_assoc($result)) {
         // no campo "Link do tutorial".
         'link_ludopedia'     => $row['link_ludopedia'] ?? '',
         'link_ver_ludopedia' => $row['link_ludopedia'] ?: ($row['link_tutorial'] ?? ''),
+        'imagens'            => $imagensPorJogo[$row['id_jogo']] ?? [$srcImagem],
     ];
 }
 
