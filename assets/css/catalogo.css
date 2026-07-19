@@ -913,7 +913,7 @@ body {
     object-fit: contain;
 }
 
-.modal-imagem-area {
+#modal-jogo .modal-conteudo > .modal-imagem-area {
     grid-column: 1;
     position: relative;
 }

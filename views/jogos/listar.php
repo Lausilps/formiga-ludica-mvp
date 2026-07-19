@@ -63,6 +63,32 @@ if (!$resultado) {
     die("Ocorreu um erro ao carregar os jogos.");
 }
 
+$linhasJogos = [];
+while ($linha = mysqli_fetch_assoc($resultado)) {
+    $linhasJogos[] = $linha;
+}
+
+// Galeria de fotos de cada jogo desta página, numa única consulta extra
+// (evita uma query por jogo). Usada pro carrossel no modal de detalhes.
+$idsJogosPagina = array_column($linhasJogos, 'id_jogo');
+$imagensPorJogoAdmin = [];
+
+if (!empty($idsJogosPagina)) {
+    $placeholdersImg = implode(',', array_fill(0, count($idsJogosPagina), '?'));
+    $tiposImgAdmin = str_repeat('i', count($idsJogosPagina));
+
+    $stmtImgAdmin = mysqli_prepare($conexao, "SELECT id_jogo, caminho FROM jogos_imagens WHERE id_jogo IN ($placeholdersImg) ORDER BY id_jogo, ordem ASC");
+    mysqli_stmt_bind_param($stmtImgAdmin, $tiposImgAdmin, ...$idsJogosPagina);
+    mysqli_stmt_execute($stmtImgAdmin);
+    $resultImgAdmin = mysqli_stmt_get_result($stmtImgAdmin);
+
+    while ($linhaImgAdmin = mysqli_fetch_assoc($resultImgAdmin)) {
+        $caminhoImg = $linhaImgAdmin['caminho'];
+        $srcImg = str_starts_with($caminhoImg, 'http') ? $caminhoImg : '../../' . $caminhoImg;
+        $imagensPorJogoAdmin[$linhaImgAdmin['id_jogo']][] = $srcImg;
+    }
+}
+
 $buscaUrl = urlencode($busca);
 ?>
 
@@ -175,7 +201,7 @@ $buscaUrl = urlencode($busca);
                         </thead>
 
                         <tbody>
-                            <?php while ($jogo = mysqli_fetch_assoc($resultado)): ?>
+                            <?php foreach ($linhasJogos as $jogo): ?>
                                 <?php
                                     if (!empty($jogo['imagem'])) {
                                         $srcImagem = str_starts_with($jogo['imagem'], 'http')
@@ -228,6 +254,7 @@ $buscaUrl = urlencode($busca);
                                             class="btn-acao btn-detalhes"
                                             data-nome="<?= htmlspecialchars($jogo['nome']) ?>"
                                             data-imagem="<?= htmlspecialchars($srcImagem) ?>"
+                                            data-imagens="<?= htmlspecialchars(json_encode($imagensPorJogoAdmin[$jogo['id_jogo']] ?? [$srcImagem])) ?>"
                                             data-descricao="<?= htmlspecialchars($jogo['descricao'] ?? 'Sem descrição cadastrada.') ?>"
                                             data-preco="<?= htmlspecialchars(number_format($jogo['preco'], 2, ',', '.')) ?>"
                                             data-min="<?= $jogo['min_jogadores'] ?>"
@@ -242,7 +269,7 @@ $buscaUrl = urlencode($busca);
                                         </button>
                                     </td>
                                 </tr>
-                            <?php endwhile; ?>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -300,7 +327,12 @@ $buscaUrl = urlencode($busca);
     <div class="modal" id="modal-detalhes-jogo">
         <div class="modal-conteudo">
             <button type="button" class="fechar-modal" id="fechar-modal-detalhes">×</button>
-            <img id="detalhes-imagem" src="" alt="">
+            <div class="modal-imagem-area">
+                <img id="detalhes-imagem" src="" alt="">
+                <button type="button" id="detalhes-imagem-anterior" class="modal-imagem-nav modal-imagem-nav-esquerda" title="Foto anterior" style="display:none;">‹</button>
+                <button type="button" id="detalhes-imagem-proxima" class="modal-imagem-nav modal-imagem-nav-direita" title="Próxima foto" style="display:none;">›</button>
+                <div id="detalhes-imagem-contador" class="modal-imagem-contador" style="display:none;"></div>
+            </div>
             <div>
                 <span class="badge-status" id="detalhes-status"></span>
                 <h2 id="detalhes-nome"></h2>
@@ -443,11 +475,44 @@ $buscaUrl = urlencode($busca);
         // MODAL DE DETALHES DO JOGO
         // ============================================================
         const modalDetalhes = document.getElementById('modal-detalhes-jogo');
+        const detalhesImagem = document.getElementById('detalhes-imagem');
+        const detalhesImagemAnterior = document.getElementById('detalhes-imagem-anterior');
+        const detalhesImagemProxima  = document.getElementById('detalhes-imagem-proxima');
+        const detalhesImagemContador = document.getElementById('detalhes-imagem-contador');
+
+        let detalhesImagens = [];
+        let detalhesIndiceImagem = 0;
+
+        function atualizarImagemDetalhes() {
+            detalhesImagem.src = detalhesImagens[detalhesIndiceImagem];
+
+            const temVarias = detalhesImagens.length > 1;
+            detalhesImagemAnterior.style.display = temVarias ? 'flex' : 'none';
+            detalhesImagemProxima.style.display  = temVarias ? 'flex' : 'none';
+            detalhesImagemContador.style.display = temVarias ? 'block' : 'none';
+
+            if (temVarias) {
+                detalhesImagemContador.textContent = `${detalhesIndiceImagem + 1} / ${detalhesImagens.length}`;
+            }
+        }
+
+        detalhesImagemAnterior.addEventListener('click', () => {
+            detalhesIndiceImagem = (detalhesIndiceImagem - 1 + detalhesImagens.length) % detalhesImagens.length;
+            atualizarImagemDetalhes();
+        });
+
+        detalhesImagemProxima.addEventListener('click', () => {
+            detalhesIndiceImagem = (detalhesIndiceImagem + 1) % detalhesImagens.length;
+            atualizarImagemDetalhes();
+        });
 
         document.querySelectorAll('.btn-detalhes').forEach(function(botao) {
             botao.addEventListener('click', function() {
-                document.getElementById('detalhes-imagem').src = botao.dataset.imagem;
-                document.getElementById('detalhes-imagem').alt = botao.dataset.nome;
+                detalhesImagens = JSON.parse(botao.dataset.imagens || '[]');
+                if (!detalhesImagens.length) detalhesImagens = [botao.dataset.imagem];
+                detalhesIndiceImagem = 0;
+                atualizarImagemDetalhes();
+                detalhesImagem.alt = botao.dataset.nome;
                 document.getElementById('detalhes-nome').textContent = botao.dataset.nome;
                 document.getElementById('detalhes-descricao').textContent = botao.dataset.descricao;
                 document.getElementById('detalhes-jogadores').textContent = `👥 ${botao.dataset.min} - ${botao.dataset.max} jogadores`;
