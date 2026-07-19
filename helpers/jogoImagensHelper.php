@@ -1,10 +1,33 @@
 <?php
 
+require_once __DIR__ . '/storageHelper.php';
+
 // Gerencia a galeria de fotos de um jogo (tabela jogos_imagens). A foto de
 // ordem 0 é sempre a capa, e jogos.imagem é mantida como um espelho dela —
 // assim todas as outras telas do sistema (listagem, catálogo, relatórios,
 // recomendação) continuam lendo jogos.imagem normalmente, sem precisar
 // saber que a galeria existe.
+
+// Apaga o arquivo de verdade por trás de um "caminho" salvo no banco —
+// só se ele for nosso (bucket ou, por retrocompatibilidade, disco local).
+// Link externo (Ludopedia, começa com http) não é apagado: não é nosso.
+function removerArquivoDeCaminho(string $caminho): void
+{
+    if ($caminho === '' || str_starts_with($caminho, 'http')) {
+        return;
+    }
+
+    if (str_starts_with($caminho, 'imagem.php?arquivo=')) {
+        $chave = urldecode(substr($caminho, strlen('imagem.php?arquivo=')));
+        removerArquivoDoBucket($chave);
+        return;
+    }
+
+    $caminhoArquivo = '../' . $caminho;
+    if (is_file($caminhoArquivo)) {
+        unlink($caminhoArquivo);
+    }
+}
 
 function listarImagensJogo(mysqli $conexao, int $idJogo): array
 {
@@ -72,12 +95,7 @@ function removerImagemJogo(mysqli $conexao, int $idJogo, int $idImagem): void
     mysqli_stmt_bind_param($stmt, 'ii', $idImagem, $idJogo);
     mysqli_stmt_execute($stmt);
 
-    if (!empty($imagem['caminho']) && !str_starts_with($imagem['caminho'], 'http')) {
-        $caminhoArquivo = '../' . $imagem['caminho'];
-        if (is_file($caminhoArquivo)) {
-            unlink($caminhoArquivo);
-        }
-    }
+    removerArquivoDeCaminho($imagem['caminho'] ?? '');
 
     reordenarSequencialmente($conexao, listarImagensJogo($conexao, $idJogo));
     sincronizarCapaJogo($conexao, $idJogo);

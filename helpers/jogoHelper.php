@@ -33,20 +33,19 @@ function uploadImagemJogo(?array $arquivo): ?string
         return null;
     }
 
-    $pastaDestino = "../uploads/jogos/";
-
-    if (!is_dir($pastaDestino)) {
-        mkdir($pastaDestino, 0777, true);
-    }
+    require_once __DIR__ . '/storageHelper.php';
 
     $extensao = strtolower(pathinfo($arquivo['name'], PATHINFO_EXTENSION));
     $nomeArquivo = uniqid('jogo_') . '.' . $extensao;
+    $chaveObjeto = 'jogos/' . $nomeArquivo;
 
-    if (!move_uploaded_file($arquivo['tmp_name'], $pastaDestino . $nomeArquivo)) {
+    $tipoConteudo = mime_content_type($arquivo['tmp_name']) ?: 'application/octet-stream';
+
+    if (!enviarArquivoParaBucket($arquivo['tmp_name'], $chaveObjeto, $tipoConteudo)) {
         return null;
     }
 
-    return 'uploads/jogos/' . $nomeArquivo;
+    return 'imagem.php?arquivo=' . urlencode($chaveObjeto);
 }
 
 function formatarDificuldade(?string $dificuldade): string
