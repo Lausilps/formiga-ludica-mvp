@@ -3,6 +3,9 @@
 require_once '../config/conexao.php';
 require_once '../helpers/logHelper.php';
 require_once '../helpers/jogoHelper.php';
+require_once '../helpers/authHelper.php';
+
+protegerAdmin('../login.php');
 
 $json = $_POST['json_olaclick'] ?? '';
 
