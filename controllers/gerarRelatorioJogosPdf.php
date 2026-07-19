@@ -11,9 +11,12 @@ require_once '../config/conexao.php';
 require_once '../helpers/logHelper.php';
 require_once '../helpers/jogoHelper.php';
 require_once '../helpers/relatorioJogosHelper.php';
+require_once '../helpers/authHelper.php';
 require_once '../vendor/autoload.php';
 
 use Dompdf\Dompdf;
+
+protegerAdmin('../login.php');
 
 $tipo = $_GET['tipo'] ?? 'sintetico';
 
