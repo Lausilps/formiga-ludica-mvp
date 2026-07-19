@@ -142,14 +142,23 @@ unset($_SESSION['form_recomendacao']);
 
 <div id="overlay-carregando">
     <div class="modal-carregando">
-        <video src="assets/img/formiguinha-pesquisando.mp4" class="gif-formiguinha" autoplay loop muted playsinline></video>
-        <p>🐜 A Formiguinha está fuçando o catálogo pra achar os jogos perfeitos pra você...</p>
+        <video id="video-formiguinha-carregando" src="assets/img/formiguinha-pesquisando.mp4" class="gif-formiguinha" autoplay loop muted playsinline></video>
+        <p>🐜 A Formiguinha está fuçando o catálogo em busca dos jogos perfeitos para você...</p>
     </div>
 </div>
 
 <script>
     document.getElementById('form-recomendacao').addEventListener('submit', function () {
         document.getElementById('overlay-carregando').style.display = 'flex';
+
+        // No celular, video que fica escondido (display:none) desde o
+        // carregamento da página às vezes não respeita o autoplay sozinho
+        // na primeira vez que fica visível — chama o play() na mão pra
+        // garantir, já que isso acontece dentro do gesto do usuário (o
+        // clique em "Ver recomendações").
+        const videoCarregando = document.getElementById('video-formiguinha-carregando');
+        videoCarregando.currentTime = 0;
+        videoCarregando.play().catch(() => {});
     });
 </script>
 

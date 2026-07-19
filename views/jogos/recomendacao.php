@@ -83,7 +83,7 @@
                         <?php endif; ?>
 
                         <div class="rodape-card">
-                            <span class="card-preco">R$ <?= number_format($jogo['preco'], 2, ',', '.') ?>/dia</span>
+                            <span class="card-preco">R$ <?= number_format($jogo['preco'], 2, ',', '.') ?>/periodo</span>
                             <button type="button" class="btn-escolher" data-nome="<?= htmlspecialchars($jogo['nome']) ?>">Escolher</button>
                         </div>
                     </div>
@@ -194,7 +194,7 @@
                             Ver na Ludopedia
                         </a>` : ''}
                         <div class="rodape-card">
-                            <span class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/dia</span>
+                            <span class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/periodo</span>
                             <button type="button" class="btn-escolher" data-nome="${jogo.nome}">Escolher</button>
                         </div>
                     </div>
