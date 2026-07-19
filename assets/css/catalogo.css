@@ -890,6 +890,34 @@ body {
     color: white;
 }
 
+/* Celular estreito: o banner "Formiguinha recomenda" ficava com a
+   formiguinha e o texto lado a lado até em telas bem pequenas, sobrando
+   pouco espaço pro botão — o texto quebrava linha e o formato arredondado
+   (999px) ficava distorcido, meio "balão furado". Empilha tudo em vez de
+   manter lado a lado. */
+@media (max-width: 480px) {
+    .catalogo-topo {
+        flex-direction: column;
+        text-align: center;
+        gap: 14px;
+        padding: 24px 18px;
+    }
+
+    .banner-formiguinha-img {
+        width: 150px;
+        margin: 0 auto;
+    }
+
+    .banner-texto {
+        align-items: center;
+    }
+
+    .btn-recomendar-banner {
+        align-self: center;
+        width: 100%;
+        max-width: 280px;
+    }
+}
 
 @media (max-width: 700px) {
     .modal-conteudo {
