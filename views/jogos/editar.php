@@ -104,57 +104,17 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
             <h2>Galeria de fotos</h2>
             <p class="descricao-galeria">A primeira foto é a capa usada no catálogo e na listagem. Use as setas pra reordenar ou a estrela pra trocar a capa.</p>
 
-            <?php if (empty($imagensGaleria)): ?>
-                <p class="sem-fotos">Nenhuma foto cadastrada ainda.</p>
-            <?php else: ?>
-                <div class="galeria-fotos">
-                    <?php foreach ($imagensGaleria as $indice => $imagem): ?>
-                        <?php
-                            $srcGaleria = str_starts_with($imagem['caminho'], 'http')
-                                ? $imagem['caminho']
-                                : '../../' . $imagem['caminho'];
-                        ?>
-                        <div class="foto-galeria">
-                            <img src="<?= htmlspecialchars($srcGaleria) ?>" alt="Foto <?= $indice + 1 ?> de <?= htmlspecialchars($jogo['nome']) ?>">
+            <div id="galeria-conteudo">
+                <?php include '../partials/galeria_fotos.php'; ?>
+            </div>
 
-                            <?php if ($indice === 0): ?>
-                                <span class="etiqueta-capa">Capa</span>
-                            <?php endif; ?>
-
-                            <div class="acoes-foto-galeria">
-                                <?php if ($indice !== 0): ?>
-                                    <button type="button" class="btn-foto" onclick="acaoGaleria('capa', <?= $imagem['id_imagem'] ?>)" title="Tornar capa">★</button>
-                                <?php endif; ?>
-
-                                <?php if ($indice > 0): ?>
-                                    <button type="button" class="btn-foto" onclick="acaoGaleria('mover', <?= $imagem['id_imagem'] ?>, 'esquerda')" title="Mover pra esquerda">←</button>
-                                <?php endif; ?>
-
-                                <?php if ($indice < count($imagensGaleria) - 1): ?>
-                                    <button type="button" class="btn-foto" onclick="acaoGaleria('mover', <?= $imagem['id_imagem'] ?>, 'direita')" title="Mover pra direita">→</button>
-                                <?php endif; ?>
-
-                                <button type="button" class="btn-foto btn-foto-excluir" onclick="excluirFotoGaleria(<?= $imagem['id_imagem'] ?>)" title="Excluir foto">🗑</button>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
-
-            <form action="../../controllers/jogoImagensController.php" method="POST" enctype="multipart/form-data" class="form-upload-galeria">
+            <form id="form-upload-galeria" action="../../controllers/jogoImagensController.php" method="POST" enctype="multipart/form-data" class="form-upload-galeria">
                 <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
                 <input type="hidden" name="acao" value="upload">
 
                 <label>Adicionar fotos:</label>
                 <input type="file" name="imagens[]" accept="image/*" multiple required>
                 <button type="submit" class="btn-add-foto">Enviar fotos</button>
-            </form>
-
-            <form id="form-acao-galeria" action="../../controllers/jogoImagensController.php" method="POST" style="display:none;">
-                <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
-                <input type="hidden" name="acao" id="galeria-acao">
-                <input type="hidden" name="id_imagem" id="galeria-id-imagem">
-                <input type="hidden" name="direcao" id="galeria-direcao">
             </form>
 
         </div>
@@ -178,11 +138,38 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
         }
     }
 
+    // ============================================================
+    // GALERIA DE FOTOS — atualiza só o pedaço da galeria, sem
+    // recarregar a página (mantém posição do scroll, campos do
+    // formulário de cima intactos, etc.)
+    // ============================================================
+    const galeriaConteudo = document.getElementById('galeria-conteudo');
+    const idJogoAtual = <?= (int) $jogo['id_jogo'] ?>;
+
+    async function enviarAcaoGaleria(formData) {
+        try {
+            const resposta = await fetch('../../controllers/jogoImagensController.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!resposta.ok) {
+                throw new Error('Resposta não OK');
+            }
+
+            galeriaConteudo.innerHTML = await resposta.text();
+        } catch (e) {
+            alert('Não foi possível atualizar a galeria. Tenta de novo.');
+        }
+    }
+
     function acaoGaleria(acao, idImagem, direcao) {
-        document.getElementById('galeria-acao').value = acao;
-        document.getElementById('galeria-id-imagem').value = idImagem;
-        document.getElementById('galeria-direcao').value = direcao || '';
-        document.getElementById('form-acao-galeria').submit();
+        const formData = new FormData();
+        formData.append('id_jogo', idJogoAtual);
+        formData.append('acao', acao);
+        formData.append('id_imagem', idImagem);
+        formData.append('direcao', direcao || '');
+        enviarAcaoGaleria(formData);
     }
 
     function excluirFotoGaleria(idImagem) {
@@ -190,6 +177,21 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
             acaoGaleria('excluir', idImagem);
         }
     }
+
+    document.getElementById('form-upload-galeria').addEventListener('submit', function (evento) {
+        evento.preventDefault();
+
+        const botao = this.querySelector('.btn-add-foto');
+        const textoOriginal = botao.textContent;
+        botao.disabled = true;
+        botao.textContent = 'Enviando...';
+
+        enviarAcaoGaleria(new FormData(this)).finally(() => {
+            this.reset();
+            botao.disabled = false;
+            botao.textContent = textoOriginal;
+        });
+    });
 </script>
 
 </body>

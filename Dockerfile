@@ -1,7 +1,14 @@
 FROM php:8.2-cli
 
-RUN apt-get update && apt-get install -y libcurl4-openssl-dev unzip \
-    && docker-php-ext-install mysqli pdo pdo_mysql curl
+RUN apt-get update && apt-get install -y \
+        libcurl4-openssl-dev \
+        unzip \
+        libjpeg-dev \
+        libpng-dev \
+        libwebp-dev \
+        libfreetype6-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
+    && docker-php-ext-install mysqli pdo pdo_mysql curl gd
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 

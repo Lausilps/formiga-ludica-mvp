@@ -63,5 +63,21 @@ switch ($acao) {
         break;
 }
 
-header("Location: ../views/jogos/editar.php?id=$id_jogo");
+// Devolve o HTML atualizado da galeria (a mesma partial usada em
+// editar.php) em vez de redirecionar — quem chama (fetch, em
+// editar.php) só troca o conteúdo do pedaço da tela que mudou, sem
+// recarregar a página inteira.
+$stmt = mysqli_prepare($conexao, "SELECT nome FROM jogos WHERE id_jogo = ?");
+mysqli_stmt_bind_param($stmt, 'i', $id_jogo);
+mysqli_stmt_execute($stmt);
+$jogo = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+if (!$jogo) {
+    die('Jogo não encontrado.');
+}
+
+$imagensGaleria = listarImagensJogo($conexao, $id_jogo);
+
+header('Content-Type: text/html; charset=UTF-8');
+include __DIR__ . '/../views/partials/galeria_fotos.php';
 exit;

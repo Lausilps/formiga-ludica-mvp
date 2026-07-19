@@ -174,8 +174,9 @@ textarea:focus {
 
 .acoes-foto-galeria {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
     margin-top: 10px;
 }
 
@@ -184,10 +185,15 @@ textarea:focus {
     color: #7C3AED;
     border: 1px solid #E5D7FF;
     border-radius: 10px;
-    width: 30px;
-    height: 30px;
+    width: 27px;
+    height: 27px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
     cursor: pointer;
-    font-size: .9rem;
+    font-size: .85rem;
 }
 
 .btn-foto:hover {
