@@ -85,18 +85,12 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
 
     <section class="card-admin">
 
-        <form action="../../controllers/editarJogoController.php" method="POST" enctype="multipart/form-data" class="form-editar">
+        <form id="form-editar-jogo" action="../../controllers/editarJogoController.php" method="POST" enctype="multipart/form-data" class="form-editar">
 
             <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
 
             <div class="grid-form">
                 <?php $modoEdicao = true; include '../partials/jogo_form_campos.php'; ?>
-            </div>
-
-            <div class="acoes-form">
-                <button type="submit" class="btn-salvar">Salvar alterações</button>
-                <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
-                <button type="button" class="btn-excluir" onclick="confirmarExclusao()">🗑️ Excluir jogo</button>
             </div>
 
         </form>
@@ -163,6 +157,12 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
                 <input type="hidden" name="direcao" id="galeria-direcao">
             </form>
 
+        </div>
+
+        <div class="acoes-form">
+            <button type="submit" form="form-editar-jogo" class="btn-salvar">Salvar alterações</button>
+            <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
+            <button type="button" class="btn-excluir" onclick="confirmarExclusao()">🗑️ Excluir jogo</button>
         </div>
 
     </section>
