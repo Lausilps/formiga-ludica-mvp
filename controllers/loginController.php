@@ -1,19 +1,17 @@
 <?php
 
-session_start();
-
 require_once '../config/conexao.php';
 require_once '../helpers/logHelper.php';
+require_once '../helpers/sessaoHelper.php';
+iniciarSessaoPersistente();
 
 $email = $_POST['email'];
 $senha = $_POST['senha'];
 
-$sql = "SELECT * FROM usuarios 
-        WHERE email = '$email' 
-        AND ativo = 1 
-        LIMIT 1";
-
-$resultado = mysqli_query($conexao, $sql);
+$stmt = mysqli_prepare($conexao, "SELECT * FROM usuarios WHERE email = ? AND ativo = 1 LIMIT 1");
+mysqli_stmt_bind_param($stmt, 's', $email);
+mysqli_stmt_execute($stmt);
+$resultado = mysqli_stmt_get_result($stmt);
 
 if ($resultado && mysqli_num_rows($resultado) == 1) {
 
