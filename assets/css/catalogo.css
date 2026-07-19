@@ -348,6 +348,8 @@ body {
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     cursor: pointer;
     position: relative;
+    display: flex;
+    flex-direction: column;
 }
 
 .card-jogo::after {
@@ -389,6 +391,9 @@ body {
 
 .conteudo-card {
     padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .conteudo-card h2 {
@@ -416,6 +421,8 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-top: auto;
+    padding-top: 12px;
 }
 
 .btn-escolher {
