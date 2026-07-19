@@ -1,6 +1,12 @@
 <?php
 
-require_once '../vendor/autoload.php';
+// __DIR__ em vez de caminho relativo puro: esse helper é chamado a partir
+// de profundidades diferentes (controllers/, views/jogos/), e um caminho
+// relativo tipo '../vendor/autoload.php' é resolvido pelo PHP com base no
+// diretório do script de entrada (que muda a cada chamador), não com base
+// nesse arquivo — quebrava a edição de jogo, que fica 2 pastas mais fundo
+// que os controllers.
+require_once __DIR__ . '/../vendor/autoload.php';
 
 use Aws\S3\S3Client;
 
@@ -8,6 +14,10 @@ use Aws\S3\S3Client;
 // não existe link público direto — então toda leitura passa pelo nosso
 // próprio proxy (imagem.php), que busca o arquivo aqui e devolve pro
 // navegador.
+//
+// Nomes de variável no padrão AWS (é o que o Railway injetou pra esse
+// bucket): AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION,
+// AWS_ENDPOINT_URL, AWS_S3_BUCKET_NAME.
 
 function clienteBucket(): S3Client
 {
@@ -16,11 +26,11 @@ function clienteBucket(): S3Client
     if ($cliente === null) {
         $cliente = new S3Client([
             'version' => 'latest',
-            'region' => getenv('REGION') ?: 'auto',
-            'endpoint' => getenv('ENDPOINT') ?: 'https://storage.railway.app',
+            'region' => getenv('AWS_DEFAULT_REGION') ?: 'auto',
+            'endpoint' => getenv('AWS_ENDPOINT_URL') ?: 'https://storage.railway.app',
             'credentials' => [
-                'key' => getenv('ACCESS_KEY_ID') ?: '',
-                'secret' => getenv('SECRET_ACCESS_KEY') ?: '',
+                'key' => getenv('AWS_ACCESS_KEY_ID') ?: '',
+                'secret' => getenv('AWS_SECRET_ACCESS_KEY') ?: '',
             ],
         ]);
     }
@@ -30,7 +40,7 @@ function clienteBucket(): S3Client
 
 function nomeBucket(): string
 {
-    return getenv('BUCKET') ?: '';
+    return getenv('AWS_S3_BUCKET_NAME') ?: '';
 }
 
 function enviarArquivoParaBucket(string $caminhoLocalTemp, string $chaveObjeto, string $tipoConteudo): bool
