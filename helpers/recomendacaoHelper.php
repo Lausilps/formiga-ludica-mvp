@@ -43,11 +43,16 @@ function diagnosticarZeroCandidatos($conexao, int $jogadores, int $idade, int $t
             FROM jogos
             WHERE ativo = 1
               AND min_jogadores <= ?
-              AND max_jogadores >= ?
               AND idade_minima <= ?";
 
-    $tipos  = 'iii';
-    $params = [$jogadores, $jogadores, $idade];
+    $tipos  = 'ii';
+    $params = [$jogadores, $idade];
+
+    if (!grupoGrande($jogadores)) {
+        $sql .= " AND max_jogadores >= ?";
+        $tipos .= 'i';
+        $params[] = $jogadores;
+    }
 
     if ($tempo < 999) {
         $sql .= " AND (duracao_minutos <= ? OR duracao_minutos IS NULL)";
@@ -75,6 +80,16 @@ function diagnosticarZeroCandidatos($conexao, int $jogadores, int $idade, int $t
     return "{$total} jogo(s) bateriam com esse filtro e já têm embedding — investigar outra causa.";
 }
 
+// Acima desse número de pessoas, não faz sentido exigir um jogo que caiba
+// o grupo inteiro numa mesa só — na prática um grupo desse tamanho se
+// divide em várias mesas jogando coisas diferentes ao mesmo tempo.
+const LIMITE_GRUPO_GRANDE = 16;
+
+function grupoGrande(int $jogadores): bool
+{
+    return $jogadores > LIMITE_GRUPO_GRANDE;
+}
+
 function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo, array $idsExcluidos = []): array
 {
     // Trava extra contra jogo placeholder "SEM NOME (Ludopedia #...)": ele
@@ -90,11 +105,20 @@ function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo,
               AND nome NOT LIKE 'SEM NOME (Ludopedia #%'
               AND embedding IS NOT NULL
               AND min_jogadores <= ?
-              AND max_jogadores >= ?
               AND idade_minima <= ?";
 
-    $tipos  = 'iii';
-    $params = [$jogadores, $jogadores, $idade];
+    $tipos  = 'ii';
+    $params = [$jogadores, $idade];
+
+    // Grupo "normal": exige que o jogo caiba todo mundo (comportamento de
+    // sempre). Grupo grande: só exige gente suficiente pra abrir uma mesa
+    // (min_jogadores) — sem travar no max_jogadores, que nenhum jogo comum
+    // alcança pra grupos assim.
+    if (!grupoGrande($jogadores)) {
+        $sql .= " AND max_jogadores >= ?";
+        $tipos .= 'i';
+        $params[] = $jogadores;
+    }
 
     if ($tempo < 999) {
         $sql .= " AND (duracao_minutos <= ? OR duracao_minutos IS NULL)";
