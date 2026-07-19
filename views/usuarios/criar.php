@@ -67,12 +67,18 @@ protegerAdmin('../../login.php');
 
                 <div class="campo">
                     <label>Senha:</label>
-                    <input type="password" name="senha" required minlength="8">
+                    <div class="campo-senha">
+                        <input type="password" name="senha" id="campo-senha" required minlength="8">
+                        <button type="button" class="btn-mostrar-senha" onclick="alternarSenha('campo-senha', this)" aria-label="Mostrar senha">👁</button>
+                    </div>
                 </div>
 
                 <div class="campo">
                     <label>Confirmar senha:</label>
-                    <input type="password" name="confirmar_senha" required minlength="8">
+                    <div class="campo-senha">
+                        <input type="password" name="confirmar_senha" id="campo-confirmar-senha" required minlength="8">
+                        <button type="button" class="btn-mostrar-senha" onclick="alternarSenha('campo-confirmar-senha', this)" aria-label="Mostrar senha">👁</button>
+                    </div>
                 </div>
 
             </div>
@@ -87,6 +93,8 @@ protegerAdmin('../../login.php');
     </section>
 
 </main>
+
+<script src="../../assets/js/mostrarSenha.js"></script>
 
 </body>
 </html>

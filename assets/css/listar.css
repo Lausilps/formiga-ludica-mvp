@@ -56,21 +56,6 @@
     margin-top: 8px;
 }
 
-.btn-logout-topo {
-    background: rgba(255,255,255,.13);
-    color: white;
-    border: 1px solid rgba(255,255,255,.22);
-    padding: 12px 18px;
-    border-radius: 14px;
-    text-decoration: none;
-    font-weight: 800;
-    transition: .2s;
-}
-
-.btn-logout-topo:hover {
-    background: #F04A23;
-}
-
 /* CONTAINER */
 .admin-container {
     max-width: 1500px;

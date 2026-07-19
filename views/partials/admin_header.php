@@ -14,9 +14,15 @@
                 </div>
             </div>
 
-            <a href="../../logout.php" class="btn-logout-topo">
-                Sair
-            </a>
+            <div class="area-usuario-topo">
+                <?php if (!empty($_SESSION['nome'])): ?>
+                    <span class="saudacao-usuario">Olá, <?= htmlspecialchars($_SESSION['nome']) ?>!</span>
+                <?php endif; ?>
+
+                <a href="../../logout.php" class="btn-logout-topo">
+                    Sair
+                </a>
+            </div>
 
         <?php else: ?>
 

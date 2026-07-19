@@ -28,12 +28,16 @@ iniciarSessaoPersistente();
         <input type="email" name="email" id="campo-email" autocomplete="email" required>
 
         <label>Senha:</label>
-        <input type="password" name="senha" required>
+        <div class="campo-senha">
+            <input type="password" name="senha" id="campo-senha" required>
+            <button type="button" class="btn-mostrar-senha" onclick="alternarSenha('campo-senha', this)" aria-label="Mostrar senha">👁</button>
+        </div>
 
         <button type="submit">Entrar</button>
 
     </form>
 
+    <script src="assets/js/mostrarSenha.js"></script>
     <script>
         const CHAVE_ULTIMO_EMAIL = 'formigaludica_ultimo_email';
         const campoEmail = document.getElementById('campo-email');
