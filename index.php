@@ -69,24 +69,6 @@ if (!$resultado) {
     </div>
 </section>
 
-<section class="secao-carrossel" id="secao-novidades" style="display:none;">
-    <h2 class="titulo-carrossel">🆕 Confira as novidades</h2>
-    <div class="carrossel-wrap">
-        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-novidades" aria-label="Anterior">‹</button>
-        <div class="carrossel-trilha" id="carrossel-novidades"></div>
-        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-novidades" aria-label="Próximo">›</button>
-    </div>
-</section>
-
-<section class="secao-carrossel" id="secao-destaques" style="display:none;">
-    <h2 class="titulo-carrossel">⭐ Recomendação da loja</h2>
-    <div class="carrossel-wrap">
-        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-destaques" aria-label="Anterior">‹</button>
-        <div class="carrossel-trilha" id="carrossel-destaques"></div>
-        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-destaques" aria-label="Próximo">›</button>
-    </div>
-</section>
-
 <section class="filtros-catalogo">
     <input type="text" id="busca-jogo" placeholder="Buscar jogos...">
 
@@ -121,6 +103,35 @@ if (!$resultado) {
 
     <button type="button" id="limpar-filtros">Limpar filtros</button>
 </section>
+
+<section class="secao-carrossel" id="secao-novidades" style="display:none;">
+    <div class="cabecalho-carrossel">
+        <h2 class="titulo-carrossel">Confira as novidades</h2>
+        <p class="subtitulo-carrossel">Os últimos jogos que chegaram por aqui.</p>
+    </div>
+    <div class="carrossel-wrap">
+        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-novidades" aria-label="Anterior">‹</button>
+        <div class="carrossel-trilha" id="carrossel-novidades"></div>
+        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-novidades" aria-label="Próximo">›</button>
+    </div>
+</section>
+
+<section class="secao-carrossel" id="secao-destaques" style="display:none;">
+    <div class="cabecalho-carrossel">
+        <h2 class="titulo-carrossel">Recomendações da loja</h2>
+        <p class="subtitulo-carrossel">Jogos selecionados a dedo para garantir a sua diversão.</p>
+    </div>
+    <div class="carrossel-wrap">
+        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-destaques" aria-label="Anterior">‹</button>
+        <div class="carrossel-trilha" id="carrossel-destaques"></div>
+        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-destaques" aria-label="Próximo">›</button>
+    </div>
+</section>
+
+<div class="cabecalho-carrossel cabecalho-todos-jogos">
+    <h2 class="titulo-carrossel">Todos os jogos</h2>
+    <p class="subtitulo-carrossel">Explore nosso catálogo completo.</p>
+</div>
 
 <main class="grid-jogos" id="grid-jogos">
     <div id="loading-inicial" style="grid-column:1/-1; text-align:center; padding:40px; color:#666;">
@@ -589,11 +600,23 @@ function iniciarCarrossel(idTrilha) {
     iniciarAutoplay();
 }
 
-function popularCarrossel(idSecao, idTrilha, jogos) {
+function popularCarrossel(idSecao, idTrilha, jogos, mostrarSeloNovo = false) {
     if (!jogos.length) return;
 
     const trilha = document.getElementById(idTrilha);
-    jogos.forEach(jogo => trilha.appendChild(criarCard(jogo)));
+
+    jogos.forEach(jogo => {
+        const card = criarCard(jogo);
+
+        if (mostrarSeloNovo) {
+            const selo = document.createElement('span');
+            selo.className = 'selo-novo';
+            selo.textContent = 'NOVO';
+            card.appendChild(selo);
+        }
+
+        trilha.appendChild(card);
+    });
 
     document.getElementById(idSecao).style.display = 'block';
     iniciarCarrossel(idTrilha);
@@ -602,7 +625,7 @@ function popularCarrossel(idSecao, idTrilha, jogos) {
 fetch('controllers/carrosseisAjax.php')
     .then(res => res.json())
     .then(data => {
-        popularCarrossel('secao-novidades', 'carrossel-novidades', data.novidades || []);
+        popularCarrossel('secao-novidades', 'carrossel-novidades', data.novidades || [], true);
         popularCarrossel('secao-destaques', 'carrossel-destaques', data.destaques || []);
     })
     .catch(() => {});

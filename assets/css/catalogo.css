@@ -255,10 +255,25 @@ body {
     padding: 24px 30px 4px;
 }
 
+.cabecalho-carrossel {
+    margin-bottom: 16px;
+}
+
+.cabecalho-todos-jogos {
+    max-width: 1500px;
+    margin: 24px auto 16px;
+    padding: 0 30px;
+}
+
 .titulo-carrossel {
     color: #2d0b5f;
     font-size: 1.4rem;
-    margin-bottom: 16px;
+}
+
+.subtitulo-carrossel {
+    color: #6b5f57;
+    font-size: .95rem;
+    margin-top: 4px;
 }
 
 .carrossel-wrap {
@@ -276,12 +291,35 @@ body {
     scroll-behavior: smooth;
     padding: 4px 4px 12px;
     flex: 1;
+
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.carrossel-trilha::-webkit-scrollbar {
+    display: none;
 }
 
 .carrossel-trilha .card-jogo {
     min-width: 260px;
     max-width: 260px;
     scroll-snap-align: start;
+}
+
+.selo-novo {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 2;
+
+    background: #F6C453;
+    color: #2b1b12;
+    font-size: .68rem;
+    font-weight: 900;
+    letter-spacing: .5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    box-shadow: 0 4px 10px rgba(0,0,0,.15);
 }
 
 .carrossel-nav {
