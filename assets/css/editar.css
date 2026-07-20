@@ -243,6 +243,87 @@ textarea:focus {
     opacity: 0.9;
 }
 
+/* DESTAQUES DA LOJA */
+.nome-destaque {
+    margin-top: 8px;
+    font-size: .82rem;
+    font-weight: 800;
+    color: #2d0b5f;
+    text-align: center;
+}
+
+.busca-destaque-area {
+    position: relative;
+    max-width: 420px;
+}
+
+.busca-destaque-area input {
+    width: 100%;
+}
+
+.sugestoes-destaque {
+    display: none;
+    position: absolute;
+    top: calc(100% - 10px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+
+    background: white;
+    border: 1px solid #E5D7FF;
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.15);
+    overflow: hidden;
+}
+
+.sugestao-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid #F5F1FF;
+}
+
+.sugestao-item:last-child {
+    border-bottom: none;
+}
+
+.sugestao-item img {
+    width: 36px;
+    height: 36px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.sugestao-item span {
+    flex: 1;
+    font-weight: 700;
+    color: #2d0b5f;
+}
+
+.sugestao-vazia {
+    padding: 14px;
+    color: #6b5f57;
+}
+
+.btn-add-destaque {
+    background: linear-gradient(135deg, #7C3AED, #9333EA);
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-weight: 900;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.btn-add-destaque:hover {
+    opacity: 0.9;
+}
+
 /* AÇÕES */
 .acoes-form {
     margin-top: 26px;

@@ -142,6 +142,10 @@ $buscaUrl = urlencode($busca);
                 Gerar relatório
             </a>
 
+            <a href="destaques.php" class="btn-admin btn-contorno">
+                ⭐ Destaques da loja
+            </a>
+
             <a href="../usuarios/criar.php" class="btn-admin btn-contorno">
                 + Novo usuário
             </a>
