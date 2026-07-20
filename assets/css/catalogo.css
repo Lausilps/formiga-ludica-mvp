@@ -110,7 +110,7 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: #94cf8c;
+    background: #FAF7F3;
     color: #2b1b12;
 }
 
@@ -255,11 +255,11 @@ body {
 }
 
 .secao-carrossel-novidades {
-    background: #EDE4FB;
+    background: #F6F2FA;
 }
 
 .secao-carrossel-destaques {
-    background: #FDF3DC;
+    background: #FBF4E8;
 }
 
 .secao-carrossel-inner {
