@@ -10,10 +10,18 @@ $offset   = (int)($_GET['offset'] ?? 0);
 $limite   = 24;
 $temFiltro = !empty($busca) || !empty($idades) || !empty($jogadores) || !empty($tempos);
 
+// Usado pelo carrossel "Recomendações da loja": mesmos filtros do catálogo,
+// mas só entre os jogos curados (ordem_destaque preenchido), sem paginação.
+$soDestaques = ($_GET['so_destaques'] ?? '') === '1';
+
 // Monta WHERE
 $where = ["ativo = 1", "nome NOT LIKE 'SEM NOME (Ludopedia #%'"];
 $params = [];
 $types  = '';
+
+if ($soDestaques) {
+    $where[] = "ordem_destaque IS NOT NULL";
+}
 
 if (!empty($busca)) {
     $where[] = "nome LIKE ?";
@@ -70,19 +78,21 @@ if (!empty($params)) {
 mysqli_stmt_execute($stmtTotal);
 $total = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtTotal))['total'];
 
+$ordemSQL = $soDestaques ? 'ordem_destaque ASC' : 'nome ASC';
+
 // Busca jogos
-if ($temFiltro) {
-    // Com filtro: traz todos de uma vez
+if ($temFiltro || $soDestaques) {
+    // Com filtro (ou carrossel de destaques): traz todos de uma vez, sem paginação
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
                    min_jogadores, max_jogadores, idade_minima,
                    duracao_minutos, dificuldade, link_ludopedia, link_tutorial
-            FROM jogos {$whereSQL} ORDER BY nome ASC";
+            FROM jogos {$whereSQL} ORDER BY {$ordemSQL}";
 } else {
     // Sem filtro: paginação
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
                    min_jogadores, max_jogadores, idade_minima,
                    duracao_minutos, dificuldade, link_ludopedia, link_tutorial
-            FROM jogos {$whereSQL} ORDER BY nome ASC LIMIT ? OFFSET ?";
+            FROM jogos {$whereSQL} ORDER BY {$ordemSQL} LIMIT ? OFFSET ?";
     $params[] = $limite;
     $params[] = $offset;
     $types   .= 'ii';

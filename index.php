@@ -432,11 +432,17 @@ observer.observe(sentinel);
 // ============================================================
 document.getElementById('busca-jogo').addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => carregarJogos(true), 300);
+    debounceTimer = setTimeout(() => {
+        carregarJogos(true);
+        carregarDestaquesFiltrados();
+    }, 300);
 });
 
 document.querySelectorAll('.filtro-idade, .filtro-jogadores, .filtro-tempo').forEach(input => {
-    input.addEventListener('change', () => carregarJogos(true));
+    input.addEventListener('change', () => {
+        carregarJogos(true);
+        carregarDestaquesFiltrados();
+    });
 });
 
 document.getElementById('limpar-filtros').addEventListener('click', () => {
@@ -444,6 +450,7 @@ document.getElementById('limpar-filtros').addEventListener('click', () => {
     document.querySelectorAll('.filtro-idade, .filtro-jogadores, .filtro-tempo')
         .forEach(i => i.checked = false);
     carregarJogos(true);
+    carregarDestaquesFiltrados();
 });
 
 // ============================================================
@@ -615,6 +622,8 @@ function iniciarCarrossel(idTrilha) {
     iniciarAutoplay();
 }
 
+let destaquesCarrosselIniciado = false;
+
 function popularCarrossel(idSecao, idTrilha, jogos, mostrarSeloNovo = false) {
     if (!jogos.length) return;
 
@@ -642,8 +651,49 @@ fetch('controllers/carrosseisAjax.php')
     .then(data => {
         popularCarrossel('secao-novidades', 'carrossel-novidades', data.novidades || [], true);
         popularCarrossel('secao-destaques', 'carrossel-destaques', data.destaques || []);
+        destaquesCarrosselIniciado = (data.destaques || []).length > 0;
     })
     .catch(() => {});
+
+// ============================================================
+// RECOMENDAÇÕES DA LOJA — segue os mesmos filtros do catálogo
+// ============================================================
+async function carregarDestaquesFiltrados() {
+    const { busca, idades, jogadores, tempos } = pegarFiltros();
+
+    const params = new URLSearchParams();
+    params.set('busca', busca);
+    params.set('so_destaques', '1');
+    idades.forEach(i => params.append('idades[]', i));
+    jogadores.forEach(j => params.append('jogadores[]', j));
+    tempos.forEach(t => params.append('tempos[]', t));
+
+    const secaoDestaques   = document.getElementById('secao-destaques');
+    const trilhaDestaques  = document.getElementById('carrossel-destaques');
+
+    try {
+        const res  = await fetch(`controllers/listarJogosAjax.php?${params}`);
+        const data = await res.json();
+
+        trilhaDestaques.innerHTML = '';
+        trilhaDestaques.scrollLeft = 0;
+
+        if (data.jogos.length === 0) {
+            secaoDestaques.style.display = 'none';
+            return;
+        }
+
+        data.jogos.forEach(jogo => trilhaDestaques.appendChild(criarCard(jogo, { ocultarDescricao: true })));
+        secaoDestaques.style.display = 'block';
+
+        if (!destaquesCarrosselIniciado) {
+            iniciarCarrossel('carrossel-destaques');
+            destaquesCarrosselIniciado = true;
+        }
+    } catch (e) {
+        console.error('Erro ao filtrar recomendações da loja:', e);
+    }
+}
 
 // ============================================================
 // INICIA
