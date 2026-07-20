@@ -317,7 +317,7 @@ body {
 
 .carrossel-trilha {
     display: flex;
-    gap: 24px;
+    gap: 18px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
@@ -333,9 +333,33 @@ body {
 }
 
 .carrossel-trilha .card-jogo {
-    min-width: 260px;
-    max-width: 260px;
+    min-width: 190px;
+    max-width: 190px;
     scroll-snap-align: start;
+}
+
+.carrossel-trilha .imagem-card {
+    height: 150px;
+}
+
+.carrossel-trilha .conteudo-card {
+    padding: 14px;
+}
+
+.carrossel-trilha .conteudo-card h2 {
+    font-size: 17px;
+    margin-bottom: 8px;
+}
+
+.carrossel-trilha .infos-card {
+    font-size: 12px;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.carrossel-trilha .btn-escolher {
+    padding: 8px 12px;
+    font-size: 13px;
 }
 
 .selo-novo {
@@ -633,8 +657,32 @@ body {
     }
 
     .carrossel-trilha .card-jogo {
-        min-width: 200px;
-        max-width: 200px;
+        min-width: 155px;
+        max-width: 155px;
+    }
+
+    .carrossel-trilha .imagem-card {
+        height: 115px;
+    }
+
+    .carrossel-trilha .conteudo-card {
+        padding: 10px;
+    }
+
+    .carrossel-trilha .conteudo-card h2 {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .carrossel-trilha .infos-card {
+        font-size: 10px;
+        gap: 5px;
+        margin-bottom: 8px;
+    }
+
+    .carrossel-trilha .btn-escolher {
+        padding: 6px 10px;
+        font-size: 11px;
     }
 
     .carrossel-nav {
