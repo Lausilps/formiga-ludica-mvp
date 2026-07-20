@@ -69,6 +69,24 @@ if (!$resultado) {
     </div>
 </section>
 
+<section class="secao-carrossel" id="secao-novidades" style="display:none;">
+    <h2 class="titulo-carrossel">🆕 Confira as novidades</h2>
+    <div class="carrossel-wrap">
+        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-novidades" aria-label="Anterior">‹</button>
+        <div class="carrossel-trilha" id="carrossel-novidades"></div>
+        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-novidades" aria-label="Próximo">›</button>
+    </div>
+</section>
+
+<section class="secao-carrossel" id="secao-destaques" style="display:none;">
+    <h2 class="titulo-carrossel">⭐ Recomendação da loja</h2>
+    <div class="carrossel-wrap">
+        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-destaques" aria-label="Anterior">‹</button>
+        <div class="carrossel-trilha" id="carrossel-destaques"></div>
+        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-destaques" aria-label="Próximo">›</button>
+    </div>
+</section>
+
 <section class="filtros-catalogo">
     <input type="text" id="busca-jogo" placeholder="Buscar jogos...">
 
@@ -520,6 +538,74 @@ window.addEventListener('scroll', () => {
 btnVoltarTopo.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+// ============================================================
+// CARROSSÉIS (novidades + destaques da loja)
+// ============================================================
+function iniciarCarrossel(idTrilha) {
+    const trilha = document.getElementById(idTrilha);
+    if (!trilha) return;
+
+    let intervalo = null;
+
+    function distanciaCard() {
+        const card = trilha.querySelector('.card-jogo');
+        return card ? card.offsetWidth + 24 : 260;
+    }
+
+    function avancar() {
+        const noFim = trilha.scrollLeft + trilha.clientWidth >= trilha.scrollWidth - 10;
+        trilha.scrollTo({
+            left: noFim ? 0 : trilha.scrollLeft + distanciaCard(),
+            behavior: 'smooth'
+        });
+    }
+
+    function voltar() {
+        trilha.scrollTo({ left: trilha.scrollLeft - distanciaCard(), behavior: 'smooth' });
+    }
+
+    function iniciarAutoplay() {
+        pararAutoplay();
+        intervalo = setInterval(avancar, 3500);
+    }
+
+    function pararAutoplay() {
+        if (intervalo) clearInterval(intervalo);
+    }
+
+    trilha.addEventListener('mouseenter', pararAutoplay);
+    trilha.addEventListener('mouseleave', iniciarAutoplay);
+    trilha.addEventListener('touchstart', pararAutoplay, { passive: true });
+
+    document.querySelectorAll(`.carrossel-nav[data-alvo="${idTrilha}"]`).forEach(botao => {
+        botao.addEventListener('click', () => {
+            pararAutoplay();
+            botao.classList.contains('carrossel-nav-direita') ? avancar() : voltar();
+            iniciarAutoplay();
+        });
+    });
+
+    iniciarAutoplay();
+}
+
+function popularCarrossel(idSecao, idTrilha, jogos) {
+    if (!jogos.length) return;
+
+    const trilha = document.getElementById(idTrilha);
+    jogos.forEach(jogo => trilha.appendChild(criarCard(jogo)));
+
+    document.getElementById(idSecao).style.display = 'block';
+    iniciarCarrossel(idTrilha);
+}
+
+fetch('controllers/carrosseisAjax.php')
+    .then(res => res.json())
+    .then(data => {
+        popularCarrossel('secao-novidades', 'carrossel-novidades', data.novidades || []);
+        popularCarrossel('secao-destaques', 'carrossel-destaques', data.destaques || []);
+    })
+    .catch(() => {});
 
 // ============================================================
 // INICIA

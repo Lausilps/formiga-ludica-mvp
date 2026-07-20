@@ -248,6 +248,64 @@ body {
     display: none;
 }
 
+/* ===== CARROSSÉIS (novidades / destaques da loja) ===== */
+.secao-carrossel {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 24px 30px 4px;
+}
+
+.titulo-carrossel {
+    color: #2d0b5f;
+    font-size: 1.4rem;
+    margin-bottom: 16px;
+}
+
+.carrossel-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.carrossel-trilha {
+    display: flex;
+    gap: 24px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    padding: 4px 4px 12px;
+    flex: 1;
+}
+
+.carrossel-trilha .card-jogo {
+    min-width: 260px;
+    max-width: 260px;
+    scroll-snap-align: start;
+}
+
+.carrossel-nav {
+    flex-shrink: 0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    color: #7C3AED;
+    font-size: 1.4rem;
+    box-shadow: 0 6px 16px rgba(0,0,0,.15);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: .2s;
+}
+
+.carrossel-nav:hover {
+    background: #7C3AED;
+    color: white;
+}
+
 .filtros-catalogo {
     position: sticky;
     top: 72px;
@@ -469,6 +527,26 @@ body {
 }
 
 @media (max-width: 900px) {
+
+    .secao-carrossel {
+        padding: 18px 14px 4px;
+    }
+
+    .titulo-carrossel {
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+
+    .carrossel-trilha .card-jogo {
+        min-width: 200px;
+        max-width: 200px;
+    }
+
+    .carrossel-nav {
+        width: 34px;
+        height: 34px;
+        font-size: 1.1rem;
+    }
 
     .whatsapp-flutuante {
         right: 10px;
