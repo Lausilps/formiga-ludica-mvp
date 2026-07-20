@@ -134,19 +134,15 @@ $buscaUrl = urlencode($busca);
                 + Cadastrar novo jogo
             </a>
 
-            <a href="importar_olaclick.php" class="btn-admin btn-amarelo">
-                Importar OlaClick
-            </a>
-
-            <a href="relatorio.php" class="btn-admin btn-contorno">
+            <a href="relatorio.php" class="btn-admin btn-amarelo">
                 Gerar relatório
             </a>
 
-            <a href="destaques.php" class="btn-admin btn-contorno">
+            <a href="destaques.php" class="btn-admin btn-verde">
                 ⭐ Destaques da loja
             </a>
 
-            <a href="../usuarios/criar.php" class="btn-admin btn-contorno">
+            <a href="../usuarios/criar.php" class="btn-admin btn-rosa">
                 + Novo usuário
             </a>
 

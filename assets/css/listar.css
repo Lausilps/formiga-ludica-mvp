@@ -162,6 +162,16 @@
     color: white;
 }
 
+.btn-verde {
+    background: linear-gradient(135deg, #1a8a4a, #25a85c);
+    color: white;
+}
+
+.btn-rosa {
+    background: linear-gradient(135deg, #D6336C, #E8578A);
+    color: white;
+}
+
 .status-embeddings {
     color: #5f5148;
     font-size: .9rem;
