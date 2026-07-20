@@ -13,6 +13,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['id_jogo'])) {
 }
 
 $id_jogo = (int) $_POST['id_jogo'];
+$paginaOrigem = (int) ($_POST['pagina'] ?? 1);
+$buscaOrigem = $_POST['busca'] ?? '';
 
 $stmt = mysqli_prepare($conexao, "SELECT nome FROM jogos WHERE id_jogo = ?");
 mysqli_stmt_bind_param($stmt, 'i', $id_jogo);
@@ -21,7 +23,8 @@ $jogo = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
 if (!$jogo) {
     registrarLog('ERRO', "Tentativa de excluir jogo inexistente. ID: $id_jogo");
-    header("Location: ../views/jogos/listar.php?erro=nao_encontrado");
+    $paramsRetorno = http_build_query(['erro' => 'nao_encontrado', 'pagina' => $paginaOrigem, 'busca' => $buscaOrigem]);
+    header("Location: ../views/jogos/listar.php?$paramsRetorno");
     exit;
 }
 
@@ -45,7 +48,8 @@ if (mysqli_stmt_execute($stmt)) {
     }
 
     registrarLog('INFO', "Jogo excluído: {$jogo['nome']} | ID: $id_jogo");
-    header("Location: ../views/jogos/listar.php?sucesso=excluido");
+    $paramsRetorno = http_build_query(['sucesso' => 'excluido', 'pagina' => $paginaOrigem, 'busca' => $buscaOrigem]);
+    header("Location: ../views/jogos/listar.php?$paramsRetorno");
     exit;
 
 } else {
@@ -57,6 +61,7 @@ if (mysqli_stmt_execute($stmt)) {
         "Falha ao excluir jogo '{$jogo['nome']}' | ID: $id_jogo | Erro: $erro"
     );
 
-    header("Location: ../views/jogos/editar.php?id=$id_jogo&erro=falha_exclusao");
+    $paramsRetorno = http_build_query(['id' => $id_jogo, 'erro' => 'falha_exclusao', 'pagina' => $paginaOrigem, 'busca' => $buscaOrigem]);
+    header("Location: ../views/jogos/editar.php?$paramsRetorno");
     exit;
 }

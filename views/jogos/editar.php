@@ -25,6 +25,12 @@ if (!$resultado || mysqli_num_rows($resultado) == 0) {
 $jogo = mysqli_fetch_assoc($resultado);
 $imagensGaleria = listarImagensJogo($conexao, $id_jogo);
 
+// De onde a edição foi aberta (página/busca da listagem) — pra "Voltar" e
+// pro redirect depois de salvar/excluir levarem de volta pro mesmo lugar,
+// em vez de sempre reiniciar na página 1.
+$paginaOrigem = (int) ($_GET['pagina'] ?? 1);
+$buscaOrigem = $_GET['busca'] ?? '';
+
 $nome = $_GET['nome'] ?? $jogo['nome'];
 $descricao = $_GET['descricao'] ?? $jogo['descricao'];
 $preco = $_GET['preco'] ?? $jogo['preco'];
@@ -88,6 +94,8 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
         <form id="form-editar-jogo" action="../../controllers/editarJogoController.php" method="POST" enctype="multipart/form-data" class="form-editar">
 
             <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
+            <input type="hidden" name="pagina" value="<?= $paginaOrigem ?>">
+            <input type="hidden" name="busca" value="<?= htmlspecialchars($buscaOrigem) ?>">
 
             <div class="grid-form">
                 <?php $modoEdicao = true; include '../partials/jogo_form_campos.php'; ?>
@@ -97,6 +105,8 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
 
         <form id="form-excluir-jogo" action="../../controllers/excluirJogoController.php" method="POST" style="display:none;">
             <input type="hidden" name="id_jogo" value="<?= $jogo['id_jogo'] ?>">
+            <input type="hidden" name="pagina" value="<?= $paginaOrigem ?>">
+            <input type="hidden" name="busca" value="<?= htmlspecialchars($buscaOrigem) ?>">
         </form>
 
         <div class="area-galeria">
@@ -121,7 +131,7 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
 
         <div class="acoes-form">
             <button type="submit" form="form-editar-jogo" class="btn-salvar">Salvar alterações</button>
-            <a href="listar.php" class="btn-voltar">← Voltar para listagem</a>
+            <a href="listar.php?pagina=<?= $paginaOrigem ?>&busca=<?= urlencode($buscaOrigem) ?>" class="btn-voltar">← Voltar para listagem</a>
             <button type="button" class="btn-excluir" onclick="confirmarExclusao()">🗑️ Excluir jogo</button>
         </div>
 

@@ -21,7 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dificuldade = $_POST['dificuldade'];
     $resumo_regras = $_POST['resumo_regras'];
     $link_tutorial = $_POST['link_tutorial'];
-    $ativo = isset($_POST['inativar']) ? 0 : 1;
+    $ativo = (int) ($_POST['ativo'] ?? 1) === 0 ? 0 : 1;
+
+    // Página/busca de onde a edição foi aberta — só pra voltar pro lugar
+    // certo na listagem, não afeta a gravação do jogo em si.
+    $paginaOrigem = (int) ($_POST['pagina'] ?? 1);
+    $buscaOrigem = $_POST['busca'] ?? '';
 
     $dadosFormulario = [
         'id' => $id_jogo,
@@ -35,7 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'dificuldade' => $dificuldade,
         'ativo' => $ativo,
         'resumo_regras' => $resumo_regras,
-        'link_tutorial' => $link_tutorial
+        'link_tutorial' => $link_tutorial,
+        'pagina' => $paginaOrigem,
+        'busca' => $buscaOrigem
     ];
 
     // Validação de campos obrigatórios
@@ -115,7 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             "Jogo atualizado com sucesso: $nome | ID: $id_jogo"
         );
 
-        header("Location: ../views/jogos/listar.php?sucesso=editado");
+        $paramsRetorno = http_build_query(['sucesso' => 'editado', 'pagina' => $paginaOrigem, 'busca' => $buscaOrigem]);
+        header("Location: ../views/jogos/listar.php?$paramsRetorno");
         exit;
 
     } else {

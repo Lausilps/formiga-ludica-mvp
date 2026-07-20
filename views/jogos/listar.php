@@ -245,7 +245,7 @@ $buscaUrl = urlencode($busca);
                                     </td>
 
                                     <td class="acoes-tabela">
-                                        <a href="editar.php?id=<?= $jogo['id_jogo'] ?>" class="btn-acao">
+                                        <a href="editar.php?id=<?= $jogo['id_jogo'] ?>&pagina=<?= $pagina ?>&busca=<?= $buscaUrl ?>" class="btn-acao">
                                             Editar
                                         </a>
 
