@@ -656,39 +656,43 @@ body {
         font-size: 1.1rem;
     }
 
+    .carrossel-trilha {
+        gap: 10px;
+    }
+
     .carrossel-trilha .card-jogo {
-        min-width: 155px;
-        max-width: 155px;
+        min-width: 138px;
+        max-width: 138px;
     }
 
     .carrossel-trilha .imagem-card {
-        height: 115px;
+        height: 90px;
     }
 
     .carrossel-trilha .conteudo-card {
-        padding: 10px;
+        padding: 8px;
     }
 
     .carrossel-trilha .conteudo-card h2 {
-        font-size: 13px;
-        margin-bottom: 6px;
+        font-size: 12px;
+        margin-bottom: 4px;
     }
 
     .carrossel-trilha .infos-card {
-        font-size: 10px;
-        gap: 5px;
-        margin-bottom: 8px;
+        font-size: 9px;
+        gap: 4px;
+        margin-bottom: 6px;
     }
 
     .carrossel-trilha .btn-escolher {
-        padding: 6px 10px;
-        font-size: 11px;
+        padding: 6px 8px;
+        font-size: 10px;
     }
 
+    /* No celular o toque já arrasta o carrossel (scroll-snap nativo) —
+       as setinhas só tomavam espaço horizontal que os cards precisavam. */
     .carrossel-nav {
-        width: 34px;
-        height: 34px;
-        font-size: 1.1rem;
+        display: none;
     }
 
     .whatsapp-flutuante {
