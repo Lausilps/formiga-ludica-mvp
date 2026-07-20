@@ -104,33 +104,46 @@ if (!$resultado) {
     <button type="button" id="limpar-filtros">Limpar filtros</button>
 </section>
 
-<section class="secao-carrossel" id="secao-novidades" style="display:none;">
-    <div class="cabecalho-carrossel">
-        <h2 class="titulo-carrossel">Confira as novidades</h2>
-        <p class="subtitulo-carrossel">Os últimos jogos que chegaram por aqui.</p>
-    </div>
-    <div class="carrossel-wrap">
-        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-novidades" aria-label="Anterior">‹</button>
-        <div class="carrossel-trilha" id="carrossel-novidades"></div>
-        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-novidades" aria-label="Próximo">›</button>
+<section class="secao-carrossel secao-carrossel-novidades" id="secao-novidades" style="display:none;">
+    <div class="secao-carrossel-inner">
+        <div class="cabecalho-carrossel">
+            <span class="icone-secao">✨</span>
+            <div>
+                <h2 class="titulo-carrossel">Confira as novidades</h2>
+                <p class="subtitulo-carrossel">Os últimos jogos que chegaram por aqui.</p>
+            </div>
+        </div>
+        <div class="carrossel-wrap">
+            <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-novidades" aria-label="Anterior">‹</button>
+            <div class="carrossel-trilha" id="carrossel-novidades"></div>
+            <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-novidades" aria-label="Próximo">›</button>
+        </div>
     </div>
 </section>
 
-<section class="secao-carrossel" id="secao-destaques" style="display:none;">
-    <div class="cabecalho-carrossel">
-        <h2 class="titulo-carrossel">Recomendações da loja</h2>
-        <p class="subtitulo-carrossel">Jogos selecionados a dedo para garantir a sua diversão.</p>
-    </div>
-    <div class="carrossel-wrap">
-        <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-destaques" aria-label="Anterior">‹</button>
-        <div class="carrossel-trilha" id="carrossel-destaques"></div>
-        <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-destaques" aria-label="Próximo">›</button>
+<section class="secao-carrossel secao-carrossel-destaques" id="secao-destaques" style="display:none;">
+    <div class="secao-carrossel-inner">
+        <div class="cabecalho-carrossel">
+            <span class="icone-secao">👍</span>
+            <div>
+                <h2 class="titulo-carrossel">Recomendações da loja</h2>
+                <p class="subtitulo-carrossel">Jogos selecionados a dedo para garantir a sua diversão.</p>
+            </div>
+        </div>
+        <div class="carrossel-wrap">
+            <button type="button" class="carrossel-nav carrossel-nav-esquerda" data-alvo="carrossel-destaques" aria-label="Anterior">‹</button>
+            <div class="carrossel-trilha" id="carrossel-destaques"></div>
+            <button type="button" class="carrossel-nav carrossel-nav-direita" data-alvo="carrossel-destaques" aria-label="Próximo">›</button>
+        </div>
     </div>
 </section>
 
 <div class="cabecalho-carrossel cabecalho-todos-jogos">
-    <h2 class="titulo-carrossel">Todos os jogos</h2>
-    <p class="subtitulo-carrossel">Explore nosso catálogo completo.</p>
+    <span class="icone-secao">🎲</span>
+    <div>
+        <h2 class="titulo-carrossel">Todos os jogos</h2>
+        <p class="subtitulo-carrossel">Explore nosso catálogo completo.</p>
+    </div>
 </div>
 
 <main class="grid-jogos" id="grid-jogos">
@@ -263,7 +276,9 @@ function temFiltroAtivo() {
 // ============================================================
 // CRIAR CARD HTML
 // ============================================================
-function criarCard(jogo) {
+function criarCard(jogo, opcoes = {}) {
+    const ocultarDescricao = opcoes.ocultarDescricao || false;
+
     const descricaoCurta = jogo.descricao.length > 110
         ? jogo.descricao.substring(0, 110) + '...'
         : jogo.descricao;
@@ -303,7 +318,7 @@ function criarCard(jogo) {
         </div>
         <div class="conteudo-card">
             <h2>${jogo.nome}</h2>
-            <p class="descricao-card">${descricaoCurta}</p>
+            ${ocultarDescricao ? '' : `<p class="descricao-card">${descricaoCurta}</p>`}
             <div class="infos-card">
                 <span>👥 ${jogo.min_jogadores} - ${jogo.max_jogadores}</span>
                 <span>⏱ ${jogo.duracao} min</span>
@@ -606,13 +621,13 @@ function popularCarrossel(idSecao, idTrilha, jogos, mostrarSeloNovo = false) {
     const trilha = document.getElementById(idTrilha);
 
     jogos.forEach(jogo => {
-        const card = criarCard(jogo);
+        const card = criarCard(jogo, { ocultarDescricao: true });
 
         if (mostrarSeloNovo) {
             const selo = document.createElement('span');
             selo.className = 'selo-novo';
             selo.textContent = 'NOVO';
-            card.appendChild(selo);
+            card.querySelector('.imagem-card').appendChild(selo);
         }
 
         trilha.appendChild(card);

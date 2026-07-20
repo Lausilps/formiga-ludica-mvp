@@ -250,19 +250,51 @@ body {
 
 /* ===== CARROSSÉIS (novidades / destaques da loja) ===== */
 .secao-carrossel {
+    width: 100%;
+    padding: 30px 0 24px;
+}
+
+.secao-carrossel-novidades {
+    background: #EDE4FB;
+}
+
+.secao-carrossel-destaques {
+    background: #FDF3DC;
+}
+
+.secao-carrossel-inner {
     max-width: 1500px;
     margin: 0 auto;
-    padding: 24px 30px 4px;
+    padding: 0 30px;
 }
 
 .cabecalho-carrossel {
-    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
 }
 
 .cabecalho-todos-jogos {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     max-width: 1500px;
-    margin: 24px auto 16px;
+    margin: 30px auto 18px;
     padding: 0 30px;
+}
+
+.icone-secao {
+    flex-shrink: 0;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #2d0b5f, #7C3AED);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+    box-shadow: 0 6px 14px rgba(45,11,95,.25);
 }
 
 .titulo-carrossel {
@@ -308,18 +340,28 @@ body {
 
 .selo-novo {
     position: absolute;
-    top: 12px;
-    left: 12px;
+    bottom: 10px;
+    left: 10px;
     z-index: 2;
 
-    background: #F6C453;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    background: linear-gradient(135deg, #F9D57C, #F0AE30);
     color: #2b1b12;
     font-size: .68rem;
     font-weight: 900;
-    letter-spacing: .5px;
-    padding: 4px 10px;
+    letter-spacing: .4px;
+    padding: 5px 11px 5px 8px;
     border-radius: 999px;
-    box-shadow: 0 4px 10px rgba(0,0,0,.15);
+    box-shadow: 0 4px 10px rgba(0,0,0,.2);
+    transform: rotate(-4deg);
+}
+
+.selo-novo::before {
+    content: "✨";
+    font-size: .78rem;
 }
 
 .carrossel-nav {
@@ -474,6 +516,7 @@ body {
 }
 
 .imagem-card {
+    position: relative;
     height: 210px;
     background: #eee;
 }
@@ -567,12 +610,26 @@ body {
 @media (max-width: 900px) {
 
     .secao-carrossel {
-        padding: 18px 14px 4px;
+        padding: 18px 0 14px;
+    }
+
+    .secao-carrossel-inner {
+        padding: 0 14px;
+    }
+
+    .cabecalho-todos-jogos {
+        padding: 0 14px;
+    }
+
+    .icone-secao {
+        width: 38px;
+        height: 38px;
+        font-size: 1.1rem;
+        border-radius: 11px;
     }
 
     .titulo-carrossel {
         font-size: 1.1rem;
-        margin-bottom: 10px;
     }
 
     .carrossel-trilha .card-jogo {
