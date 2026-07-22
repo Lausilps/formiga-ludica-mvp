@@ -99,7 +99,7 @@ function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo,
     $sql = "SELECT id_jogo, nome, descricao, imagem, preco,
                    min_jogadores, max_jogadores, idade_minima,
                    duracao_minutos, dificuldade, embedding,
-                   link_ludopedia, link_tutorial
+                   link_ludopedia, link_tutorial, ordem_destaque
             FROM jogos
             WHERE ativo = 1
               AND nome NOT LIKE 'SEM NOME (Ludopedia #%'
@@ -151,8 +151,10 @@ function buscarJogosCandidatos($conexao, int $jogadores, int $idade, int $tempo,
 }
 
 // $jogadores > 0 garante prioridade (não só tendência) pra quem realmente
-// comporta o grupo inteiro: esses vêm sempre antes dos que não comportam,
-// e só dentro de cada um desses dois grupos a ordem é por similaridade.
+// comporta o grupo inteiro: esses vêm sempre antes dos que não comportam.
+// Dentro disso, jogos em destaque da loja (ordem_destaque, mesmo carrossel
+// "Recomendação da loja" do index.php) vêm antes dos que não são destaque —
+// e só dentro de cada um desses grupos a ordem final é por similaridade.
 // Pra grupo grande (>16), onde buscarJogosCandidatos() não filtra mais por
 // max_jogadores, isso é o que garante que os jogos que chegam mais perto
 // do tamanho pedido apareçam primeiro em vez de ficar só na sorte da
@@ -164,12 +166,17 @@ function rankearJogosPorSimilaridade(array $jogos, array $queryEmbedding, int $l
         $jogo['score']      = cosineSimilarity($queryEmbedding, $embJogo);
         $jogo['embedding']  = null;
         $jogo['atendeGrupoTodo'] = $jogadores > 0 && (int) $jogo['max_jogadores'] >= $jogadores;
+        $jogo['emDestaque']      = $jogo['ordem_destaque'] !== null;
     }
     unset($jogo);
 
     usort($jogos, function ($a, $b) {
         if ($a['atendeGrupoTodo'] !== $b['atendeGrupoTodo']) {
             return $b['atendeGrupoTodo'] <=> $a['atendeGrupoTodo'];
+        }
+
+        if ($a['emDestaque'] !== $b['emDestaque']) {
+            return $b['emDestaque'] <=> $a['emDestaque'];
         }
 
         return $b['score'] <=> $a['score'];
@@ -191,10 +198,38 @@ function montarContextoCatalogo(array $topJogos): string
             $contexto .= "dificuldade: {$j['dificuldade']}, ";
         }
 
-        $contexto .= "idade mínima: {$j['idade_minima']} anos)\n";
+        $contexto .= "idade mínima: {$j['idade_minima']} anos)";
+
+        if (!empty($j['emDestaque'])) {
+            $contexto .= " [Recomendação da loja]";
+        }
+
+        $contexto .= "\n";
     }
 
     return $contexto;
+}
+
+// Usado nos dois controllers de recomendação (inicial e "+ Recomendações")
+// pra montar a mesma instrução de priorizar destaques, evitando duplicar o
+// texto em si — só o resultado (string pronta pra entrar no prompt, ou vazia
+// se nenhum candidato do lote atual for destaque).
+function montarObservacaoDestaque(array $topJogos): string
+{
+    $temDestaque = false;
+
+    foreach ($topJogos as $j) {
+        if (!empty($j['emDestaque'])) {
+            $temDestaque = true;
+            break;
+        }
+    }
+
+    if (!$temDestaque) {
+        return '';
+    }
+
+    return "\nNo catálogo abaixo, os jogos marcados com \"[Recomendação da loja]\" são destaques que a loja quer promover. Se algum deles combinar bem com o pedido do cliente, priorize recomendá-lo em vez de um jogo parecido que não seja destaque — mas só recomende se ele realmente encaixar no perfil pedido, nunca force um destaque que não faz sentido pra esse cliente.";
 }
 
 function interpretarRespostaGemini(string $respostaTexto, array $topJogos): array

@@ -78,13 +78,15 @@ try {
         $observacaoGrupoGrande = "\nATENÇÃO: o grupo tem {$jogadores} pessoas — nenhum jogo de tabuleiro comum comporta todo mundo numa partida só. Os jogos do catálogo abaixo foram escolhidos considerando que o grupo vai se dividir em mais de uma mesa jogando coisas diferentes ao mesmo tempo, não que um jogo só vai servir pra todo mundo junto. Deixe isso claro e natural no campo \"intro\" (algo como: pra um grupão desse tamanho, o barato é dividir em mais de uma mesa) e mencione nos \"motivo\" quantas pessoas cada jogo comporta por mesa.";
     }
 
+    $observacaoDestaque = montarObservacaoDestaque($topJogos);
+
     $prompt = <<<PROMPT
 Você é a Formiguinha, assistente especialista em jogos de tabuleiro da Formiga Lúdica, uma locadora de jogos.
 Seu jeito é animado, divertido e descontraído — fala como brasileiro mesmo!
 
 Um cliente está buscando jogos com esse perfil:
 "{$queryTexto}"
-{$observacaoGrupoGrande}
+{$observacaoGrupoGrande}{$observacaoDestaque}
 
 Com base APENAS nos jogos do catálogo abaixo, escolha até {$qtdMaxima} jogo(s) que melhor combinam com o pedido.
 Nunca repita o mesmo jogo mais de uma vez na resposta — se o catálogo abaixo tiver menos de {$qtdMaxima} jogos, devolva só os que existem, sem repetir nenhum.
