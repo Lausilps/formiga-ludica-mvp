@@ -23,16 +23,20 @@ There is no framework CLI, no test suite, and no bundler/npm. Development happen
 - `ADMIN_IMPORT_TOKEN` in env gates the HTTP-triggered embedding batch (`controllers/gerarEmbeddings.php`) and Ludopedia sync (`controllers/importarLudopediaController.php`) endpoints when hit outside the admin panel button. If unset, those endpoints refuse all requests (fail closed) — CLI runs are unaffected.
 - No `.sql` schema file exists in the repo — the `jogos` table structure has to be inferred from the queries in `controllers/`.
 - **Production database is hosted on Railway** (MySQL service), not local XAMPP — Laura owns the Railway project/account. Connection vars (`MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`) are found in the Railway dashboard → MySQL service → **Connect** tab. Local XAMPP (`localhost`/`root`) is only used for local dev, per `config/conexao.php`'s fallback defaults.
+- `config/googleDrive.php` (gitignored, local only) or the `GOOGLE_DRIVE_CLIENT_ID` / `GOOGLE_DRIVE_CLIENT_SECRET` / `GOOGLE_DRIVE_REDIRECT_URI` env vars (Railway) hold the OAuth2 credentials for the per-admin Google Drive backup feature, loaded by `config/googleDriveLoader.php`. Missing `CLIENT_ID`/`CLIENT_SECRET` makes it `die()`. `MYSQLDUMP_BIN` env var optionally overrides the `mysqldump` binary path (used locally to point at the XAMPP one on Windows).
 
 ## Backups
 
-Railway's automatic/scheduled backups only exist on **Pro-tier** accounts — this project is not on Pro, so there is no automatic backup. Backups must be done manually:
+Railway's automatic/scheduled backups only exist on **Pro-tier** accounts — this project is not on Pro, so there is no automatic backup. Two ways to cover that gap:
+
+- **In-app (admin panel):** each admin connects their own Google Drive once (OAuth2, "Conectar Google Drive" button in `views/jogos/listar.php`), then a "Fazer backup agora" button runs `mysqldump` server-side (`controllers/gerarBackupController.php`) and uploads the `.sql` straight to that admin's personal Drive via `helpers/googleDriveHelper.php`. Tokens live in the `usuarios_google_drive` table (created by `migracao_google_drive.sql` — run it manually on the Railway console, it's not an auto-applied migration). This is still an on-demand click, not a scheduled job.
+- **Manual (CLI), as a fallback / for local dumps:**
 
 ```powershell
 & "C:\xampp\mysql\bin\mysqldump.exe" -h <MYSQLHOST> -P <MYSQLPORT> -u <MYSQLUSER> -p<MYSQLPASSWORD> <MYSQLDATABASE> > backup_YYYY-MM-DD.sql
 ```
 
-(XAMPP already ships `mysqldump.exe` at that path — no extra install needed.) Store the resulting `.sql` file somewhere outside the local disk too (Drive/OneDrive). Do a manual dump daily (or after each cadastro session) whenever someone is actively adding games, since there's no safety net otherwise. Never commit real Railway credentials into this repo or into `.sql` dumps that get committed — treat them like any other secret.
+(XAMPP already ships `mysqldump.exe` at that path — no extra install needed.) Store the resulting `.sql` file somewhere outside the local disk too (Drive/OneDrive). Do a dump (either way) daily, or after each cadastro session, whenever someone is actively adding games, since there's no safety net otherwise. Never commit real Railway credentials into this repo or into `.sql` dumps that get committed — treat them like any other secret.
 
 ## Architecture
 
@@ -40,7 +44,7 @@ There is no router or front controller. Each `.php` file at the root or under `v
 
 ### Two areas of the site
 
-- **Public catalog** (root level): `index.php` (catalog + infinite scroll + WhatsApp cart), `recomendacao_form.php` + `controllers/recomendacaoController.php` (AI recommendation flow), `views/jogos/recomendacao.php` (results page). No auth.
+- **Public catalog** (root level): `index.php` (catalog + infinite scroll + WhatsApp cart + direct/shareable game links), `recomendacao_form.php` + `controllers/recomendacaoController.php` (AI recommendation flow), `views/jogos/recomendacao.php` (results page). No auth.
 - **Admin panel** (`views/jogos/*.php` + matching `controllers/*Controller.php`): listing/search/pagination, cadastrar (create), editar (edit), relatório (PDF report), imports. Every admin view calls `helpers/authHelper.php::protegerAdmin()` at the top, which redirects to `login.php` unless `$_SESSION['tipo'] === 'admin'`. Session-based auth only, single user table (`usuarios`), passwords via `password_hash`/`password_verify` (see `gerar_senha.php` for hash generation, `controllers/loginController.php`, `logout.php`).
 
 ### AI recommendation flow (RAG)
@@ -49,6 +53,7 @@ This is the core "smart" feature, split across:
 - `controllers/gerarEmbeddings.php` — batch job that generates a Gemini embedding for every game missing one and stores it as JSON text in the `jogos.embedding` column. Guarded by a `?token=...` query token (checked against the `ADMIN_IMPORT_TOKEN` env var) when not run from CLI.
 - `controllers/recomendacaoController.php` — takes the user's free-text description + player count/age/time filters, embeds the query via Gemini, pre-filters candidate games in SQL (players/age/time), ranks by `cosineSimilarity()` computed in PHP against stored embeddings, takes the top 12, then asks Gemini to pick and justify 6 of them via a prompt requiring strict JSON output. Renders `views/jogos/recomendacao.php`.
 - `controllers/maisRecomendacoesController.php` — same flow as an AJAX/JSON endpoint for the "+ Recomendações" button, excluding games already shown (`ids_exibidos`).
+- `helpers/recomendacaoHelper.php::rankearJogosPorSimilaridade()` — besides sorting by `cosineSimilarity()`, games curated as store highlights (`ordem_destaque` not null — the same ones shown in index.php's "Recomendações da loja" carousel) that also fit the request's filters are boosted ahead of non-highlighted games of similar score. `montarObservacaoDestaque()` adds a line to the Gemini prompt telling it to prefer those `[Recomendação da loja]`-tagged candidates when they genuinely fit, never forcing one that doesn't. Shared by both the initial flow and "+ Recomendações".
 - All steps log heavily to `logs/sistema.log` via `helpers/logHelper.php::registrarLog()` — useful for debugging Gemini prompt/response issues.
 
 ### External integrations
@@ -61,6 +66,13 @@ This is the core "smart" feature, split across:
 ### Cart / selection state
 
 `assets/js/carrinho.js` exposes a tiny `Carrinho` object (`obter()`/`salvar()`) wrapping `localStorage` under key `formigaludica_carrinho`. Both `index.php` (catalog) and `views/jogos/recomendacao.php` (recommendation results) embed their own near-duplicate inline `<script>` blocks that read/write this same cart, so a selection made on one page persists into the other — if you change cart behavior, check both files, not just `carrinho.js`.
+
+### Direct/shareable game links
+
+`index.php`'s catalog modal reflects the open game in the URL as `?jogo=<slug>` (e.g. `?jogo=bananagrams`) via `history.pushState`, so the address bar itself becomes a shareable link, and a "Compartilhar jogo" button in the modal uses the Web Share API (`navigator.share`) to open the device's native share sheet, falling back to copy-to-clipboard where `navigator.share` isn't available (most desktop browsers).
+- `helpers/slugHelper.php::gerarSlug()` — turns a game name into a slug using a **fixed accent-mapping table** (á/à/â/ã/ä → a, ç → c, etc.), not `iconv(...TRANSLIT...)` — that was tried first but its output for accented chars is inconsistent across systems/locales (e.g. produced `edic-ao` instead of `edicao` locally). There is no `slug` column in the DB; the slug is always computed on the fly from `nome`.
+- `controllers/buscarJogoPorIdAjax.php` — despite the filename (kept from when it looked up by numeric ID), it now takes `?slug=...` and finds the matching game by comparing `gerarSlug()` against every active game's `nome` (no indexed lookup — fine at this catalog's size, would need revisiting if the collection grows a lot).
+- `controllers/listarJogosAjax.php` and `controllers/carrosseisAjax.php` also include `slug` in every game they return, so cards built anywhere in the catalog (grid, carousels) carry it in `dataset.slug` for the share button to use.
 
 ### Data access patterns (inconsistent — know both when editing)
 
@@ -93,6 +105,8 @@ This is the core "smart" feature, split across:
 - Cart logic is duplicated in inline scripts and should be changed carefully.
 
 ## Working with Laura
+
+**Never add an AI co-authorship/credit line to commit messages** (e.g. `Co-Authored-By: Claude ...`) — Laura has asked for this explicitly more than once. Commit messages should read as if she wrote them herself, no exceptions.
 
 Laura prefers incremental development.
 
