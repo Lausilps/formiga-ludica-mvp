@@ -185,6 +185,7 @@ if (!$resultado) {
             </div>
             <br>
             <button type="button" id="modal-selecionar" class="btn-escolher">Selecionar jogo</button>
+            <button type="button" id="modal-copiar-link" class="btn-copiar-link">🔗 Copiar link do jogo</button>
         </div>
     </div>
 </div>
@@ -247,6 +248,7 @@ const modalPreco     = document.getElementById('modal-preco');
 const modalSelecionar = document.getElementById('modal-selecionar');
 const modalLudopedia  = document.getElementById('modal-ludopedia');
 const modalLinkLudo   = document.getElementById('modal-link-ludopedia');
+const modalCopiarLink = document.getElementById('modal-copiar-link');
 
 let jogoModalAtual = null;
 
@@ -477,6 +479,7 @@ function atualizarImagemModal() {
 
 function abrirModalJogo(card) {
     jogoModalAtual = {
+        id:       card.dataset.id,
         nome:     card.dataset.nome,
         descricao: card.dataset.descricao,
         imagem:   card.dataset.imagem,
@@ -512,7 +515,12 @@ function abrirModalJogo(card) {
     atualizarBotaoModal();
     modalJogo.classList.add('ativo');
     modalJogoAberto = true;
-    history.pushState({ modal: 'jogo' }, '');
+
+    // Reflete o jogo aberto na URL — assim a barra de endereço já vira um
+    // link compartilhável (funciona junto com o botão "Copiar link").
+    const urlModal = new URL(window.location.href);
+    urlModal.searchParams.set('jogo', jogoModalAtual.id);
+    history.pushState({ modal: 'jogo', id: jogoModalAtual.id }, '', urlModal);
 }
 
 function fecharModalJogo() {
@@ -551,6 +559,19 @@ function atualizarBotaoModal() {
 modalSelecionar.addEventListener('click', () => {
     if (!jogoModalAtual) return;
     carrinhoUI.alternarJogoSelecionado({ nome: jogoModalAtual.nome, preco: jogoModalAtual.preco });
+});
+
+modalCopiarLink.addEventListener('click', () => {
+    if (!jogoModalAtual) return;
+
+    const url = new URL(window.location.href);
+    url.searchParams.set('jogo', jogoModalAtual.id);
+
+    navigator.clipboard.writeText(url.toString()).then(() => {
+        const textoOriginal = modalCopiarLink.textContent;
+        modalCopiarLink.textContent = '✅ Link copiado!';
+        setTimeout(() => { modalCopiarLink.textContent = textoOriginal; }, 2000);
+    });
 });
 
 // ============================================================
@@ -696,9 +717,36 @@ async function carregarDestaquesFiltrados() {
 }
 
 // ============================================================
+// LINK DIRETO PRO JOGO (?jogo=ID) — abre o modal dele automaticamente
+// ============================================================
+async function abrirJogoPorLinkDireto() {
+    const idJogo = new URLSearchParams(window.location.search).get('jogo');
+    if (!idJogo) return;
+
+    // Zera o "estado base" da URL (sem o parâmetro) antes de abrir o modal,
+    // pra fechar (history.back()) voltar pro catálogo em vez de sair do
+    // site inteiro — quem chegou aqui por um link direto ainda não tem
+    // nenhum estado nosso no histórico do navegador.
+    const urlBase = new URL(window.location.href);
+    urlBase.searchParams.delete('jogo');
+    history.replaceState(null, '', urlBase);
+
+    try {
+        const res  = await fetch(`controllers/buscarJogoPorIdAjax.php?id=${encodeURIComponent(idJogo)}`);
+        const data = await res.json();
+        if (!data.jogo) return;
+
+        abrirModalJogo(criarCard(data.jogo));
+    } catch (e) {
+        console.error('Erro ao abrir jogo pelo link direto:', e);
+    }
+}
+
+// ============================================================
 // INICIA
 // ============================================================
 carregarJogos(true);
+abrirJogoPorLinkDireto();
 </script>
 
 <?php include 'views/partials/footer.php'; ?>
