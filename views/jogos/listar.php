@@ -4,10 +4,12 @@ require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
 require_once '../../helpers/authHelper.php';
 require_once '../../helpers/jogoHelper.php';
+require_once '../../helpers/googleDriveHelper.php';
 
 protegerAdmin();
 
 $tokenAdmin = getenv('ADMIN_IMPORT_TOKEN') ?: '';
+$googleDriveConectado = usuarioTemGoogleDriveConectado($conexao, $_SESSION['id_usuario']);
 
 $busca = $_GET['busca'] ?? '';
 $pagina = (int)($_GET['pagina'] ?? 1);
@@ -154,13 +156,36 @@ $buscaUrl = urlencode($busca);
                 🎲 Sincronizar Ludopedia
             </button>
 
+            <?php if ($googleDriveConectado): ?>
+                <button type="button" onclick="fazerBackup()" id="btn-backup" class="btn-admin btn-backup">
+                    💾 Fazer backup agora
+                </button>
+            <?php else: ?>
+                <a href="../../controllers/googleDriveConectarController.php" class="btn-admin btn-backup">
+                    🔗 Conectar Google Drive
+                </a>
+            <?php endif; ?>
+
             <span id="status-embeddings" class="status-embeddings"></span>
             <span id="status-ludopedia" class="status-embeddings"></span>
+            <span id="status-backup" class="status-embeddings"></span>
         </section>
 
         <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] == 'excluido'): ?>
             <div class="alerta alerta-sucesso">
                 Jogo excluído com sucesso.
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['sucesso']) && $_GET['sucesso'] === 'google_drive_conectado'): ?>
+            <div class="alerta alerta-sucesso">
+                Google Drive conectado com sucesso.
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['erro']) && str_starts_with($_GET['erro'], 'google_drive')): ?>
+            <div class="alerta alerta-erro">
+                Não foi possível conectar o Google Drive. Tente novamente.
             </div>
         <?php endif; ?>
 
@@ -469,6 +494,30 @@ $buscaUrl = urlencode($busca);
             }
 
             proximaPagina();
+        }
+
+        function fazerBackup() {
+            const btn = document.getElementById('btn-backup');
+            const status = document.getElementById('status-backup');
+
+            if (!confirm('Isso vai gerar um backup completo do banco e enviar pro seu Google Drive. Continuar?')) return;
+
+            btn.disabled = true;
+            btn.style.opacity = '0.6';
+            status.textContent = '⏳ Gerando backup...';
+
+            fetch('../../controllers/gerarBackupController.php')
+                .then(res => res.json())
+                .then(data => {
+                    status.textContent = (data.sucesso ? '✅ ' : '❌ ') + data.mensagem;
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                })
+                .catch(() => {
+                    status.textContent = '❌ Erro ao gerar o backup.';
+                    btn.disabled = false;
+                    btn.style.opacity = '';
+                });
         }
 
         // ============================================================

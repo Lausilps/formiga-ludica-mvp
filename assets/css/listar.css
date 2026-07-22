@@ -172,6 +172,11 @@
     color: white;
 }
 
+.btn-backup {
+    background: linear-gradient(135deg, #0F7CA8, #1AA6C9);
+    color: white;
+}
+
 .status-embeddings {
     color: #5f5148;
     font-size: .9rem;

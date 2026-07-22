@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
         libpng-dev \
         libwebp-dev \
         libfreetype6-dev \
+        default-mysql-client \
     && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
     && docker-php-ext-install mysqli pdo pdo_mysql curl gd
 

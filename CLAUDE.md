@@ -22,6 +22,17 @@ There is no framework CLI, no test suite, and no bundler/npm. Development happen
 - `config/ludopedia.php` and `config/groq.php` are **gitignored** (real API credentials live there locally, not in the repo) — `LUDOPEDIA_APP_ID`, `LUDOPEDIA_APP_SECRET`, `LUDOPEDIA_TOKEN`, `LUDOPEDIA_CALLBACK`. Anyone recreating this file locally needs Ludopedia API credentials.
 - `ADMIN_IMPORT_TOKEN` in env gates the HTTP-triggered embedding batch (`controllers/gerarEmbeddings.php`) and Ludopedia sync (`controllers/importarLudopediaController.php`) endpoints when hit outside the admin panel button. If unset, those endpoints refuse all requests (fail closed) — CLI runs are unaffected.
 - No `.sql` schema file exists in the repo — the `jogos` table structure has to be inferred from the queries in `controllers/`.
+- **Production database is hosted on Railway** (MySQL service), not local XAMPP — Laura owns the Railway project/account. Connection vars (`MYSQLHOST`, `MYSQLPORT`, `MYSQLUSER`, `MYSQLPASSWORD`, `MYSQLDATABASE`) are found in the Railway dashboard → MySQL service → **Connect** tab. Local XAMPP (`localhost`/`root`) is only used for local dev, per `config/conexao.php`'s fallback defaults.
+
+## Backups
+
+Railway's automatic/scheduled backups only exist on **Pro-tier** accounts — this project is not on Pro, so there is no automatic backup. Backups must be done manually:
+
+```powershell
+& "C:\xampp\mysql\bin\mysqldump.exe" -h <MYSQLHOST> -P <MYSQLPORT> -u <MYSQLUSER> -p<MYSQLPASSWORD> <MYSQLDATABASE> > backup_YYYY-MM-DD.sql
+```
+
+(XAMPP already ships `mysqldump.exe` at that path — no extra install needed.) Store the resulting `.sql` file somewhere outside the local disk too (Drive/OneDrive). Do a manual dump daily (or after each cadastro session) whenever someone is actively adding games, since there's no safety net otherwise. Never commit real Railway credentials into this repo or into `.sql` dumps that get committed — treat them like any other secret.
 
 ## Architecture
 
