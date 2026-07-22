@@ -1,6 +1,7 @@
 <?php
 
 require_once 'config/conexao.php';
+require_once 'helpers/slugHelper.php';
 
 $sql = "SELECT
             id_jogo,
@@ -24,6 +25,44 @@ if (!$resultado) {
     die("Erro ao carregar catálogo.");
 }
 
+// Prévia de compartilhamento (Open Graph): quando o link vem com
+// ?jogo=slug, troca o título/descrição/imagem padrão do site pelos do
+// jogo específico, pra quem recebe o link no WhatsApp ver a capa do jogo
+// em vez da logo da loja. Precisa ser resolvido aqui no PHP (antes do
+// <head>) porque o crawler do WhatsApp só lê o HTML, não roda o JS que
+// abre o modal.
+$ogTitulo    = 'Formiga Lúdica - Catálogo';
+$ogDescricao = 'Encontre o jogo perfeito para sua próxima jogatina!';
+$ogImagem    = 'assets/img/logo_formiga_ludica.png';
+
+$slugUrl = trim((string) ($_GET['jogo'] ?? ''));
+
+if ($slugUrl !== '') {
+    $resultadoNomes = mysqli_query($conexao, "SELECT nome, descricao, imagem FROM jogos WHERE ativo = 1");
+    while ($linha = mysqli_fetch_assoc($resultadoNomes)) {
+        if (gerarSlug($linha['nome']) === $slugUrl) {
+            $ogTitulo    = $linha['nome'] . ' - Formiga Lúdica';
+            $ogDescricao = mb_substr(trim(strip_tags($linha['descricao'] ?? '')), 0, 200);
+            if (!empty($linha['imagem'])) {
+                $ogImagem = $linha['imagem'];
+            }
+            break;
+        }
+    }
+}
+
+// og:image e og:url precisam ser URLs absolutas pro WhatsApp/Facebook
+// conseguirem buscar a imagem — imagens vindas da Ludopedia já são
+// (começam com "http"), as cadastradas manualmente são caminho relativo.
+$protocolo = (!empty($_SERVER['HTTPS']) || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https') ? 'https' : 'http';
+$baseUrl   = $protocolo . '://' . $_SERVER['HTTP_HOST'];
+
+if (!str_starts_with($ogImagem, 'http')) {
+    $ogImagem = $baseUrl . '/' . ltrim($ogImagem, '/');
+}
+
+$ogUrl = $baseUrl . $_SERVER['REQUEST_URI'];
+
 ?>
 
 <!DOCTYPE html>
@@ -31,7 +70,13 @@ if (!$resultado) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formiga Lúdica - Catálogo</title>
+    <title><?= htmlspecialchars($ogTitulo) ?></title>
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="<?= htmlspecialchars($ogTitulo) ?>">
+    <meta property="og:description" content="<?= htmlspecialchars($ogDescricao) ?>">
+    <meta property="og:image" content="<?= htmlspecialchars($ogImagem) ?>">
+    <meta property="og:url" content="<?= htmlspecialchars($ogUrl) ?>">
+    <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/png" href="assets/img/logo_formiga_ludica.png">
     <link rel="stylesheet" href="assets/css/catalogo.css">
     <script src="assets/js/carrinho.js"></script>
