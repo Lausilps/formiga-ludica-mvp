@@ -602,9 +602,25 @@ body {
     background: #2d3a22;
 }
 
-.btn-copiar-link {
-    display: block;
+/* Wrapper dos botões "Selecionar jogo" + "Compartilhar jogo" no modal de
+   detalhes — flex pra deixarem proporcionais entre si no desktop, e
+   empilham naturalmente quando não cabem lado a lado (celular). */
+.acoes-modal-jogo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
     margin-top: 10px;
+}
+
+.acoes-modal-jogo > button {
+    flex: 1 1 200px;
+}
+
+.btn-copiar-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     background: #fff8e6;
     border: 1px solid #f0c040;
     color: #7a5c00;
@@ -613,7 +629,6 @@ body {
     cursor: pointer;
     font-weight: bold;
     font-size: 14px;
-    width: 100%;
     transition: background 0.2s;
 }
 

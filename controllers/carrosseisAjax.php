@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/conexao.php';
+require_once __DIR__ . '/../helpers/slugHelper.php';
 header('Content-Type: application/json');
 
 // Mesmo formato de card que listarJogosAjax.php devolve, pra reaproveitar
@@ -41,6 +42,7 @@ function montarJogosParaCarrossel(mysqli $conexao, string $sql): array
 
         $jogos[] = [
             'id'                 => $row['id_jogo'],
+            'slug'               => gerarSlug($row['nome']),
             'nome'               => $row['nome'],
             'imagem'             => $srcImagem,
             'descricao'          => $row['descricao'] ?? '',

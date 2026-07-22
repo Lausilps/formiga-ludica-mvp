@@ -1,13 +1,32 @@
 <?php
 require_once __DIR__ . '/../config/conexao.php';
+require_once __DIR__ . '/../helpers/slugHelper.php';
 header('Content-Type: application/json');
 
-// Busca um único jogo por ID, no mesmo formato que listarJogosAjax.php usa
-// pra cada item — usado pra abrir o modal de detalhes a partir de um link
-// direto (?jogo=ID), quando o jogo pode nem estar carregado no grid ainda.
-$idJogo = (int) ($_GET['id'] ?? 0);
+// Busca um único jogo pelo slug do nome, no mesmo formato que
+// listarJogosAjax.php usa pra cada item — usado pra abrir o modal de
+// detalhes a partir de um link direto (?jogo=slug), quando o jogo pode
+// nem estar carregado no grid ainda.
+$slug = trim((string) ($_GET['slug'] ?? ''));
 
-if ($idJogo <= 0) {
+if ($slug === '') {
+    echo json_encode(['jogo' => null]);
+    exit;
+}
+
+// Não existe coluna de slug no banco — compara o slug gerado a partir do
+// nome de cada jogo ativo até achar o que bate com o da URL.
+$resultadoNomes = mysqli_query($conexao, "SELECT id_jogo, nome FROM jogos WHERE ativo = 1");
+
+$idJogo = null;
+while ($linha = mysqli_fetch_assoc($resultadoNomes)) {
+    if (gerarSlug($linha['nome']) === $slug) {
+        $idJogo = (int) $linha['id_jogo'];
+        break;
+    }
+}
+
+if ($idJogo === null) {
     echo json_encode(['jogo' => null]);
     exit;
 }
@@ -43,6 +62,7 @@ $srcImagem = !empty($row['imagem']) ? $row['imagem'] : 'assets/img/sem-imagem.pn
 echo json_encode([
     'jogo' => [
         'id'                 => $row['id_jogo'],
+        'slug'               => gerarSlug($row['nome']),
         'nome'               => $row['nome'],
         'imagem'             => $srcImagem,
         'descricao'          => $row['descricao'] ?? '',

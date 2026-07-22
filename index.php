@@ -184,8 +184,10 @@ if (!$resultado) {
                 </a>
             </div>
             <br>
-            <button type="button" id="modal-selecionar" class="btn-escolher">Selecionar jogo</button>
-            <button type="button" id="modal-copiar-link" class="btn-copiar-link">🔗 Copiar link do jogo</button>
+            <div class="acoes-modal-jogo">
+                <button type="button" id="modal-selecionar" class="btn-escolher">Selecionar jogo</button>
+                <button type="button" id="modal-compartilhar" class="btn-copiar-link">🔗 Compartilhar jogo</button>
+            </div>
         </div>
     </div>
 </div>
@@ -248,7 +250,7 @@ const modalPreco     = document.getElementById('modal-preco');
 const modalSelecionar = document.getElementById('modal-selecionar');
 const modalLudopedia  = document.getElementById('modal-ludopedia');
 const modalLinkLudo   = document.getElementById('modal-link-ludopedia');
-const modalCopiarLink = document.getElementById('modal-copiar-link');
+const modalCompartilhar = document.getElementById('modal-compartilhar');
 
 let jogoModalAtual = null;
 
@@ -302,6 +304,7 @@ function criarCard(jogo, opcoes = {}) {
     const article = document.createElement('article');
     article.className = 'card-jogo';
     article.dataset.id       = jogo.id;
+    article.dataset.slug     = jogo.slug;
     article.dataset.nome     = jogo.nome;
     article.dataset.descricao = jogo.descricao;
     article.dataset.imagem   = jogo.imagem;
@@ -480,6 +483,7 @@ function atualizarImagemModal() {
 function abrirModalJogo(card) {
     jogoModalAtual = {
         id:       card.dataset.id,
+        slug:     card.dataset.slug,
         nome:     card.dataset.nome,
         descricao: card.dataset.descricao,
         imagem:   card.dataset.imagem,
@@ -519,7 +523,7 @@ function abrirModalJogo(card) {
     // Reflete o jogo aberto na URL — assim a barra de endereço já vira um
     // link compartilhável (funciona junto com o botão "Copiar link").
     const urlModal = new URL(window.location.href);
-    urlModal.searchParams.set('jogo', jogoModalAtual.id);
+    urlModal.searchParams.set('jogo', jogoModalAtual.slug);
     history.pushState({ modal: 'jogo', id: jogoModalAtual.id }, '', urlModal);
 }
 
@@ -561,16 +565,29 @@ modalSelecionar.addEventListener('click', () => {
     carrinhoUI.alternarJogoSelecionado({ nome: jogoModalAtual.nome, preco: jogoModalAtual.preco });
 });
 
-modalCopiarLink.addEventListener('click', () => {
+modalCompartilhar.addEventListener('click', async () => {
     if (!jogoModalAtual) return;
 
     const url = new URL(window.location.href);
-    url.searchParams.set('jogo', jogoModalAtual.id);
+    url.searchParams.set('jogo', jogoModalAtual.slug);
+    const link = url.toString();
 
-    navigator.clipboard.writeText(url.toString()).then(() => {
-        const textoOriginal = modalCopiarLink.textContent;
-        modalCopiarLink.textContent = '✅ Link copiado!';
-        setTimeout(() => { modalCopiarLink.textContent = textoOriginal; }, 2000);
+    // No celular/navegadores compatíveis, abre o menu nativo de
+    // compartilhamento (WhatsApp, copiar link, etc). Sem suporte, cai pro
+    // comportamento antigo de só copiar o link.
+    if (navigator.share) {
+        try {
+            await navigator.share({ title: jogoModalAtual.nome, text: `Confira ${jogoModalAtual.nome} na Formiga Lúdica!`, url: link });
+        } catch (e) {
+            // usuário cancelou o compartilhamento — nada a fazer
+        }
+        return;
+    }
+
+    navigator.clipboard.writeText(link).then(() => {
+        const textoOriginal = modalCompartilhar.textContent;
+        modalCompartilhar.textContent = '✅ Link copiado!';
+        setTimeout(() => { modalCompartilhar.textContent = textoOriginal; }, 2000);
     });
 });
 
@@ -717,11 +734,11 @@ async function carregarDestaquesFiltrados() {
 }
 
 // ============================================================
-// LINK DIRETO PRO JOGO (?jogo=ID) — abre o modal dele automaticamente
+// LINK DIRETO PRO JOGO (?jogo=slug) — abre o modal dele automaticamente
 // ============================================================
 async function abrirJogoPorLinkDireto() {
-    const idJogo = new URLSearchParams(window.location.search).get('jogo');
-    if (!idJogo) return;
+    const slugJogo = new URLSearchParams(window.location.search).get('jogo');
+    if (!slugJogo) return;
 
     // Zera o "estado base" da URL (sem o parâmetro) antes de abrir o modal,
     // pra fechar (history.back()) voltar pro catálogo em vez de sair do
@@ -732,7 +749,7 @@ async function abrirJogoPorLinkDireto() {
     history.replaceState(null, '', urlBase);
 
     try {
-        const res  = await fetch(`controllers/buscarJogoPorIdAjax.php?id=${encodeURIComponent(idJogo)}`);
+        const res  = await fetch(`controllers/buscarJogoPorIdAjax.php?slug=${encodeURIComponent(slugJogo)}`);
         const data = await res.json();
         if (!data.jogo) return;
 

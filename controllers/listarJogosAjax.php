@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config/conexao.php';
+require_once __DIR__ . '/../helpers/slugHelper.php';
 header('Content-Type: application/json');
 
 $busca    = trim($_GET['busca'] ?? '');
@@ -143,6 +144,7 @@ foreach ($linhas as $row) {
 
     $jogos[] = [
         'id'            => $row['id_jogo'],
+        'slug'          => gerarSlug($row['nome']),
         'nome'          => $row['nome'],
         'imagem'        => $srcImagem,
         'descricao'     => $row['descricao'] ?? '',
