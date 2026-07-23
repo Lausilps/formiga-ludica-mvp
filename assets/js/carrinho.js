@@ -96,9 +96,10 @@ const Carrinho = {
                 const item = document.createElement('div');
                 item.className = 'item-pedido';
                 item.innerHTML = `
-                    <span>${jogo.nome} - ${Carrinho.formatarPreco(jogo.preco)}</span>
-                    <button type="button" data-index="${index}">Remover</button>
+                    <span class="item-pedido-nome"></span>
+                    <button type="button" class="btn-remover-item" data-index="${index}" aria-label="Remover jogo" title="Remover">×</button>
                 `;
+                item.querySelector('.item-pedido-nome').textContent = `${jogo.nome} - ${Carrinho.formatarPreco(jogo.preco)}`;
                 listaPedido.appendChild(item);
             });
 

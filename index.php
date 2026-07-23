@@ -247,7 +247,7 @@ $ogUrl = $baseUrl . $_SERVER['REQUEST_URI'];
         <strong id="total-pedido"></strong>
         <div class="acoes-modal">
             <button type="button" id="continuar-escolhendo">Adicionar mais jogos</button>
-            <button type="button" id="confirmar-whatsapp">Enviar para WhatsApp</button>
+            <button type="button" id="confirmar-whatsapp">Enviar pedido pelo WhatsApp</button>
         </div>
     </div>
 </div>
@@ -440,7 +440,7 @@ function criarCard(jogo, opcoes = {}) {
 // ============================================================
 // CARREGAR JOGOS
 // ============================================================
-async function carregarJogos(resetar = false) {
+async function carregarJogos(resetar = false, idsExcluir = new Set()) {
     if (carregando) return;
     carregando = true;
 
@@ -464,12 +464,19 @@ async function carregarJogos(resetar = false) {
         const res  = await fetch(`controllers/listarJogosAjax.php?${params}`);
         const data = await res.json();
 
+        // idsExcluir só vem preenchido quando há busca por nome: jogos já
+        // mostrados em "Recomendações da loja"/"Novidades" não repetem
+        // aqui (ver atualizarCatalogoFiltrado).
+        const jogosFiltrados = idsExcluir.size > 0
+            ? data.jogos.filter(jogo => !idsExcluir.has(jogo.id))
+            : data.jogos;
+
         if (resetar) grid.innerHTML = '';
 
-        if (data.jogos.length === 0 && resetar) {
+        if (jogosFiltrados.length === 0 && resetar) {
             grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#666;">😕 Nenhum jogo encontrado.</div>';
         } else {
-            data.jogos.forEach(jogo => grid.appendChild(criarCard(jogo)));
+            jogosFiltrados.forEach(jogo => grid.appendChild(criarCard(jogo)));
         }
 
         offset  = data.offset + data.jogos.length;
@@ -502,17 +509,13 @@ observer.observe(sentinel);
 document.getElementById('busca-jogo').addEventListener('input', () => {
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => {
-        carregarJogos(true);
-        carregarDestaquesFiltrados();
-        carregarNovidadesFiltradas();
+        atualizarCatalogoFiltrado();
     }, 300);
 });
 
 document.querySelectorAll('.filtro-idade, .filtro-jogadores, .filtro-tempo').forEach(input => {
     input.addEventListener('change', () => {
-        carregarJogos(true);
-        carregarDestaquesFiltrados();
-        carregarNovidadesFiltradas();
+        atualizarCatalogoFiltrado();
     });
 });
 
@@ -520,9 +523,7 @@ document.getElementById('limpar-filtros').addEventListener('click', () => {
     document.getElementById('busca-jogo').value = '';
     document.querySelectorAll('.filtro-idade, .filtro-jogadores, .filtro-tempo')
         .forEach(i => i.checked = false);
-    carregarJogos(true);
-    carregarDestaquesFiltrados();
-    carregarNovidadesFiltradas();
+    atualizarCatalogoFiltrado();
 });
 
 // ============================================================
@@ -765,7 +766,7 @@ fetch('controllers/carrosseisAjax.php')
 // ============================================================
 // NOVIDADES — segue os mesmos filtros do catálogo
 // ============================================================
-async function carregarNovidadesFiltradas() {
+async function carregarNovidadesFiltradas(idsExcluir = new Set()) {
     const { busca, idades, jogadores, tempos } = pegarFiltros();
 
     const params = new URLSearchParams();
@@ -782,15 +783,19 @@ async function carregarNovidadesFiltradas() {
         const res  = await fetch(`controllers/listarJogosAjax.php?${params}`);
         const data = await res.json();
 
+        // idsExcluir vem preenchido quando há busca por nome e o jogo já
+        // apareceu em "Recomendações da loja" (ver atualizarCatalogoFiltrado).
+        const jogosFiltrados = data.jogos.filter(jogo => !idsExcluir.has(jogo.id));
+
         trilhaNovidades.innerHTML = '';
         trilhaNovidades.scrollLeft = 0;
 
-        if (data.jogos.length === 0) {
+        if (jogosFiltrados.length === 0) {
             secaoNovidades.style.display = 'none';
-            return;
+            return [];
         }
 
-        data.jogos.forEach(jogo => {
+        jogosFiltrados.forEach(jogo => {
             const card = criarCard(jogo, { ocultarDescricao: true });
             const selo = document.createElement('span');
             selo.className = 'selo-novo';
@@ -804,9 +809,38 @@ async function carregarNovidadesFiltradas() {
             iniciarCarrossel('carrossel-novidades');
             novidadesCarrosselIniciado = true;
         }
+
+        return jogosFiltrados.map(jogo => jogo.id);
     } catch (e) {
         console.error('Erro ao filtrar novidades:', e);
+        return [];
     }
+}
+
+// Coordena os três carregamentos quando os filtros mudam. Com busca por
+// nome, mostra cada jogo numa seção só — a mais "curada" possível (destaque
+// da loja > novidade > catálogo geral) — pra não repetir o mesmo resultado
+// três vezes na tela quando a pessoa já está atrás de um jogo específico.
+// Sem busca por nome (só idade/jogadores/tempo), continua tudo
+// independente como antes: esses filtros são de navegação, não de "já
+// achei o jogo que queria", então repetir entre as seções está OK.
+async function atualizarCatalogoFiltrado() {
+    const { busca } = pegarFiltros();
+
+    if (busca.trim() === '') {
+        carregarJogos(true);
+        carregarDestaquesFiltrados();
+        carregarNovidadesFiltradas();
+        return;
+    }
+
+    const idsDestaques = await carregarDestaquesFiltrados();
+    const idsExibidos = new Set(idsDestaques);
+
+    const idsNovidades = await carregarNovidadesFiltradas(idsExibidos);
+    idsNovidades.forEach(id => idsExibidos.add(id));
+
+    carregarJogos(true, idsExibidos);
 }
 
 // ============================================================
@@ -834,7 +868,7 @@ async function carregarDestaquesFiltrados() {
 
         if (data.jogos.length === 0) {
             secaoDestaques.style.display = 'none';
-            return;
+            return [];
         }
 
         data.jogos.forEach(jogo => trilhaDestaques.appendChild(criarCard(jogo, { ocultarDescricao: true })));
@@ -844,8 +878,11 @@ async function carregarDestaquesFiltrados() {
             iniciarCarrossel('carrossel-destaques');
             destaquesCarrosselIniciado = true;
         }
+
+        return data.jogos.map(jogo => jogo.id);
     } catch (e) {
         console.error('Erro ao filtrar recomendações da loja:', e);
+        return [];
     }
 }
 

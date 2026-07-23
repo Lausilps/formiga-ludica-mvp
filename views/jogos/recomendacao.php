@@ -118,7 +118,7 @@
             <strong id="total-pedido"></strong>
             <div class="acoes-modal">
                 <button type="button" id="continuar-escolhendo">Continuar escolhendo</button>
-                <button type="button" id="confirmar-whatsapp">Enviar para WhatsApp</button>
+                <button type="button" id="confirmar-whatsapp">Enviar pedido pelo WhatsApp</button>
             </div>
         </div>
     </div>
