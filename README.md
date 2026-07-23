@@ -18,7 +18,6 @@ O Formiga Lúdica MVP nasceu pra automatizar o dia a dia de uma locadora de jogo
 - [x] Recomendação inteligente de jogos com IA (RAG: embeddings + Gemini)
 - [x] Importação e sincronização automática via API da Ludopedia (com retomada de onde parou)
 - [x] Geração automática de descrição dos jogos via IA na importação
-- [x] Importação avulsa a partir de um JSON colado (catálogo do OlaClick)
 - [x] Relatório de jogos em PDF (sintético/analítico), com filtros e sinalização de possíveis duplicados
 - [x] Relatório de jogos ainda não importados da Ludopedia
 
@@ -162,7 +161,7 @@ php controllers/importarLudopediaController.php
 ## Problemas conhecidos
 
 - **`DB_PORT` é obrigatória.** `config/conexao.php` tem um fallback pra uma constante `PORTA` que **não existe em lugar nenhum do código** — se `DB_PORT` não estiver definida no ambiente, a aplicação quebra com fatal error. Sempre configure `DB_PORT` explicitamente (ex: `3306`) em qualquer hospedagem nova.
-- Parte dos controllers de CRUD (`jogosController.php`, `editarJogoController.php`, `loginController.php`, `importarOlaClickController.php`, `gerarRelatorioJogosPdf.php`) monta SQL por interpolação de string em vez de prepared statements. Funciona, mas qualquer query nova deve seguir o padrão de `controllers/listarJogosAjax.php` (prepared statements).
+- `jogosController.php`, `editarJogoController.php` e `loginController.php` já usam prepared statements. `helpers/relatorioJogosHelper.php` (usado por `gerarRelatorioJogosPdf.php`) ainda monta parte do SQL por interpolação de string, escapando cada valor manualmente (`mysqli_real_escape_string`/cast pra int/float) em vez de bind de parâmetro — funciona, mas qualquer query nova deve seguir o padrão de `controllers/listarJogosAjax.php` (prepared statements de verdade).
 
 ---
 

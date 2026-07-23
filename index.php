@@ -361,14 +361,19 @@ function criarCard(jogo, opcoes = {}) {
     article.dataset.linkLudo = jogo.link_ver_ludopedia ?? '';
     article._imagens = jogo.imagens && jogo.imagens.length ? jogo.imagens : [jogo.imagem];
 
+    // Nome/descrição vêm do banco (jogo cadastrado à mão, ou importado da
+    // Ludopedia) e podem conter caracteres que o navegador interpretaria
+    // como HTML. Por isso o card monta a estrutura fixa via innerHTML, mas
+    // preenche esses campos de texto livre depois, via textContent/src/alt
+    // — que tratam o valor sempre como texto puro, nunca como código.
     article.innerHTML = `
         <div class="imagem-card">
-            <img src="${jogo.imagem}" alt="${jogo.nome}"
+            <img class="img-capa-card"
                  onerror="this.src='assets/img/sem-imagem.png'">
         </div>
         <div class="conteudo-card">
-            <h2>${jogo.nome}</h2>
-            ${ocultarDescricao ? '' : `<p class="descricao-card">${descricaoCurta}</p>`}
+            <h2 class="titulo-card"></h2>
+            ${ocultarDescricao ? '' : `<p class="descricao-card"></p>`}
             <div class="infos-card">
                 <span>👥 ${jogo.min_jogadores} - ${jogo.max_jogadores}</span>
                 <span>⏱ ${jogo.duracao} min</span>
@@ -377,10 +382,24 @@ function criarCard(jogo, opcoes = {}) {
             </div>
             <div class="rodape-card">
                 <strong>${preco}</strong>
-                <button type="button" class="btn-escolher" data-nome="${jogo.nome}">Escolher</button>
+                <button type="button" class="btn-escolher"></button>
             </div>
         </div>
     `;
+
+    const imgCapa = article.querySelector('.img-capa-card');
+    imgCapa.src = jogo.imagem;
+    imgCapa.alt = jogo.nome;
+
+    article.querySelector('.titulo-card').textContent = jogo.nome;
+
+    if (!ocultarDescricao) {
+        article.querySelector('.descricao-card').textContent = descricaoCurta;
+    }
+
+    const botaoEscolher = article.querySelector('.btn-escolher');
+    botaoEscolher.textContent = 'Escolher';
+    botaoEscolher.dataset.nome = jogo.nome;
 
     // Passa as fotos automaticamente enquanto o mouse fica em cima do card
     // (só se tiver mais de uma foto)

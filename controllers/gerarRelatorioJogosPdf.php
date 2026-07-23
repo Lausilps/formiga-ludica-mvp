@@ -82,7 +82,7 @@ $html = '
 
 <h1>Formiga Ludica - Relatorio de Jogos</h1>
 <div class="subtitulo">
-    Gerado em ' . date('d/m/Y H:i') . ' | Tipo: ' . ucfirst($tipo) . '
+    Gerado em ' . date('d/m/Y H:i') . ' | Tipo: ' . htmlspecialchars(ucfirst($tipo)) . '
 </div>
 
 <table>

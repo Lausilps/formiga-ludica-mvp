@@ -60,8 +60,8 @@ This is the core "smart" feature, split across:
 
 - **Gemini** (`config/gemini.php`): embeddings (`models/gemini-embedding-2`) and chat (`models/gemini-2.5-flash`) via raw cURL to `generativelanguage.googleapis.com`. `CURLOPT_SSL_VERIFYPEER/HOST` are disabled to work around XAMPP's SSL setup.
 - **Ludopedia API** (`config/ludopedia.php`, `controllers/importarLudopediaController.php`): paginated import/sync of the rental shop's game collection, auto-generates Portuguese descriptions per game via Gemini, maps categories into a `categorias`/`jogos_categorias` join. Also gated by the same `?token=...`/`ADMIN_IMPORT_TOKEN` mechanism. `relatorio_faltantes.php` cross-checks the local DB against the full Ludopedia collection to find games not yet imported.
-- **OlaClick import** (`controllers/importarOlaClickController.php`): one-off import from a pasted JSON blob (product catalog), regex-parses player count/age/duration out of free-text descriptions.
 - **WhatsApp**: no API — both `index.php` and `views/jogos/recomendacao.php` build a `wa.me` deep link with a pre-filled order message client-side.
+- (Removed) **OlaClick import**: a one-off "paste a JSON blob" import existed at `controllers/importarOlaClickController.php` / `views/jogos/importar_olaclick.php`, no longer used and deleted from the codebase. Some already-imported games still have `origem = 'manual'` and hotlinked (non-Ludopedia) image URLs from it — see the comments in `controllers/listarJogosAjax.php`, `helpers/recomendacaoHelper.php`, and `controllers/migrarImagensBucket.php` for how those are still handled.
 
 ### Cart / selection state
 
@@ -76,8 +76,8 @@ This is the core "smart" feature, split across:
 
 ### Data access patterns (inconsistent — know both when editing)
 
-- `controllers/listarJogosAjax.php` (catalog search/filter/infinite-scroll endpoint) uses proper `mysqli_prepare`/bound params.
-- Most CRUD controllers (`jogosController.php`, `editarJogoController.php`, `loginController.php`, `importarOlaClickController.php`, `gerarRelatorioJogosPdf.php`) interpolate `$_POST`/`$_GET` values directly into SQL strings. Be careful when touching these — follow the prepared-statement pattern from `listarJogosAjax.php` rather than the string-interpolation pattern when adding new queries.
+- `controllers/listarJogosAjax.php`, `controllers/jogosController.php`, `controllers/editarJogoController.php`, and `controllers/loginController.php` use proper `mysqli_prepare`/bound params.
+- `helpers/relatorioJogosHelper.php::buscarJogosRelatorio()` (used by `gerarRelatorioJogosPdf.php` and the CSV report) still builds part of its `WHERE` clause by string interpolation — string filters go through `mysqli_real_escape_string()`, numeric filters through `(int)`/`(float)` casts, so it isn't an open injection hole, but it's not the prepared-statement pattern either. Follow `listarJogosAjax.php`'s pattern (real bound params) rather than this one when adding new queries.
 
 ### PDF reports
 

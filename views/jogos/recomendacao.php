@@ -178,27 +178,47 @@
                 card.dataset.id = jogo.id;
                 card.dataset.nome = jogo.nome;
                 card.dataset.preco = jogo.preco;
+
+                // Nome e motivo são texto livre (um vem do cadastro do
+                // jogo, o outro é escrito pelo Gemini) — preenchidos via
+                // textContent depois de montar a estrutura fixa do card,
+                // nunca direto no innerHTML.
                 card.innerHTML = `
-                    <img src="${imgSrc}" alt="${jogo.nome}">
+                    <img class="img-capa-recomendacao">
                     <div class="card-body">
-                        <h3>${jogo.nome}</h3>
-                        <p class="card-motivo">${jogo.motivo}</p>
+                        <h3 class="titulo-recomendacao"></h3>
+                        <p class="card-motivo"></p>
                         <p class="card-meta">
                             👥 ${jogo.min_jogadores}–${jogo.max_jogadores} jogadores &nbsp;|&nbsp;
                             ⏱ ${jogo.duracao} min &nbsp;|&nbsp;
                             🎯 ${jogo.dificuldade === 'nao_informada' ? '-' : jogo.dificuldade.charAt(0).toUpperCase() + jogo.dificuldade.slice(1)}
                         </p>
                         ${jogo.link_ver_ludopedia ? `
-                        <a href="${jogo.link_ver_ludopedia}" target="_blank" class="btn-ludopedia">
+                        <a href="#" target="_blank" class="btn-ludopedia link-ludopedia-recomendacao">
                             <img src="../assets/img/logo-ludopedia.png" alt="Ludopedia">
                             Ver na Ludopedia
                         </a>` : ''}
                         <div class="rodape-card">
                             <span class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/periodo</span>
-                            <button type="button" class="btn-escolher" data-nome="${jogo.nome}">Escolher</button>
+                            <button type="button" class="btn-escolher"></button>
                         </div>
                     </div>
                 `;
+
+                const imgCapa = card.querySelector('.img-capa-recomendacao');
+                imgCapa.src = imgSrc;
+                imgCapa.alt = jogo.nome;
+
+                card.querySelector('.titulo-recomendacao').textContent = jogo.nome;
+                card.querySelector('.card-motivo').textContent = jogo.motivo;
+
+                const linkLudo = card.querySelector('.link-ludopedia-recomendacao');
+                if (linkLudo) linkLudo.href = jogo.link_ver_ludopedia;
+
+                const botaoEscolher = card.querySelector('.btn-escolher');
+                botaoEscolher.textContent = 'Escolher';
+                botaoEscolher.dataset.nome = jogo.nome;
+
                 grid.appendChild(card);
             });
             carrinhoUI.atualizarBotoesSelecionados();
