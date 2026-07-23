@@ -28,6 +28,24 @@ if ($soDestaques) {
     $where[] = "ordem_destaque IS NOT NULL";
 }
 
+if ($soNovidades) {
+    // "Novidades" = os 10 jogos mais recentes de verdade — não os 10 mais
+    // recentes ENTRE OS QUE BATEM COM O FILTRO (isso faria um jogo antigo
+    // aparecer como novidade só por não ter concorrência no resultado
+    // filtrado). O filtro só reduz dentro desse conjunto fixo, nunca
+    // forma um "top 10" novo a partir dele. O subselect precisa desse
+    // envelope (SELECT ... FROM (SELECT ... LIMIT 10) AS x) porque o
+    // MySQL não aceita LIMIT direto dentro de um IN (subquery).
+    $where[] = "id_jogo IN (
+        SELECT id_jogo FROM (
+            SELECT id_jogo FROM jogos
+            WHERE ativo = 1 AND nome NOT LIKE 'SEM NOME (Ludopedia #%'
+            ORDER BY criado_em DESC
+            LIMIT 10
+        ) AS novidades_recentes
+    )";
+}
+
 if (!empty($busca)) {
     $where[] = "nome LIKE ?";
     $params[] = "%{$busca}%";
@@ -88,11 +106,10 @@ $ordemSQL = $soDestaques ? 'ordem_destaque ASC' : ($soNovidades ? 'criado_em DES
 // Busca jogos
 if ($temFiltro || $soDestaques || $soNovidades) {
     // Com filtro (ou carrossel de destaques/novidades): traz de uma vez, sem paginação
-    $limiteNovidades = $soNovidades ? ' LIMIT 10' : '';
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
                    min_jogadores, max_jogadores, idade_minima,
                    duracao_minutos, dificuldade, link_ludopedia, link_tutorial
-            FROM jogos {$whereSQL} ORDER BY {$ordemSQL}{$limiteNovidades}";
+            FROM jogos {$whereSQL} ORDER BY {$ordemSQL}";
 } else {
     // Sem filtro: paginação
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
