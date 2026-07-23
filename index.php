@@ -504,6 +504,7 @@ document.getElementById('busca-jogo').addEventListener('input', () => {
     debounceTimer = setTimeout(() => {
         carregarJogos(true);
         carregarDestaquesFiltrados();
+        carregarNovidadesFiltradas();
     }, 300);
 });
 
@@ -511,6 +512,7 @@ document.querySelectorAll('.filtro-idade, .filtro-jogadores, .filtro-tempo').for
     input.addEventListener('change', () => {
         carregarJogos(true);
         carregarDestaquesFiltrados();
+        carregarNovidadesFiltradas();
     });
 });
 
@@ -520,6 +522,7 @@ document.getElementById('limpar-filtros').addEventListener('click', () => {
         .forEach(i => i.checked = false);
     carregarJogos(true);
     carregarDestaquesFiltrados();
+    carregarNovidadesFiltradas();
 });
 
 // ============================================================
@@ -725,6 +728,7 @@ function iniciarCarrossel(idTrilha) {
 }
 
 let destaquesCarrosselIniciado = false;
+let novidadesCarrosselIniciado = false;
 
 function popularCarrossel(idSecao, idTrilha, jogos, mostrarSeloNovo = false) {
     if (!jogos.length) return;
@@ -753,9 +757,57 @@ fetch('controllers/carrosseisAjax.php')
     .then(data => {
         popularCarrossel('secao-novidades', 'carrossel-novidades', data.novidades || [], true);
         popularCarrossel('secao-destaques', 'carrossel-destaques', data.destaques || []);
+        novidadesCarrosselIniciado = (data.novidades || []).length > 0;
         destaquesCarrosselIniciado = (data.destaques || []).length > 0;
     })
     .catch(() => {});
+
+// ============================================================
+// NOVIDADES — segue os mesmos filtros do catálogo
+// ============================================================
+async function carregarNovidadesFiltradas() {
+    const { busca, idades, jogadores, tempos } = pegarFiltros();
+
+    const params = new URLSearchParams();
+    params.set('busca', busca);
+    params.set('so_novidades', '1');
+    idades.forEach(i => params.append('idades[]', i));
+    jogadores.forEach(j => params.append('jogadores[]', j));
+    tempos.forEach(t => params.append('tempos[]', t));
+
+    const secaoNovidades  = document.getElementById('secao-novidades');
+    const trilhaNovidades = document.getElementById('carrossel-novidades');
+
+    try {
+        const res  = await fetch(`controllers/listarJogosAjax.php?${params}`);
+        const data = await res.json();
+
+        trilhaNovidades.innerHTML = '';
+        trilhaNovidades.scrollLeft = 0;
+
+        if (data.jogos.length === 0) {
+            secaoNovidades.style.display = 'none';
+            return;
+        }
+
+        data.jogos.forEach(jogo => {
+            const card = criarCard(jogo, { ocultarDescricao: true });
+            const selo = document.createElement('span');
+            selo.className = 'selo-novo';
+            selo.textContent = 'NOVO';
+            card.querySelector('.imagem-card').appendChild(selo);
+            trilhaNovidades.appendChild(card);
+        });
+        secaoNovidades.style.display = 'block';
+
+        if (!novidadesCarrosselIniciado) {
+            iniciarCarrossel('carrossel-novidades');
+            novidadesCarrosselIniciado = true;
+        }
+    } catch (e) {
+        console.error('Erro ao filtrar novidades:', e);
+    }
+}
 
 // ============================================================
 // RECOMENDAÇÕES DA LOJA — segue os mesmos filtros do catálogo

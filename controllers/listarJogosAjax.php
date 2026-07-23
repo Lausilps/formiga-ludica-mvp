@@ -15,6 +15,10 @@ $temFiltro = !empty($busca) || !empty($idades) || !empty($jogadores) || !empty($
 // mas só entre os jogos curados (ordem_destaque preenchido), sem paginação.
 $soDestaques = ($_GET['so_destaques'] ?? '') === '1';
 
+// Usado pelo carrossel "Confira as novidades": mesmos filtros do catálogo,
+// ordenado por mais recentes, sempre limitado a 10 (sem paginação).
+$soNovidades = ($_GET['so_novidades'] ?? '') === '1';
+
 // Monta WHERE
 $where = ["ativo = 1", "nome NOT LIKE 'SEM NOME (Ludopedia #%'"];
 $params = [];
@@ -79,15 +83,16 @@ if (!empty($params)) {
 mysqli_stmt_execute($stmtTotal);
 $total = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtTotal))['total'];
 
-$ordemSQL = $soDestaques ? 'ordem_destaque ASC' : 'nome ASC';
+$ordemSQL = $soDestaques ? 'ordem_destaque ASC' : ($soNovidades ? 'criado_em DESC' : 'nome ASC');
 
 // Busca jogos
-if ($temFiltro || $soDestaques) {
-    // Com filtro (ou carrossel de destaques): traz todos de uma vez, sem paginação
+if ($temFiltro || $soDestaques || $soNovidades) {
+    // Com filtro (ou carrossel de destaques/novidades): traz de uma vez, sem paginação
+    $limiteNovidades = $soNovidades ? ' LIMIT 10' : '';
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
                    min_jogadores, max_jogadores, idade_minima,
                    duracao_minutos, dificuldade, link_ludopedia, link_tutorial
-            FROM jogos {$whereSQL} ORDER BY {$ordemSQL}";
+            FROM jogos {$whereSQL} ORDER BY {$ordemSQL}{$limiteNovidades}";
 } else {
     // Sem filtro: paginação
     $sql = "SELECT id_jogo, nome, imagem, descricao, preco,
