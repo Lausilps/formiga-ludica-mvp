@@ -78,7 +78,7 @@
                         <?php if (!empty($jogo['link_ver_ludopedia'])): ?>
                             <a href="<?= htmlspecialchars($jogo['link_ver_ludopedia']) ?>" target="_blank" class="btn-ludopedia">
                                 <img src="../assets/img/logo-ludopedia.png" alt="Ludopedia">
-                                Ver na Ludopedia
+                                Ver mais sobre o jogo
                             </a>
                         <?php endif; ?>
 
@@ -196,7 +196,7 @@
                         ${jogo.link_ver_ludopedia ? `
                         <a href="#" target="_blank" class="btn-ludopedia link-ludopedia-recomendacao">
                             <img src="../assets/img/logo-ludopedia.png" alt="Ludopedia">
-                            Ver na Ludopedia
+                            Ver mais sobre o jogo
                         </a>` : ''}
                         <div class="rodape-card">
                             <span class="card-preco">R$ ${parseFloat(jogo.preco).toFixed(2).replace('.', ',')}/periodo</span>

@@ -225,7 +225,7 @@ $ogUrl = $baseUrl . $_SERVER['REQUEST_URI'];
             <div id="modal-ludopedia" style="display:none; margin-top:12px;">
                 <a id="modal-link-ludopedia" href="#" target="_blank" class="btn-ludopedia">
                     <img src="assets/img/logo-ludopedia.png" alt="Ludopedia">
-                    Ver na Ludopedia
+                    Ver mais sobre o jogo
                 </a>
             </div>
             <br>
