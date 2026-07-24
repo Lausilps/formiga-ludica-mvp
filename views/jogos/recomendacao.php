@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../../helpers/assetHelper.php'; ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recomendações - Formiga Lúdica</title>
     <link rel="icon" type="image/png" href="../assets/img/logo_formiga_ludica.png">
-    <link rel="stylesheet" href="../assets/css/catalogo.css">
-    <link rel="stylesheet" href="../assets/css/recomendacao_resultado.css">
-    <script src="../assets/js/carrinho.js"></script>
+    <link rel="stylesheet" href="../assets/css/catalogo.css<?= assetVersao('assets/css/catalogo.css') ?>">
+    <link rel="stylesheet" href="../assets/css/recomendacao_resultado.css<?= assetVersao('assets/css/recomendacao_resultado.css') ?>">
+    <script src="../assets/js/carrinho.js<?= assetVersao('assets/js/carrinho.js') ?>"></script>
 </head>
 <body>
 

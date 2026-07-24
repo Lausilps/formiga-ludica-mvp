@@ -1,6 +1,7 @@
 <?php
 require_once 'config/conexao.php';
 require_once 'helpers/sessaoHelper.php';
+require_once 'helpers/assetHelper.php';
 iniciarSessaoPersistente();
 
 $dadosAnteriores = $_SESSION['form_recomendacao'] ?? [];
@@ -15,8 +16,8 @@ unset($_SESSION['form_recomendacao']);
     <title>Recomendação - Formiga Lúdica</title>
     <link rel="icon" type="image/png" href="assets/img/logo_formiga_ludica.png">
 
-    <link rel="stylesheet" href="assets/css/global.css">
-    <link rel="stylesheet" href="assets/css/recomendar_form.css">
+    <link rel="stylesheet" href="assets/css/global.css<?= assetVersao('assets/css/global.css') ?>">
+    <link rel="stylesheet" href="assets/css/recomendar_form.css<?= assetVersao('assets/css/recomendar_form.css') ?>">
 </head>
 <body class="recomendar-body">
 

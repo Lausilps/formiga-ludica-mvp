@@ -1,5 +1,6 @@
 <?php
 require_once 'helpers/sessaoHelper.php';
+require_once 'helpers/assetHelper.php';
 iniciarSessaoPersistente();
 ?>
 
@@ -10,7 +11,7 @@ iniciarSessaoPersistente();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Formiga Lúdica</title>
     <link rel="icon" type="image/png" href="assets/img/logo_formiga_ludica.png">
-    <link rel="stylesheet" href="assets/css/global.css">
+    <link rel="stylesheet" href="assets/css/global.css<?= assetVersao('assets/css/global.css') ?>">
 </head>
 <body>
 
@@ -37,7 +38,7 @@ iniciarSessaoPersistente();
 
     </form>
 
-    <script src="assets/js/mostrarSenha.js"></script>
+    <script src="assets/js/mostrarSenha.js<?= assetVersao('assets/js/mostrarSenha.js') ?>"></script>
     <script>
         const CHAVE_ULTIMO_EMAIL = 'formigaludica_ultimo_email';
         const campoEmail = document.getElementById('campo-email');

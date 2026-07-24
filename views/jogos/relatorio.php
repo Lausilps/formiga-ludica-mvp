@@ -1,5 +1,6 @@
 <?php
 require_once '../../helpers/authHelper.php';
+require_once '../../helpers/assetHelper.php';
 protegerAdmin();
 ?>
 
@@ -11,8 +12,8 @@ protegerAdmin();
     <title>Relatório de Jogos</title>
     <link rel="icon" type="image/png" href="../../assets/img/logo_formiga_ludica.png">
 
-    <link rel="stylesheet" href="../../assets/css/global.css">
-    <link rel="stylesheet" href="../../assets/css/relatorio.css">
+    <link rel="stylesheet" href="../../assets/css/global.css<?= assetVersao('assets/css/global.css') ?>">
+    <link rel="stylesheet" href="../../assets/css/relatorio.css<?= assetVersao('assets/css/relatorio.css') ?>">
 </head>
 <body class="admin-body">
 

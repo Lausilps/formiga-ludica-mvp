@@ -2,6 +2,7 @@
 
 require_once 'config/conexao.php';
 require_once 'helpers/slugHelper.php';
+require_once 'helpers/assetHelper.php';
 
 $sql = "SELECT
             id_jogo,
@@ -78,8 +79,8 @@ $ogUrl = $baseUrl . $_SERVER['REQUEST_URI'];
     <meta property="og:url" content="<?= htmlspecialchars($ogUrl) ?>">
     <meta name="twitter:card" content="summary_large_image">
     <link rel="icon" type="image/png" href="assets/img/logo_formiga_ludica.png">
-    <link rel="stylesheet" href="assets/css/catalogo.css">
-    <script src="assets/js/carrinho.js"></script>
+    <link rel="stylesheet" href="assets/css/catalogo.css<?= assetVersao('assets/css/catalogo.css') ?>">
+    <script src="assets/js/carrinho.js<?= assetVersao('assets/js/carrinho.js') ?>"></script>
 </head>
 <body>
 

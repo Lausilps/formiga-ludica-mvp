@@ -4,6 +4,7 @@ require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
 require_once '../../helpers/authHelper.php';
 require_once '../../helpers/destaquesHelper.php';
+require_once '../../helpers/assetHelper.php';
 
 protegerAdmin();
 
@@ -18,8 +19,8 @@ $destaques = listarDestaques($conexao);
     <title>Destaques da loja</title>
     <link rel="icon" type="image/png" href="../../assets/img/logo_formiga_ludica.png">
 
-    <link rel="stylesheet" href="../../assets/css/global.css">
-    <link rel="stylesheet" href="../../assets/css/editar.css">
+    <link rel="stylesheet" href="../../assets/css/global.css<?= assetVersao('assets/css/global.css') ?>">
+    <link rel="stylesheet" href="../../assets/css/editar.css<?= assetVersao('assets/css/editar.css') ?>">
 </head>
 <body class="admin-body">
 

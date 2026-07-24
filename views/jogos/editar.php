@@ -4,6 +4,7 @@ require_once '../../config/conexao.php';
 require_once '../../helpers/logHelper.php';
 require_once '../../helpers/authHelper.php';
 require_once '../../helpers/jogoImagensHelper.php';
+require_once '../../helpers/assetHelper.php';
 
 protegerAdmin();
 
@@ -52,8 +53,8 @@ $ativo = $_GET['ativo'] ?? $jogo['ativo'];
     <title>Editar Jogo</title>
     <link rel="icon" type="image/png" href="../../assets/img/logo_formiga_ludica.png">
 
-    <link rel="stylesheet" href="../../assets/css/global.css">
-    <link rel="stylesheet" href="../../assets/css/editar.css">
+    <link rel="stylesheet" href="../../assets/css/global.css<?= assetVersao('assets/css/global.css') ?>">
+    <link rel="stylesheet" href="../../assets/css/editar.css<?= assetVersao('assets/css/editar.css') ?>">
 </head>
 <body class="admin-body">
 

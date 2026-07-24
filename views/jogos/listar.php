@@ -5,6 +5,7 @@ require_once '../../helpers/logHelper.php';
 require_once '../../helpers/authHelper.php';
 require_once '../../helpers/jogoHelper.php';
 require_once '../../helpers/googleDriveHelper.php';
+require_once '../../helpers/assetHelper.php';
 
 protegerAdmin();
 
@@ -102,8 +103,8 @@ $buscaUrl = urlencode($busca);
     <title>Admin - Jogos cadastrados</title>
     <link rel="icon" type="image/png" href="../../assets/img/logo_formiga_ludica.png">
 
-    <link rel="stylesheet" href="../../assets/css/global.css">
-    <link rel="stylesheet" href="../../assets/css/listar.css">
+    <link rel="stylesheet" href="../../assets/css/global.css<?= assetVersao('assets/css/global.css') ?>">
+    <link rel="stylesheet" href="../../assets/css/listar.css<?= assetVersao('assets/css/listar.css') ?>">
 </head>
 <body class="admin-body">
 

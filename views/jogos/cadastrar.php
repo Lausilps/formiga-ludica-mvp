@@ -1,6 +1,7 @@
 <?php
 require_once '../../config/conexao.php';
 require_once '../../helpers/authHelper.php';
+require_once '../../helpers/assetHelper.php';
 
 protegerAdmin();
 
@@ -24,8 +25,8 @@ $link_tutorial = $_GET['link_tutorial'] ?? '';
     <title>Cadastrar Jogo</title>
     <link rel="icon" type="image/png" href="../../assets/img/logo_formiga_ludica.png">
 
-    <link rel="stylesheet" href="../../assets/css/global.css">
-    <link rel="stylesheet" href="../../assets/css/cadastrar.css">
+    <link rel="stylesheet" href="../../assets/css/global.css<?= assetVersao('assets/css/global.css') ?>">
+    <link rel="stylesheet" href="../../assets/css/cadastrar.css<?= assetVersao('assets/css/cadastrar.css') ?>">
 </head>
 <body class="admin-body">
 
@@ -94,7 +95,7 @@ $link_tutorial = $_GET['link_tutorial'] ?? '';
 
 </main>
 
-<script src="../../assets/js/preview-imagem.js"></script>
+<script src="../../assets/js/preview-imagem.js<?= assetVersao('assets/js/preview-imagem.js') ?>"></script>
 <script>
     inicializarPreviewImagem('imagem', 'preview-imagem');
 </script>
