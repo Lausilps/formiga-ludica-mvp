@@ -222,17 +222,22 @@ $ogUrl = $baseUrl . $_SERVER['REQUEST_URI'];
                 <span id="modal-idade"></span>
                 <strong id="modal-preco"></strong>
             </div>
-            <div id="modal-ludopedia" style="display:none; margin-top:12px;">
-                <a id="modal-link-ludopedia" href="#" target="_blank" class="btn-ludopedia">
-                    <img src="assets/img/logo-ludopedia.png" alt="Ludopedia">
-                    Ver mais sobre o jogo
-                </a>
+            <div class="linha-secundaria-modal" style="margin-top:12px;">
+                <div id="modal-ludopedia" style="display:none;">
+                    <a id="modal-link-ludopedia" href="#" target="_blank" class="btn-ludopedia">
+                        <img src="assets/img/logo-ludopedia.png" alt="Ludopedia">
+                        Ver mais sobre o jogo
+                    </a>
+                </div>
+                <button type="button" id="modal-compartilhar" class="btn-compartilhar-icone" title="Compartilhar jogo" aria-label="Compartilhar jogo">
+                    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 5l7 7-7 7v-4.1c-5.05.11-8.51 1.66-11 5.1 1-5 4-10 11-11V5z"/></svg>
+                </button>
             </div>
             <br>
             <div class="acoes-modal-jogo">
                 <button type="button" id="modal-selecionar" class="btn-escolher">Selecionar jogo</button>
-                <button type="button" id="modal-compartilhar" class="btn-copiar-link">🔗 Compartilhar jogo</button>
             </div>
+            <p id="modal-selo-ludopedia" class="selo-ludopedia-rodape" style="display:none;"><img src="assets/img/logo-ludopedia.png" alt="">integrado via Ludopedia</p>
         </div>
     </div>
 </div>
@@ -295,6 +300,7 @@ const modalPreco     = document.getElementById('modal-preco');
 const modalSelecionar = document.getElementById('modal-selecionar');
 const modalLudopedia  = document.getElementById('modal-ludopedia');
 const modalLinkLudo   = document.getElementById('modal-link-ludopedia');
+const modalSeloLudopedia = document.getElementById('modal-selo-ludopedia');
 const modalCompartilhar = document.getElementById('modal-compartilhar');
 
 let jogoModalAtual = null;
@@ -336,16 +342,6 @@ function criarCard(jogo, opcoes = {}) {
         style: 'currency', currency: 'BRL'
     });
 
-    const badgeLudo = jogo.link_ludopedia
-    ? `<a href="https://ludopedia.com.br" target="_blank" class="badge-ludopedia" title="Ver na Ludopedia">
-           <img src="assets/img/logo-ludopedia.png" alt="Ludopedia">
-           <span>
-               <span class="badge-via">integrado via</span>
-               <span class="badge-nome">Ludopedia</span>
-           </span>
-       </a>`
-    : '';
-
     const article = document.createElement('article');
     article.className = 'card-jogo';
     article.dataset.id       = jogo.id;
@@ -359,6 +355,7 @@ function criarCard(jogo, opcoes = {}) {
     article.dataset.idade    = jogo.idade_minima;
     article.dataset.tempo    = jogo.duracao;
     article.dataset.linkLudo = jogo.link_ver_ludopedia ?? '';
+    article.dataset.integradoLudopedia = jogo.link_ludopedia ? '1' : '';
     article._imagens = jogo.imagens && jogo.imagens.length ? jogo.imagens : [jogo.imagem];
 
     // Nome/descrição vêm do banco (jogo cadastrado à mão, ou importado da
@@ -378,7 +375,6 @@ function criarCard(jogo, opcoes = {}) {
                 <span>👥 ${jogo.min_jogadores} - ${jogo.max_jogadores}</span>
                 <span>⏱ ${jogo.duracao} min</span>
                 <span>👤 ${jogo.idade_minima}+</span>
-                ${badgeLudo}
             </div>
             <div class="rodape-card">
                 <strong>${preco}</strong>
@@ -561,6 +557,7 @@ function abrirModalJogo(card) {
         idade:    card.dataset.idade,
         tempo:    card.dataset.tempo,
         linkLudo: card.dataset.linkLudo,
+        integradoLudopedia: card.dataset.integradoLudopedia,
     };
 
     modalImagens = card._imagens && card._imagens.length ? card._imagens : [jogoModalAtual.imagem];
@@ -583,6 +580,8 @@ function abrirModalJogo(card) {
     } else {
         modalLudopedia.style.display = 'none';
     }
+
+    modalSeloLudopedia.style.display = jogoModalAtual.integradoLudopedia ? 'block' : 'none';
 
     atualizarBotaoModal();
     modalJogo.classList.add('ativo');
@@ -653,9 +652,13 @@ modalCompartilhar.addEventListener('click', async () => {
     }
 
     navigator.clipboard.writeText(link).then(() => {
-        const textoOriginal = modalCompartilhar.textContent;
-        modalCompartilhar.textContent = '✅ Link copiado!';
-        setTimeout(() => { modalCompartilhar.textContent = textoOriginal; }, 2000);
+        const iconeOriginal = modalCompartilhar.innerHTML;
+        modalCompartilhar.innerHTML = '✅';
+        modalCompartilhar.setAttribute('aria-label', 'Link copiado!');
+        setTimeout(() => {
+            modalCompartilhar.innerHTML = iconeOriginal;
+            modalCompartilhar.setAttribute('aria-label', 'Compartilhar jogo');
+        }, 2000);
     });
 });
 

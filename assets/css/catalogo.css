@@ -602,9 +602,7 @@ body {
     background: #2d3a22;
 }
 
-/* Wrapper dos botões "Selecionar jogo" + "Compartilhar jogo" no modal de
-   detalhes — flex pra deixarem proporcionais entre si no desktop, e
-   empilham naturalmente quando não cabem lado a lado (celular). */
+/* Wrapper do "Selecionar jogo" no modal de detalhes. */
 .acoes-modal-jogo {
     display: flex;
     flex-wrap: wrap;
@@ -616,24 +614,38 @@ body {
     flex: 1 1 200px;
 }
 
-.btn-copiar-link {
+/* Linha com "Ver mais sobre o jogo" + ícone de compartilhar, lado a lado
+   (o ícone continua aparecendo mesmo em jogos sem link da Ludopedia). */
+.linha-secundaria-modal {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-compartilhar-icone {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    background: #fff8e6;
-    border: 1px solid #f0c040;
-    color: #7a5c00;
-    padding: 10px 14px;
-    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #2d0b5f;
     cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-    transition: background 0.2s;
+    padding: 0;
+    opacity: 0.75;
+    transition: opacity 0.2s;
 }
 
-.btn-copiar-link:hover {
-    background: #fef0b0;
+.btn-compartilhar-icone:hover {
+    opacity: 1;
+}
+
+.btn-compartilhar-icone svg {
+    width: 24px;
+    height: 24px;
 }
 
 .info-topo {
@@ -1346,44 +1358,23 @@ body {
     margin: 0;
 }
 
-/* Badge Ludopedia - referencia ao site */
-.badge-ludopedia {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    background: rgba(0, 0, 0, 0.08);
-    color: #444;
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 4px 9px 4px 6px;
-    border-radius: 6px;
-    text-decoration: none;
-    letter-spacing: 0.3px;
-    transition: background 0.2s;
-    border: 1px solid rgba(0,0,0,0.12);
+/* Selo discreto "integrado via Ludopedia" no rodapé do modal de detalhes */
+#modal-jogo p.selo-ludopedia-rodape {
+    margin: 10px 0 0;
+    font-size: 0.7rem;
+    line-height: 1;
+    color: #999;
+    text-align: center;
 }
 
-.badge-ludopedia:hover {
-    background: rgba(0, 0, 0, 0.18);
-}
-
-.badge-ludopedia img {
-    width: 14px;
-    height: 14px;
+#modal-jogo .modal-conteudo .selo-ludopedia-rodape img {
+    width: 12px;
+    height: 12px;
     object-fit: contain;
+    opacity: 0.6;
+    vertical-align: middle;
+    margin-right: 4px;
 }
-
-.badge-via {
-    font-size: 0.62rem;
-    opacity: 0.7;
-    font-weight: 400;
-}
-
-.badge-nome {
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-
 
 /* Botão Ludopedia no modal */
 .btn-ludopedia {
