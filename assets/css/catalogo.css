@@ -351,6 +351,21 @@ body {
     margin-bottom: 8px;
 }
 
+/* Descrição curta e com altura fixa (2 linhas, corta com "...") — evita
+   card vazio quando o jogo não tem descrição longa, sem deixar o card
+   esticar demais quando tem. */
+.carrossel-trilha .descricao-card {
+    font-size: 12.5px;
+    line-height: 1.4;
+    min-height: 35px;
+    max-height: 35px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
 .carrossel-trilha .infos-card {
     font-size: 12px;
     gap: 8px;
@@ -722,6 +737,13 @@ body {
     .carrossel-trilha .conteudo-card h2 {
         font-size: 12px;
         margin-bottom: 4px;
+    }
+
+    .carrossel-trilha .descricao-card {
+        font-size: 9.5px;
+        min-height: 26px;
+        max-height: 26px;
+        margin-bottom: 6px;
     }
 
     .carrossel-trilha .infos-card {

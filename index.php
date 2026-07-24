@@ -741,7 +741,7 @@ function popularCarrossel(idSecao, idTrilha, jogos, mostrarSeloNovo = false) {
     const trilha = document.getElementById(idTrilha);
 
     jogos.forEach(jogo => {
-        const card = criarCard(jogo, { ocultarDescricao: true });
+        const card = criarCard(jogo);
 
         if (mostrarSeloNovo) {
             const selo = document.createElement('span');
@@ -800,7 +800,7 @@ async function carregarNovidadesFiltradas(idsExcluir = new Set()) {
         }
 
         jogosFiltrados.forEach(jogo => {
-            const card = criarCard(jogo, { ocultarDescricao: true });
+            const card = criarCard(jogo);
             const selo = document.createElement('span');
             selo.className = 'selo-novo';
             selo.textContent = 'NOVO';
@@ -875,7 +875,7 @@ async function carregarDestaquesFiltrados() {
             return [];
         }
 
-        data.jogos.forEach(jogo => trilhaDestaques.appendChild(criarCard(jogo, { ocultarDescricao: true })));
+        data.jogos.forEach(jogo => trilhaDestaques.appendChild(criarCard(jogo)));
         secaoDestaques.style.display = 'block';
 
         if (!destaquesCarrosselIniciado) {
